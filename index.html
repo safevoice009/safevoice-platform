@@ -1039,6 +1039,50 @@ body::after {
     pointer-events: none;
     z-index: 9999;
 }
+/* ===== SafeVoice v3.8.0 - UI Improvements ===== */
+
+/* Better photo upload section */
+.photo-upload-section {
+    display: flex;
+    gap: 12px;
+    margin: 16px 0;
+    flex-wrap: wrap;
+}
+
+.photo-upload-btn {
+    flex: 1;
+    min-width: 140px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, rgba(94, 53, 177, 0.1) 0%, rgba(94, 53, 177, 0.05) 100%);
+    border: 2px solid rgba(94, 53, 177, 0.4);
+    border-radius: 14px;
+    color: #5e35b1;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.photo-upload-btn:hover {
+    background: linear-gradient(135deg, rgba(94, 53, 177, 0.2) 0%, rgba(94, 53, 177, 0.1) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(94, 53, 177, 0.25);
+}
+
+.photo-upload-btn.primary {
+    background: linear-gradient(135deg, #5e35b1 0%, rgba(94, 53, 177, 0.85) 100%);
+    color: white;
+    border-color: #5e35b1;
+}
+
+.photo-upload-btn.primary:hover {
+    box-shadow: 0 8px 24px rgba(94, 53, 177, 0.4);
+}
+
 </style>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -1949,6 +1993,58 @@ document.body.style.userSelect = 'none';
 document.querySelectorAll('input, textarea').forEach(el => {
     el.style.webkitUserSelect = 'text';
     el.style.userSelect = 'text';
+});
+// ===== SafeVoice v3.8.0 - UI Improvements =====
+
+// Replace single image button with two separate buttons
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🛡️ SafeVoice v3.8.0 initializing...');
+    
+    // Find the "Add Image" button
+    const addImageBtn = document.querySelector('button[onclick*="imageInput"]');
+    
+    if (addImageBtn) {
+        // Create camera input (separate from photo library)
+        const cameraInput = document.createElement('input');
+        cameraInput.type = 'file';
+        cameraInput.id = 'cameraInput';
+        cameraInput.accept = 'image/*';
+        cameraInput.capture = 'environment';
+        cameraInput.style.display = 'none';
+        
+        // Add camera input to DOM
+        const imageInput = document.getElementById('imageInput');
+        if (imageInput && imageInput.parentNode) {
+            imageInput.parentNode.insertBefore(cameraInput, imageInput.nextSibling);
+            
+            // Create button container
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'photo-upload-section';
+            buttonContainer.innerHTML = `
+                <button type="button" class="photo-upload-btn primary" onclick="document.getElementById('imageInput').click()">
+                    📷 Choose Photo
+                </button>
+                <button type="button" class="photo-upload-btn" onclick="document.getElementById('cameraInput').click()">
+                    📸 Take Photo
+                </button>
+            `;
+            
+            // Replace old button
+            addImageBtn.parentNode.insertBefore(buttonContainer, addImageBtn);
+            addImageBtn.style.display = 'none';
+            
+            console.log('✅ Photo buttons upgraded');
+        }
+    }
+    
+    // Prevent iOS text selection on long-press (except in inputs)
+    document.addEventListener('selectstart', function(e) {
+        if (!e.target.matches('input, textarea')) {
+            e.preventDefault();
+        }
+    });
+    
+    console.log('✅ SafeVoice v3.8.0 loaded successfully!');
 });
 
 // iOS SCROLL FIX - Wrapper function
