@@ -1083,91 +1083,14 @@ body::after {
     box-shadow: 0 8px 24px rgba(94, 53, 177, 0.4);
 }
 
-
-/* ===== v5.0.0 Photo Upload Buttons (All Devices) ===== */
-.photo-buttons-container {
-    display: flex;
-    gap: 12px;
-    margin: 16px 0;
-    flex-wrap: wrap;
-}
-
-.photo-btn {
-    flex: 1;
-    min-width: 140px;
-    padding: 16px 20px;
-    border-radius: 14px;
-    font-weight: 600;
-    font-size: 15px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: 2px solid;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-family: 'Inter', sans-serif;
-}
-
-.photo-btn-primary {
-    background: linear-gradient(135deg, #5e35b1 0%, rgba(94, 53, 177, 0.85) 100%);
-    color: white;
-    border-color: #5e35b1;
-}
-
-.photo-btn-primary:active {
-    transform: scale(0.97);
-    box-shadow: 0 4px 12px rgba(94, 53, 177, 0.4);
-}
-
-.photo-btn-secondary {
-    background: linear-gradient(135deg, rgba(94, 53, 177, 0.1) 0%, rgba(94, 53, 177, 0.05) 100%);
-    color: #5e35b1;
-    border-color: rgba(94, 53, 177, 0.4);
-}
-
-.photo-btn-secondary:active {
-    transform: scale(0.97);
-    background: linear-gradient(135deg, rgba(94, 53, 177, 0.2) 0%, rgba(94, 53, 177, 0.1) 100%);
-}
-
-.image-preview-box {
-    margin-top: 16px;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-}
-
-.image-preview {
-    max-width: 100%;
-    max-height: 300px;
-    border-radius: 12px;
-    border: 2px solid var(--border);
-}
-
-.remove-image-btn {
-    padding: 10px 20px;
-    background: rgba(239, 68, 68, 0.15);
-    border: 2px solid rgba(239, 68, 68, 0.4);
-    border-radius: 10px;
-    color: #ef4444;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.remove-image-btn:active {
-    transform: scale(0.95);
-    background: rgba(239, 68, 68, 0.25);
-}
-
 </style>
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+
+        <button onclick="forceUpdate()" style="position: fixed; top: 20px; right: 20px; z-index: 10000; padding: 10px 16px; background: rgba(94, 53, 177, 0.9); border: none; border-radius: 10px; color: white; font-weight: 600; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); backdrop-filter: blur(10px);">
+            🔄 Update
+        </button>
 </head>
 <body>
 
@@ -1313,27 +1236,12 @@ body::after {
                 </div>
                 
                 <div class="file-upload">
-                    <!-- Photo Upload Buttons -->
-                    <div class="photo-buttons-container">
-                        <button type="button" class="photo-btn photo-btn-primary" onclick="document.getElementById('photoLibrary').click()">
-                            📷 Choose Photo
-                        </button>
-                        <button type="button" class="photo-btn photo-btn-secondary" onclick="document.getElementById('photoCamera').click()">
-                            📸 Take Photo
-                        </button>
-                    </div>
-
-                    <!-- Hidden File Inputs -->
-                    <input type="file" id="photoLibrary" accept="image/*" style="display: none;" onchange="handleImageSelect(this)">
-                    <input type="file" id="photoCamera" accept="image/*" capture="environment" style="display: none;" onchange="handleImageSelect(this)">
-
-                    <!-- Image Preview Container -->
-                    <div id="imagePreviewBox" class="image-preview-box" style="display: none;">
-                        <img id="imagePreview" class="image-preview">
-                        <button type="button" class="remove-image-btn" onclick="removeImage()">
-                            ❌ Remove Image
-                        </button>
-                    </div>
+                    <label for="imageUpload" class="file-upload-label">
+                        <span>📷</span>
+                        <span id="uploadText">Add Image (Optional)</span>
+                    </label>
+                    <input type="file" id="imageUpload" accept="image/*,video/*" capture="environment" onchange="previewImage()">
+                    <img id="imagePreview" class="image-preview">
                 </div>
                 
                 <button class="btn" onclick="submitPost()">📤 Post Anonymously</button>
@@ -1442,7 +1350,7 @@ body::after {
 
     <script>
         const CONFIG = {
-            version: '5.0.0',
+            version: '5.0_20251016_1946',
             maxPostLength: 1000,
             minPostLength: 10,
             storageKey: 'safevoice_posts_v3',
@@ -1927,88 +1835,6 @@ body::after {
             }
         }
         
-        
-// ===== v5.0.0 Image Upload Functions =====
-let currentImageData = null;
-
-function handleImageSelect(input) {
-    const file = input.files[0];
-    if (!file) return;
-
-    // Validate file size (max 10MB)
-    if (file.size > 10000000) {
-        alert('⚠️ Image too large! Maximum size is 10MB.');
-        input.value = '';
-        return;
-    }
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-        alert('⚠️ Please select a valid image file.');
-        input.value = '';
-        return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        // If file is large, compress it
-        if (file.size > 2000000) {
-            compressAndDisplay(e.target.result);
-        } else {
-            displayImage(e.target.result);
-        }
-    };
-    reader.readAsDataURL(file);
-}
-
-function compressAndDisplay(dataURL) {
-    const img = new Image();
-    img.onload = function() {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-
-        // Calculate new dimensions (max 1200px)
-        let width = img.width;
-        let height = img.height;
-        const maxSize = 1200;
-
-        if (width > height) {
-            if (width > maxSize) {
-                height *= maxSize / width;
-                width = maxSize;
-            }
-        } else {
-            if (height > maxSize) {
-                width *= maxSize / height;
-                height = maxSize;
-            }
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Compress to JPEG 80% quality
-        const compressed = canvas.toDataURL('image/jpeg', 0.8);
-        displayImage(compressed);
-    };
-    img.src = dataURL;
-}
-
-function displayImage(dataURL) {
-    currentImageData = dataURL;
-    document.getElementById('imagePreview').src = dataURL;
-    document.getElementById('imagePreviewBox').style.display = 'flex';
-}
-
-function removeImage() {
-    currentImageData = null;
-    document.getElementById('photoLibrary').value = '';
-    document.getElementById('photoCamera').value = '';
-    document.getElementById('imagePreview').src = '';
-    document.getElementById('imagePreviewBox').style.display = 'none';
-}
-
         function previewImage() {
             const file = document.getElementById('imageUpload').files[0];
             if (file) {
@@ -2039,14 +1865,14 @@ function removeImage() {
                             ctx.drawImage(img, 0, 0, width, height);
                             currentImageData = canvas.toDataURL('image/jpeg', 0.8);
                             document.getElementById('imagePreview').src = currentImageData;
-                            document.getElementById('imagePreview').style.display = 'block';
+                            document.getElementById('imagePreview').style.display = 'block'; document.getElementById('removeBtn').style.display = 'block';
                             document.getElementById('uploadText').textContent = '✅ Compressed';
                         };
                         img.src = e.target.result;
                     } else {
                         currentImageData = e.target.result;
                         document.getElementById('imagePreview').src = currentImageData;
-                        document.getElementById('imagePreview').style.display = 'block';
+                        document.getElementById('imagePreview').style.display = 'block'; document.getElementById('removeBtn').style.display = 'block';
                         document.getElementById('uploadText').textContent = '✅ Added';
                     }
                 };
@@ -2054,6 +1880,15 @@ function removeImage() {
             }
         }
         
+        
+function clearImg() {
+    document.getElementById('imgLib').value = '';
+    document.getElementById('imgCam').value = '';
+    document.getElementById('imagePreview').style.display = 'none';
+    document.getElementById('removeBtn').style.display = 'none';
+    currentImageData = null;
+}
+
         function updateAnalytics() {
             const posts = getPosts();
             const uniqueUsers = new Set(posts.map(p => p.anonymousId)).size;
@@ -2253,7 +2088,23 @@ window.addEventListener('load', function() {
 });
 
 console.log('✅ SafeVoice v3.7.0 loaded successfully');
-</script>
+
+function forceUpdate() {
+    if (confirm('Force update SafeVoice? This will reload the page.')) {
+        // Clear all caches
+        if ('caches' in window) {
+            caches.keys().then(names => {
+                names.forEach(name => caches.delete(name));
+            });
+        }
+        // Clear localStorage
+        localStorage.clear();
+        // Hard reload
+        window.location.reload(true);
+    }
+}
+
+    </script>
 
 </body>
 </html>
