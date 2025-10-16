@@ -1,12 +1,11 @@
-// SafeVoice Service Worker v3.1.0
-const CACHE_NAME = 'safevoice-v3.1.0';
+// SafeVoice Service Worker v3.2.0
+const CACHE_NAME = 'safevoice-v3.2.0';
 const urlsToCache = [
   '/safevoice-platform/',
   '/safevoice-platform/index.html',
   '/safevoice-platform/manifest.json'
 ];
 
-// Install event - cache resources
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -21,7 +20,6 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// Activate event - clean old caches
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
@@ -38,26 +36,21 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // Cache hit - return response
         if (response) {
           return response;
         }
         
-        // Clone the request
         const fetchRequest = event.request.clone();
         
         return fetch(fetchRequest).then(response => {
-          // Check if valid response
           if (!response || response.status !== 200 || response.type !== 'basic') {
             return response;
           }
           
-          // Clone the response
           const responseToCache = response.clone();
           
           caches.open(CACHE_NAME)
@@ -67,19 +60,17 @@ self.addEventListener('fetch', event => {
           
           return response;
         }).catch(() => {
-          // Offline fallback
           return caches.match('/safevoice-platform/index.html');
         });
       })
   );
 });
 
-// Push notification (future feature)
 self.addEventListener('push', event => {
   const options = {
     body: event.data ? event.data.text() : 'New update on SafeVoice',
-    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🛡️</text></svg>',
-    badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🛡️</text></svg>',
+    icon: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ctext y="75" font-size="75"%3E🛡️%3C/text%3E%3C/svg%3E',
+    badge: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Ctext y="75" font-size="75"%3E🛡️%3C/text%3E%3C/svg%3E',
     vibrate: [200, 100, 200],
     tag: 'safevoice-notification',
     requireInteraction: false
@@ -90,4 +81,4 @@ self.addEventListener('push', event => {
   );
 });
 
-console.log('🛡️ SafeVoice Service Worker v3.1.0 loaded');
+console.log('🛡️ SafeVoice Service Worker v3.2.0 loaded');
