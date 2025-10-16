@@ -1004,7 +1004,7 @@
         }
     
 
-/* SafeVoice v3.7.0 - Working Improvements */
+/* SafeVoice v3.9.0 - Working Improvements */
 
 /* Prevent text selection on long press globally */
 * {
@@ -1030,7 +1030,7 @@ button:active {
 
 /* Version indicator (bottom right) */
 body::after {
-    content: 'v3.7.0';
+    content: 'v3.9.0';
     position: fixed;
     bottom: 10px;
     right: 10px;
@@ -1039,7 +1039,7 @@ body::after {
     pointer-events: none;
     z-index: 9999;
 }
-/* ===== SafeVoice v3.8.0 - UI Improvements ===== */
+/* ===== SafeVoice v3.9.0 - UI Improvements ===== */
 
 /* Better photo upload section */
 .photo-upload-section {
@@ -1232,13 +1232,22 @@ body::after {
                 </div>
                 
                 <div class="file-upload">
-                    <label for="imageUpload" class="file-upload-label">
-                        <span>📷</span>
-                        <span id="uploadText">Add Image (Optional)</span>
-                    </label>
-                    <input type="file" id="imageUpload" accept="image/*,video/*" capture="environment" onchange="previewImage()">
-                    <img id="imagePreview" class="image-preview">
+                <!-- Two Separate Photo Buttons -->
+                <div class="photo-upload-section">
+                    <button type="button" class="photo-upload-btn primary" onclick="document.getElementById('imageUpload').click()">
+                        📷 Choose Photo
+                    </button>
+                    <button type="button" class="photo-upload-btn" onclick="document.getElementById('cameraInput').click()">
+                        📸 Take Photo
+                    </button>
                 </div>
+
+                <!-- Hidden file inputs -->
+                <input type="file" id="imageUpload" accept="image/*" style="display: none;" onchange="previewImage()">
+                <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;" onchange="previewImageCamera()">
+
+                <img id="imagePreview" class="image-preview">
+            </div>/div>
                 
                 <button class="btn" onclick="submitPost()">📤 Post Anonymously</button>
             </div>
@@ -1876,7 +1885,57 @@ body::after {
             }
         }
         
-        function updateAnalytics() {
+        
+
+function previewImageCamera() {
+    // Same as previewImage but for camera input
+    const file = document.getElementById('cameraInput').files[0];
+    if (file) {
+        if (file.size > 10000000) {
+            alert('Max 10MB');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if (file.size > 2000000) {
+                // Compress
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    let width = img.width;
+                    let height = img.height;
+                    const maxSize = 1200;
+                    if (width > height) {
+                        if (width > maxSize) {
+                            height *= maxSize / width;
+                            width = maxSize;
+                        }
+                    } else {
+                        if (height > maxSize) {
+                            width *= maxSize / height;
+                            height = maxSize;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    currentImageData = canvas.toDataURL('image/jpeg', 0.8);
+                    document.getElementById('imagePreview').src = currentImageData;
+                    document.getElementById('imagePreview').style.display = 'block';
+                };
+                img.src = e.target.result;
+            } else {
+                currentImageData = e.target.result;
+                document.getElementById('imagePreview').src = currentImageData;
+                document.getElementById('imagePreview').style.display = 'block';
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+function updateAnalytics() {
             const posts = getPosts();
             const uniqueUsers = new Set(posts.map(p => p.anonymousId)).size;
             document.getElementById('userCount').textContent = uniqueUsers;
@@ -1979,8 +2038,8 @@ body::after {
         }
     
 
-// ===== SAFEVOICE v3.7.0 - TESTED WORKING FIXES =====
-console.log('🛡️ SafeVoice v3.7.0 loading...');
+// ===== SAFEVOICE v3.9.0 - TESTED WORKING FIXES =====
+console.log('🛡️ SafeVoice v3.9.0 loading...');
 
 // Store for scroll position
 window.safevoice_scrollY = 0;
@@ -1994,57 +2053,10 @@ document.querySelectorAll('input, textarea').forEach(el => {
     el.style.webkitUserSelect = 'text';
     el.style.userSelect = 'text';
 });
-// ===== SafeVoice v3.8.0 - UI Improvements =====
+// ===== SafeVoice v3.9.0 - UI Improvements =====
 
-// Replace single image button with two separate buttons
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🛡️ SafeVoice v3.8.0 initializing...');
-    
-    // Find the "Add Image" button
-    const addImageBtn = document.querySelector('button[onclick*="imageInput"]');
-    
-    if (addImageBtn) {
-        // Create camera input (separate from photo library)
-        const cameraInput = document.createElement('input');
-        cameraInput.type = 'file';
-        cameraInput.id = 'cameraInput';
-        cameraInput.accept = 'image/*';
-        cameraInput.capture = 'environment';
-        cameraInput.style.display = 'none';
-        
-        // Add camera input to DOM
-        const imageInput = document.getElementById('imageInput');
-        if (imageInput && imageInput.parentNode) {
-            imageInput.parentNode.insertBefore(cameraInput, imageInput.nextSibling);
-            
-            // Create button container
-            const buttonContainer = document.createElement('div');
-            buttonContainer.className = 'photo-upload-section';
-            buttonContainer.innerHTML = `
-                <button type="button" class="photo-upload-btn primary" onclick="document.getElementById('imageInput').click()">
-                    📷 Choose Photo
-                </button>
-                <button type="button" class="photo-upload-btn" onclick="document.getElementById('cameraInput').click()">
-                    📸 Take Photo
-                </button>
-            `;
-            
-            // Replace old button
-            addImageBtn.parentNode.insertBefore(buttonContainer, addImageBtn);
-            addImageBtn.style.display = 'none';
-            
-            console.log('✅ Photo buttons upgraded');
-        }
-    }
-    
-    // Prevent iOS text selection on long-press (except in inputs)
-    document.addEventListener('selectstart', function(e) {
-        if (!e.target.matches('input, textarea')) {
-            e.preventDefault();
-        }
-    });
-    
-    console.log('✅ SafeVoice v3.8.0 loaded successfully!');
+
+// v3.9.0 - Photo buttons in HTML (no dynamic creation needed)
 });
 
 // iOS SCROLL FIX - Wrapper function
@@ -2074,9 +2086,8 @@ window.addEventListener('load', function() {
     console.log('✅ Scroll fix applied');
 });
 
-console.log('✅ SafeVoice v3.7.0 loaded successfully');
+console.log('✅ SafeVoice v3.9.0 loaded successfully');
 </script>
 
 </body>
 </html>
-
