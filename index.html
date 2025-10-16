@@ -3,307 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="description" content="SafeVoice - India's First Anonymous Student Platform for Mental Health, Justice & Freedom">
-    <meta name="keywords" content="anonymous student platform, mental health india, college reviews, report ragging, student support">
-    <meta name="author" content="SafeVoice">
-    <meta name="theme-color" content="#667eea">
+    <meta name="description" content="SafeVoice - India's First Decentralized Anonymous Student Platform">
+    <meta name="keywords" content="anonymous, decentralized, blockchain, student, mental health, web3">
+    <meta name="author" content="SafeVoice DAO">
+    <meta name="theme-color" content="#1a1a2e">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="color-scheme" content="light dark">
     
-    <title>SafeVoice - Anonymous Student Platform</title>
+    <title>🛡️ SafeVoice - Decentralized Student Platform</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-gradient-start: #667eea;
-            --bg-gradient-end: #764ba2;
-            --glass-bg: rgba(255, 255, 255, 0.92);
-            --glass-border: rgba(255, 255, 255, 0.4);
-            --card-bg: rgba(255, 255, 255, 0.85);
-            --card-border: rgba(102, 126, 234, 0.3);
-            --text-primary: #1a1a1a;
-            --text-secondary: #555;
-            --text-tertiary: #666;
-            --feature-hover: rgba(255, 255, 255, 0.95);
-            --post-bg: rgba(255, 255, 255, 0.9);
-            --empty-bg: rgba(245, 245, 247, 0.8);
-            --input-bg: rgba(255, 255, 255, 0.95);
-            --input-focus-bg: #ffffff;
-            --helpline-bg: rgba(255, 255, 255, 0.95);
-            --emergency-bg: rgba(255, 248, 225, 0.85);
-            --emergency-border: #e6b800;
-            --emergency-text: #8b6914;
+            --primary: #667eea;
+            --primary-dark: #5568d3;
+            --secondary: #764ba2;
+            --bg-dark: #0f0f1e;
+            --bg-card: #1a1a2e;
+            --bg-elevated: #252540;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0c8;
+            --text-tertiary: #808099;
+            --border: rgba(255, 255, 255, 0.1);
+            --border-focus: rgba(102, 126, 234, 0.5);
+            --success: #00d9a5;
+            --warning: #ffd93d;
+            --danger: #ff6b6b;
+            --crisis: #ff3366;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 16px 64px rgba(0, 0, 0, 0.6);
         }
         
-        @media (prefers-color-scheme: dark) {
+        @media (prefers-color-scheme: light) {
             :root {
-                --bg-gradient-start: #1a1a2e;
-                --bg-gradient-end: #0f0f1e;
-                --glass-bg: rgba(30, 30, 45, 0.92);
-                --glass-border: rgba(255, 255, 255, 0.1);
-                --card-bg: rgba(40, 40, 60, 0.85);
-                --card-border: rgba(102, 126, 234, 0.4);
-                --text-primary: #e0e0e0;
-                --text-secondary: #b0b0b0;
-                --text-tertiary: #999;
-                --feature-hover: rgba(50, 50, 70, 0.95);
-                --post-bg: rgba(40, 40, 60, 0.9);
-                --empty-bg: rgba(30, 30, 45, 0.8);
-                --input-bg: rgba(50, 50, 70, 0.95);
-                --input-focus-bg: rgba(60, 60, 80, 1);
-                --helpline-bg: rgba(40, 40, 60, 0.95);
-                --emergency-bg: rgba(80, 60, 20, 0.95);
-                --emergency-border: #ffa000;
-                --emergency-text: #ffb84d;
+                --bg-dark: #f5f5f7;
+                --bg-card: #ffffff;
+                --bg-elevated: #f9f9fb;
+                --text-primary: #1a1a2e;
+                --text-secondary: #4a4a5e;
+                --text-tertiary: #6a6a7e;
+                --border: rgba(0, 0, 0, 0.1);
+                --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+                --shadow-lg: 0 16px 64px rgba(0, 0, 0, 0.15);
             }
         }
         
-        * { 
-            margin: 0; 
-            padding: 0; 
+        * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
         
-        html {
+        html, body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
             font-size: 16px;
+            line-height: 1.6;
+            overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            scroll-behavior: smooth;
         }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
-            background-attachment: fixed;
             min-height: 100vh;
-            color: var(--text-primary);
-            overflow-x: hidden;
+            padding-bottom: 80px;
         }
         
-        .glass-container {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-radius: 24px;
-            border: 1px solid var(--glass-border);
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            padding: 40px 30px;
-            max-width: 600px;
-            width: 90%;
-            margin: 20px auto;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        h1 { 
-            font-size: clamp(2rem, 5vw, 3rem);
-            font-weight: 800;
-            margin-bottom: 12px;
-            text-align: center;
-            letter-spacing: -0.03em;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        h2 {
-            font-size: clamp(1.5rem, 4vw, 2rem);
-            font-weight: 700;
-            margin-bottom: 16px;
-            text-align: center;
-            letter-spacing: -0.02em;
-            color: var(--text-primary);
-        }
-        
-        h3 {
-            font-size: clamp(1.2rem, 3vw, 1.5rem);
-            font-weight: 600;
-            margin: 32px 0 20px 0;
-            text-align: center;
-            color: var(--text-primary);
-        }
-        
-        .subtitle {
-            text-align: center;
-            font-size: clamp(0.9rem, 2vw, 1.05rem);
-            font-weight: 500;
-            margin-bottom: 32px;
-            color: var(--text-secondary);
-            letter-spacing: 0.01em;
-            line-height: 1.6;
-        }
-        
-        .feature {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            padding: 22px;
-            border-radius: 16px;
-            margin: 14px 0;
-            border: 2px solid var(--card-border);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
-        }
-        
-        .feature::before {
-            content: '';
-            position: absolute;
+        /* HEADER */
+        .header {
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%);
-            opacity: 0;
-            transition: opacity 0.3s;
+            height: 60px;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1000;
+            box-shadow: var(--shadow);
         }
         
-        .feature:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.3);
-            border-color: #667eea;
-            background: var(--feature-hover);
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
         }
         
-        .feature:hover::before {
-            opacity: 1;
-        }
-        
-        .feature:active {
-            transform: translateY(-3px) scale(1.01);
-        }
-        
-        .feature strong {
-            display: block;
-            font-size: clamp(1.05rem, 2.5vw, 1.25rem);
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: var(--text-primary);
-            letter-spacing: -0.01em;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .feature p {
-            font-size: clamp(0.85rem, 2vw, 0.95rem);
-            line-height: 1.6;
-            color: var(--text-secondary);
-            font-weight: 400;
-            position: relative;
-            z-index: 1;
-        }
-        
-        button {
-            position: relative;
-            font-family: inherit;
-            font-size: clamp(0.95rem, 2.5vw, 1.05rem);
-            font-weight: 700;
-            padding: 16px 28px;
-            border-radius: 14px;
+        .wallet-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
             cursor: pointer;
-            width: 100%;
-            margin-top: 14px;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            letter-spacing: -0.01em;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            overflow: hidden;
-        }
-        
-        button::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.4);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-        
-        button:active::before {
-            width: 300px;
-            height: 300px;
-        }
-        
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-        }
-        
-        button:active {
-            transform: scale(0.97);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #ffffff;
-            border: 2px solid rgba(255,255,255,0.3);
-        }
-        
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #5568d3 0%, #6a3d96 100%);
-        }
-        
-        .btn-success {
-            background: #1a1a1a;
-            color: #ffffff;
-        }
-        
-        .btn-success:hover {
-            background: #000000;
-            box-shadow: 0 10px 28px rgba(0,0,0,0.3);
-        }
-        
-        .btn-warning {
-            background: #424242;
-            color: #ffffff;
-        }
-        
-        .btn-warning:hover {
-            background: #2a2a2a;
-        }
-        
-        .btn-secondary {
-            background: var(--card-bg);
-            color: #667eea;
-            border: 2px solid #667eea;
-            padding: 12px 24px;
-            font-size: clamp(0.85rem, 2vw, 0.95rem);
-        }
-        
-        .btn-secondary:hover {
-            background: #667eea;
-            color: #ffffff;
-        }
-        
-        textarea, input, select {
-            width: 100%;
-            padding: 18px;
-            border-radius: 14px;
-            border: 2px solid var(--card-border);
-            font-size: clamp(0.9rem, 2vw, 1rem);
-            font-family: inherit;
-            background: var(--input-bg);
-            color: var(--text-primary);
-            margin: 12px 0;
             transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .wallet-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* CONTAINER */
+        .container {
+            max-width: 680px;
+            margin: 80px auto 20px;
+            padding: 0 20px;
+        }
+        
+        /* CRISIS BANNER */
+        .crisis-banner {
+            background: linear-gradient(135deg, var(--crisis), #ff1744);
+            padding: 16px 20px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 24px rgba(255, 51, 102, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.95; }
+        }
+        
+        .crisis-banner h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: white;
+        }
+        
+        .crisis-banner p {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 12px;
+        }
+        
+        .crisis-btn {
+            display: inline-block;
+            background: white;
+            color: var(--crisis);
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+        
+        .crisis-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+        }
+        
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            background: var(--bg-card);
+            padding: 8px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .tab {
+            flex: 1;
+            min-width: 100px;
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .tab.active {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .tab:hover:not(.active) {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+        }
+        
+        /* POST FORM */
+        .post-form {
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: 20px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        
+        textarea, select, input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-elevated);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+            resize: vertical;
         }
         
         textarea {
-            min-height: 160px;
-            resize: vertical;
+            min-height: 140px;
+        }
+        
+        textarea:focus, select:focus, input:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            background: var(--bg-card);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
         
         select {
@@ -311,87 +264,174 @@
             appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23667eea' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 18px center;
+            background-position: right 16px center;
             padding-right: 45px;
         }
         
-        textarea:focus, input:focus, select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.25);
-            transform: translateY(-2px);
-            background: var(--input-focus-bg);
-        }
-        
-        textarea::placeholder, input::placeholder {
+        .char-count {
+            text-align: right;
+            font-size: 0.85rem;
             color: var(--text-tertiary);
+            margin-top: 8px;
         }
         
-        .post-card {
-            background: var(--post-bg);
-            backdrop-filter: blur(10px);
-            padding: 22px;
-            padding-left: 28px;
-            border-radius: 16px;
+        .file-upload {
+            position: relative;
             margin: 16px 0;
-            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+        }
+        
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px;
+            background: var(--bg-elevated);
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        
+        .file-upload-label:hover {
+            border-color: var(--primary);
+            background: var(--bg-card);
+            color: var(--primary);
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .image-preview {
+            max-width: 100%;
+            border-radius: 12px;
+            margin-top: 12px;
+            display: none;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+            margin-top: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        /* FEED */
+        .feed-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .feed-header h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-btn:hover {
+            background: var(--bg-elevated);
+            border-color: var(--primary);
+        }
+        
+        /* POST CARD */
+        .post {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 18px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
             transition: all 0.3s;
             position: relative;
             overflow: hidden;
         }
         
-        .post-card::before {
+        .post::before {
             content: '';
             position: absolute;
             left: 0;
             top: 0;
             bottom: 0;
-            width: 5px;
-            background: linear-gradient(180deg, 
-                #667eea 0%, 
-                #6f77ea 25%,
-                #7770e8 50%,
-                #7f69d6 75%,
-                #764ba2 100%);
-            border-radius: 16px 0 0 16px;
+            width: 4px;
+            background: linear-gradient(180deg, var(--primary), var(--secondary));
+            border-radius: 18px 0 0 18px;
         }
         
-        .post-card::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 20px;
-            background: linear-gradient(90deg, 
-                rgba(102, 126, 234, 0.08) 0%,
-                transparent 100%);
-            border-radius: 16px 0 0 16px;
-            pointer-events: none;
+        .post:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
         }
         
-        .post-card:hover {
-            transform: translateX(4px);
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
+        .post.crisis {
+            border: 2px solid var(--crisis);
+            background: linear-gradient(135deg, rgba(255, 51, 102, 0.05), transparent);
+        }
+        
+        .post.crisis::before {
+            background: var(--crisis);
+            width: 6px;
         }
         
         .post-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-            position: relative;
-            z-index: 1;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
         
-        .post-category {
-            display: inline-block;
+        .post-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             padding: 6px 12px;
+            background: rgba(102, 126, 234, 0.15);
             border-radius: 8px;
             font-size: 0.8rem;
-            font-weight: 600;
-            background: rgba(102, 126, 234, 0.15);
-            color: #667eea;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .post-badge.crisis {
+            background: rgba(255, 51, 102, 0.15);
+            color: var(--crisis);
         }
         
         .post-college {
@@ -401,237 +441,191 @@
         }
         
         .post-content {
-            font-size: clamp(0.95rem, 2vw, 1.05rem);
+            font-size: 1rem;
             line-height: 1.7;
             color: var(--text-primary);
             margin-bottom: 16px;
             white-space: pre-wrap;
             word-wrap: break-word;
-            font-weight: 400;
-            position: relative;
-            z-index: 1;
         }
         
         .post-image {
             width: 100%;
-            max-height: 400px;
-            object-fit: cover;
             border-radius: 12px;
             margin: 12px 0;
+            max-height: 400px;
+            object-fit: cover;
         }
         
         .post-meta {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            font-size: clamp(0.8rem, 1.8vw, 0.85rem);
-            color: var(--text-tertiary);
-            padding-top: 12px;
-            border-top: 1px solid rgba(102, 126, 234, 0.1);
+            justify-content: space-between;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
             flex-wrap: wrap;
-            gap: 10px;
-            position: relative;
-            z-index: 1;
+            gap: 12px;
         }
         
         .post-author {
-            font-weight: 600;
-            color: #667eea;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--primary);
         }
         
         .post-time {
+            font-size: 0.8rem;
             color: var(--text-tertiary);
         }
         
         .post-reactions {
             display: flex;
-            gap: 15px;
-            position: relative;
-            z-index: 1;
+            gap: 16px;
         }
         
         .reaction-btn {
             background: none;
             border: none;
-            padding: 4px 8px;
+            padding: 6px 12px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-tertiary);
+            font-weight: 600;
+            transition: all 0.3s;
             display: flex;
             align-items: center;
-            gap: 5px;
-            color: var(--text-tertiary);
-            transition: all 0.2s;
-            width: auto;
-            margin: 0;
-            box-shadow: none;
+            gap: 6px;
         }
         
         .reaction-btn:hover {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
             transform: scale(1.1);
-            box-shadow: none;
         }
         
         .reaction-btn.active {
-            color: #667eea;
+            color: var(--primary);
+            background: rgba(102, 126, 234, 0.1);
         }
         
-        .file-input-wrapper {
-            position: relative;
-            margin: 12px 0;
-        }
-        
-        .file-input-label {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
-            border: 2px dashed var(--card-border);
-            border-radius: 14px;
-            cursor: pointer;
+        /* HELPLINE PAGE */
+        .helpline-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--primary);
+            box-shadow: var(--shadow);
             transition: all 0.3s;
-            background: var(--card-bg);
-            color: var(--text-secondary);
-            font-weight: 500;
         }
         
-        .file-input-label:hover {
-            border-color: #667eea;
-            background: var(--feature-hover);
-        }
-        
-        input[type="file"] {
-            display: none;
-        }
-        
-        .image-preview {
-            max-width: 100%;
-            max-height: 300px;
-            border-radius: 12px;
-            margin-top: 12px;
-        }
-        
-        .helpline {
-            background: var(--helpline-bg);
-            backdrop-filter: blur(10px);
-            padding: 18px 20px;
-            border-radius: 14px;
-            margin: 12px 0;
-            border-left: 4px solid #1a1a1a;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        
-        .helpline:hover {
-            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        .helpline-card:hover {
             transform: translateX(6px);
-            border-left-color: #667eea;
+            border-left-color: var(--crisis);
+            box-shadow: var(--shadow-lg);
         }
         
-        .helpline strong {
+        .helpline-card h3 {
+            font-size: 1.15rem;
+            margin-bottom: 8px;
             color: var(--text-primary);
-            font-size: clamp(1rem, 2.2vw, 1.15rem);
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 700;
         }
         
-        .helpline a {
-            color: #667eea;
+        .helpline-card a {
+            color: var(--primary);
             text-decoration: none;
             font-weight: 700;
-            font-size: clamp(1.1rem, 2.5vw, 1.25rem);
+            font-size: 1.25rem;
             letter-spacing: 0.02em;
         }
         
-        .helpline a:hover {
-            text-decoration: underline;
+        .helpline-card a:hover {
+            color: var(--crisis);
         }
         
-        .helpline-text {
+        .helpline-card p {
+            margin-top: 6px;
+            font-size: 0.85rem;
             color: var(--text-tertiary);
-            font-size: clamp(0.85rem, 2vw, 0.9rem);
-            margin-top: 4px;
         }
         
-        .char-counter {
-            text-align: right;
-            margin-top: 8px;
-            color: var(--text-tertiary);
-            font-size: clamp(0.8rem, 1.8vw, 0.9rem);
-            font-weight: 500;
-        }
-        
-        .status {
-            text-align: center;
-            margin-top: 32px;
-            font-size: clamp(0.8rem, 1.8vw, 0.9rem);
-            color: var(--text-tertiary);
-            line-height: 1.8;
-        }
-        
-        .page-wrapper {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 60px 20px 40px;
-        }
-        
-        .emergency-box {
-            background: var(--emergency-bg);
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--emergency-border);
-            border-radius: 14px;
-            padding: 22px;
-            margin-top: 28px;
-            box-shadow: 0 4px 16px rgba(230, 184, 0, 0.15);
-        }
-        
-        .emergency-box strong {
-            color: var(--emergency-text);
-            font-size: 1.2rem;
-            display: block;
-            margin-bottom: 12px;
-        }
-        
-        .emergency-box a {
-            color: #d32f2f;
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-        
-        .emergency-box ul {
-            list-style: none;
-            padding-left: 0;
-            color: var(--text-tertiary);
-            line-height: 1.8;
-        }
-        
-        .emergency-box li::before {
-            content: "• ";
-            color: var(--emergency-border);
-            font-weight: bold;
-            margin-right: 8px;
-        }
-        
+        /* EMPTY STATE */
         .empty-state {
             text-align: center;
-            padding: 40px;
-            background: var(--empty-bg);
-            backdrop-filter: blur(5px);
-            border-radius: 14px;
-            margin-top: 20px;
+            padding: 60px 20px;
+            background: var(--bg-card);
+            border-radius: 18px;
+            border: 2px dashed var(--border);
         }
         
         .empty-state p {
-            font-size: clamp(1rem, 2vw, 1.15rem);
+            font-size: 1.1rem;
             color: var(--text-tertiary);
         }
         
-        @keyframes fadeInUp {
+        /* BOTTOM NAV */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 20px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 16px;
+            background: none;
+            border: none;
+            border-radius: 12px;
+            color: var(--text-tertiary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .nav-btn .icon {
+            font-size: 1.5rem;
+        }
+        
+        .nav-btn.active {
+            color: var(--primary);
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .nav-btn:hover {
+            color: var(--text-primary);
+        }
+        
+        /* PAGES */
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
@@ -639,107 +633,51 @@
             }
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        
-        .fade-in-up {
-            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.4s ease-in;
-        }
-        
-        .slide-in-right {
-            animation: slideInRight 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
+        /* RESPONSIVE */
         @media (max-width: 768px) {
-            .glass-container {
-                padding: 32px 24px;
-                width: 95%;
-                border-radius: 20px;
+            .container {
+                padding: 0 16px;
+                margin-top: 70px;
             }
             
-            .feature, .post-card {
+            .post-form {
                 padding: 20px;
-                border-radius: 14px;
             }
             
-            .post-card {
-                padding-left: 26px;
+            .tabs {
+                gap: 8px;
             }
             
-            button {
-                padding: 16px 28px;
-            }
-        }
-
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .glass-container {
-                max-width: 700px;
-            }
-        }
-
-        @media (min-width: 1025px) {
-            .glass-container {
-                max-width: 800px;
-            }
-        }
-
-        @media (orientation: landscape) and (max-height: 600px) {
-            .page-wrapper {
-                padding: 20px;
-                align-items: flex-start;
-            }
-            
-            .glass-container {
-                margin: 10px auto;
+            .tab {
+                padding: 10px 16px;
+                font-size: 0.85rem;
             }
         }
         
-        .sound-toggle {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 56px;
-            height: 56px;
+        /* LOADING */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-tertiary);
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
             border-radius: 50%;
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(102, 126, 234, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 24px;
-            transition: all 0.3s;
-            z-index: 1000;
-            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
         }
         
-        .sound-toggle:hover {
-            background: var(--feature-hover);
-            border-color: #667eea;
-            transform: scale(1.15);
-            box-shadow: 0 6px 24px rgba(102, 126, 234, 0.3);
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         
-        .sound-toggle:active {
-            transform: scale(0.95);
+        /* HIDDEN */
+        .hidden {
+            display: none !important;
         }
         
         #otherCollegeInput {
@@ -749,738 +687,502 @@
 </head>
 <body>
 
-    <div class="sound-toggle" onclick="toggleSound()" id="soundToggle" title="Toggle Sound Effects">
-        🔊
-    </div>
+    <!-- HEADER -->
+    <header class="header">
+        <div class="logo">🛡️ SafeVoice</div>
+        <button class="wallet-btn" onclick="connectWallet()">
+            <span>🔗</span>
+            <span id="walletText">Connect Wallet</span>
+        </button>
+    </header>
 
-    <!-- LANDING PAGE -->
-    <div id="landingPage" class="page-wrapper">
-        <div class="glass-container fade-in-up">
-            <h1>🛡️ SafeVoice</h1>
-            <p class="subtitle">India's First Anonymous Student Platform</p>
+    <!-- CONTAINER -->
+    <div class="container">
+        
+        <!-- HOME PAGE -->
+        <div id="homePage" class="page active">
             
-            <div class="feature slide-in-right" style="animation-delay: 0.1s;">
-                <strong>🔒 100% Anonymous</strong>
-                <p>Zero-knowledge verification. Your identity never stored. Impossible to trace.</p>
+            <!-- CRISIS BANNER -->
+            <div class="crisis-banner">
+                <h3>🚨 Need Immediate Help?</h3>
+                <p>If you're in crisis, help is available 24/7</p>
+                <a href="tel:18602662345" class="crisis-btn">📞 Call Now: 1860-2662-345</a>
             </div>
             
-            <div class="feature slide-in-right" style="animation-delay: 0.2s;">
-                <strong>🆘 Crisis Support</strong>
-                <p>Mental health resources. Exam stress relief. Peer support groups. Emergency helplines.</p>
+            <!-- TABS -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchFeed('all')">All Posts</button>
+                <button class="tab" onclick="switchFeed('crisis')">🚨 Crisis</button>
+                <button class="tab" onclick="switchFeed('trending')">🔥 Trending</button>
+                <button class="tab" onclick="switchFeed('myCollege')">🎓 My College</button>
             </div>
             
-            <div class="feature slide-in-right" style="animation-delay: 0.3s;">
-                <strong>🕯️ Digital Memorials</strong>
-                <p>Honor students lost. Permanent tributes. Community healing. Never forgotten.</p>
+            <!-- FEED -->
+            <div class="feed-header">
+                <h2>Community Feed</h2>
+                <button class="filter-btn" onclick="showFilters()">⚙️ Filter</button>
             </div>
             
-            <div class="feature slide-in-right" style="animation-delay: 0.4s;">
-                <strong>⚖️ Expose Injustice</strong>
-                <p>Protected whistleblowing. Report corruption. Fight abuse. Your voice matters.</p>
-            </div>
-            
-            <button class="btn-primary" onclick="navigate('posting')">
-                🎯 Enter Platform
-            </button>
-            
-            <button class="btn-success" onclick="navigate('helpline')">
-                🆘 Emergency Helplines
-            </button>
-            
-            <button class="btn-warning" onclick="navigate('memorial')">
-                🕯️ View Memorials
-            </button>
-            
-            <p class="status">
-                ✨ Built by students, for students<br>
-                🌟 Open Source on <a href="https://github.com/safevoice009/safevoice-platform" style="color:#667eea;text-decoration:none;font-weight:700" target="_blank">GitHub</a><br>
-                🔥 Status: Platform Active
-            </p>
-        </div>
-    </div>
-
-    <!-- POSTING INTERFACE -->
-    <div id="postingInterface" class="page-wrapper" style="display:none;">
-        <div class="glass-container fade-in">
-            <button onclick="navigate('landing')" class="btn-secondary">
-                ← Back to Home
-            </button>
-            
-            <h2>📝 Share Your Story</h2>
-            
-            <textarea id="postContent" 
-                      placeholder="Write your story here...
-
-Share anything:
-• Your struggles & experiences
-• College reviews & reality
-• Mental health challenges
-• Success stories
-• Ask for help
-
-Your identity is completely protected." 
-                      maxlength="1000"></textarea>
-            
-            <div class="char-counter">
-                <span id="charCount">0/1000</span> characters
-            </div>
-            
-            <select id="collegeSelect" required>
-                <option value="">🎓 Select Your College (Required)</option>
-                <optgroup label="IITs - Indian Institutes of Technology">
-                    <option value="IIT Delhi">IIT Delhi</option>
-                    <option value="IIT Bombay">IIT Bombay</option>
-                    <option value="IIT Madras">IIT Madras</option>
-                    <option value="IIT Kanpur">IIT Kanpur</option>
-                    <option value="IIT Kharagpur">IIT Kharagpur</option>
-                    <option value="IIT Roorkee">IIT Roorkee</option>
-                    <option value="IIT Guwahati">IIT Guwahati</option>
-                    <option value="IIT Hyderabad">IIT Hyderabad</option>
-                    <option value="IIT Indore">IIT Indore</option>
-                    <option value="IIT BHU">IIT BHU Varanasi</option>
-                    <option value="IIT Gandhinagar">IIT Gandhinagar</option>
-                    <option value="IIT Patna">IIT Patna</option>
-                    <option value="IIT Ropar">IIT Ropar</option>
-                    <option value="IIT Bhubaneswar">IIT Bhubaneswar</option>
-                    <option value="IIT Mandi">IIT Mandi</option>
-                    <option value="IIT Jodhpur">IIT Jodhpur</option>
-                    <option value="IIT Tirupati">IIT Tirupati</option>
-                    <option value="IIT Palakkad">IIT Palakkad</option>
-                    <option value="IIT Jammu">IIT Jammu</option>
-                    <option value="IIT Dharwad">IIT Dharwad</option>
-                </optgroup>
-                <optgroup label="AIIMS - All India Institute of Medical Sciences">
-                    <option value="AIIMS Delhi">AIIMS Delhi</option>
-                    <option value="AIIMS Bhopal">AIIMS Bhopal</option>
-                    <option value="AIIMS Jodhpur">AIIMS Jodhpur</option>
-                    <option value="AIIMS Rishikesh">AIIMS Rishikesh</option>
-                    <option value="AIIMS Patna">AIIMS Patna</option>
-                    <option value="AIIMS Raipur">AIIMS Raipur</option>
-                    <option value="AIIMS Bhubaneswar">AIIMS Bhubaneswar</option>
-                    <option value="AIIMS Nagpur">AIIMS Nagpur</option>
-                    <option value="AIIMS Mangalagiri">AIIMS Mangalagiri</option>
-                    <option value="AIIMS Bathinda">AIIMS Bathinda</option>
-                </optgroup>
-                <optgroup label="NITs - National Institutes of Technology">
-                    <option value="NIT Trichy">NIT Trichy</option>
-                    <option value="NIT Warangal">NIT Warangal</option>
-                    <option value="NIT Surathkal">NIT Surathkal Karnataka</option>
-                    <option value="NIT Calicut">NIT Calicut</option>
-                    <option value="NIT Rourkela">NIT Rourkela</option>
-                    <option value="NIT Allahabad">NIT Allahabad</option>
-                    <option value="NIT Bhopal">NIT Bhopal</option>
-                    <option value="NIT Jaipur">NIT Jaipur</option>
-                    <option value="NIT Kurukshetra">NIT Kurukshetra</option>
-                    <option value="NIT Durgapur">NIT Durgapur</option>
-                    <option value="NIT Silchar">NIT Silchar</option>
-                    <option value="NIT Hamirpur">NIT Hamirpur</option>
-                    <option value="NIT Jalandhar">NIT Jalandhar</option>
-                    <option value="NIT Patna">NIT Patna</option>
-                    <option value="NIT Raipur">NIT Raipur</option>
-                    <option value="NIT Agartala">NIT Agartala</option>
-                    <option value="NIT Srinagar">NIT Srinagar</option>
-                </optgroup>
-                <optgroup label="Top Private Engineering Colleges">
-                    <option value="BITS Pilani">BITS Pilani</option>
-                    <option value="BITS Goa">BITS Goa</option>
-                    <option value="BITS Hyderabad">BITS Hyderabad</option>
-                    <option value="VIT Vellore">VIT Vellore</option>
-                    <option value="VIT Chennai">VIT Chennai</option>
-                    <option value="VIT Amaravati">VIT AP</option>
-                    <option value="VIT Bhopal">VIT Bhopal</option>
-                    <option value="Manipal Institute of Technology">Manipal Institute of Technology</option>
-                    <option value="SASTRA University">SASTRA University</option>
-                    <option value="Thapar University">Thapar University</option>
-                    <option value="SRM University">SRM University Chennai</option>
-                    <option value="Amity University">Amity University Noida</option>
-                    <option value="LPU">Lovely Professional University</option>
-                    <option value="Chitkara University">Chitkara University</option>
-                    <option value="Shiv Nadar University">Shiv Nadar University</option>
-                    <option value="PES University">PES University Bangalore</option>
-                    <option value="BMS College">BMS College Bangalore</option>
-                    <option value="RV College">RV College Bangalore</option>
-                    <option value="PESIT">PESIT Bangalore</option>
-                    <option value="Dayananda Sagar">Dayananda Sagar Bangalore</option>
-                </optgroup>
-                <optgroup label="Medical Colleges">
-                    <option value="CMC Vellore">CMC Vellore</option>
-                    <option value="AFMC Pune">AFMC Pune</option>
-                    <option value="JIPMER Puducherry">JIPMER Puducherry</option>
-                    <option value="Maulana Azad Medical College">Maulana Azad Medical College Delhi</option>
-                    <option value="Grant Medical College">Grant Medical College Mumbai</option>
-                    <option value="Kasturba Medical College">Kasturba Medical College Manipal</option>
-                    <option value="St Johns Medical College">St John's Medical College Bangalore</option>
-                    <option value="Armed Forces Medical College">Armed Forces Medical College Pune</option>
-                    <option value="Lady Hardinge Medical College">Lady Hardinge Medical College Delhi</option>
-                    <option value="King Georges Medical University">King George's Medical University Lucknow</option>
-                </optgroup>
-                <optgroup label="IIMs - Management Institutes">
-                    <option value="IIM Ahmedabad">IIM Ahmedabad</option>
-                    <option value="IIM Bangalore">IIM Bangalore</option>
-                    <option value="IIM Calcutta">IIM Calcutta</option>
-                    <option value="IIM Lucknow">IIM Lucknow</option>
-                    <option value="IIM Indore">IIM Indore</option>
-                    <option value="IIM Kozhikode">IIM Kozhikode</option>
-                    <option value="IIM Shillong">IIM Shillong</option>
-                    <option value="IIM Rohtak">IIM Rohtak</option>
-                    <option value="IIM Ranchi">IIM Ranchi</option>
-                    <option value="IIM Udaipur">IIM Udaipur</option>
-                </optgroup>
-                <optgroup label="National Law Universities">
-                    <option value="NLSIU Bangalore">NLSIU Bangalore</option>
-                    <option value="NALSAR Hyderabad">NALSAR Hyderabad</option>
-                    <option value="NLU Delhi">NLU Delhi</option>
-                    <option value="NLIU Bhopal">NLIU Bhopal</option>
-                    <option value="NUJS Kolkata">NUJS Kolkata</option>
-                    <option value="GNLU Gandhinagar">GNLU Gandhinagar</option>
-                    <option value="RGNUL Patiala">RGNUL Patiala</option>
-                </optgroup>
-                <optgroup label="Central Universities">
-                    <option value="Delhi University">Delhi University</option>
-                    <option value="Jawaharlal Nehru University">JNU Delhi</option>
-                    <option value="Banaras Hindu University">BHU Varanasi</option>
-                    <option value="Aligarh Muslim University">AMU Aligarh</option>
-                    <option value="Jamia Millia Islamia">Jamia Millia Islamia Delhi</option>
-                    <option value="Central University of Hyderabad">Central University of Hyderabad</option>
-                </optgroup>
-                <optgroup label="State Universities">
-                    <option value="Anna University">Anna University Chennai</option>
-                    <option value="Jadavpur University">Jadavpur University Kolkata</option>
-                    <option value="Pune University">Pune University</option>
-                    <option value="Mumbai University">Mumbai University</option>
-                    <option value="Calcutta University">Calcutta University</option>
-                    <option value="Osmania University">Osmania University Hyderabad</option>
-                    <option value="Madras University">Madras University</option>
-                    <option value="Andhra University">Andhra University</option>
-                    <option value="Kerala University">Kerala University</option>
-                    <option value="Bangalore University">Bangalore University</option>
-                </optgroup>
-                <option value="other">🏫 Other College (Type Below)</option>
-            </select>
-            
-            <input type="text" id="otherCollegeInput" placeholder="Enter your college name" maxlength="100">
-            
-            <select id="categorySelect">
-                <option value="">📂 Select Category (Optional)</option>
-                <option value="mental-health">💙 Mental Health</option>
-                <option value="academics">📚 Academic Stress</option>
-                <option value="ragging">🚨 Ragging/Harassment</option>
-                <option value="corruption">⚖️ Corruption & Injustice</option>
-                <option value="success">✨ Success Story</option>
-                <option value="review">⭐ College Review</option>
-                <option value="memorial">🕯️ Memorial Tribute</option>
-                <option value="placement">💼 Placements & Career</option>
-                <option value="hostel">🏠 Hostel Life</option>
-                <option value="other">💬 General Discussion</option>
-            </select>
-            
-            <div class="file-input-wrapper">
-                <label for="imageUpload" class="file-input-label">
-                    📷 Add Image (Optional)
-                </label>
-                <input type="file" id="imageUpload" accept="image/*">
-                <img id="imagePreview" class="image-preview" style="display:none;">
-            </div>
-            
-            <button onclick="postAnonymously()" class="btn-success">
-                📤 Post Anonymously
-            </button>
-            
-            <h3>💬 Community Feed</h3>
-            <div id="feedContainer"></div>
-            
-            <p style="text-align: center; color: var(--text-tertiary); margin-top: 30px; font-size: 0.85rem;">
-                Posts stored locally for demo. Decentralized IPFS storage coming soon!
-            </p>
-        </div>
-    </div>
-
-    <!-- HELPLINE PAGE -->
-    <div id="helplinePage" class="page-wrapper" style="display:none;">
-        <div class="glass-container fade-in">
-            <button onclick="navigate('landing')" class="btn-secondary">
-                ← Back to Home
-            </button>
-            
-            <h2>🆘 24/7 Crisis Helplines</h2>
-            <p style="text-align: center; margin-bottom: 28px; color: var(--text-tertiary); font-size: 1.05rem;">
-                You are not alone. Help is available right now.
-            </p>
-            
-            <div class="helpline">
-                <strong>AASRA (Mumbai)</strong><br>
-                📞 <a href="tel:+912227546669">91-22-27546669</a><br>
-                <span class="helpline-text">⏰ 24/7 • Suicide prevention & mental health</span>
-            </div>
-            
-            <div class="helpline">
-                <strong>Vandrevala Foundation</strong><br>
-                📞 <a href="tel:18602662345">1860-2662-345</a><br>
-                <span class="helpline-text">⏰ 24/7 • Mental health support & crisis intervention</span>
-            </div>
-            
-            <div class="helpline">
-                <strong>iCall (TISS)</strong><br>
-                📞 <a href="tel:02225521111">022-25521111</a><br>
-                <span class="helpline-text">⏰ Mon-Sat, 8 AM - 10 PM • Professional counseling</span>
-            </div>
-            
-            <div class="helpline">
-                <strong>NIMHANS (Bangalore)</strong><br>
-                📞 <a href="tel:08026995000">080-26995000</a><br>
-                <span class="helpline-text">⏰ 24/7 • Mental health emergency</span>
-            </div>
-            
-            <div class="helpline">
-                <strong>Sumaitri (Delhi)</strong><br>
-                📞 <a href="tel:01123389090">011-23389090</a><br>
-                <span class="helpline-text">⏰ Daily, 2 PM - 10 PM • Crisis intervention</span>
-            </div>
-            
-            <div class="helpline">
-                <strong>Sneha Foundation (Chennai)</strong><br>
-                📞 <a href="tel:04424640050">044-24640050</a><br>
-                <span class="helpline-text">⏰ 24/7 • Suicide prevention</span>
-            </div>
-            
-            <div class="emergency-box">
-                <strong>⚠️ If You're in Immediate Danger:</strong>
-                <ul>
-                    <li>Call <a href="tel:112">112</a> (National Emergency Number)</li>
-                    <li>Go to nearest hospital emergency room</li>
-                    <li>Tell someone you trust NOW</li>
-                    <li>Stay with people - don't isolate</li>
-                </ul>
-            </div>
-            
-            <p style="text-align: center; margin-top: 28px; color: var(--text-tertiary); font-size: 1.05rem;">
-                💜 Your life matters. There is hope. These people care about you.
-            </p>
-        </div>
-    </div>
-
-    <!-- MEMORIAL PAGE -->
-    <div id="memorialPage" class="page-wrapper" style="display:none;">
-        <div class="glass-container fade-in">
-            <button onclick="navigate('landing')" class="btn-secondary">
-                ← Back to Home
-            </button>
-            
-            <h2>🕯️ In Loving Memory</h2>
-            <p style="text-align: center; margin-bottom: 28px; color: var(--text-tertiary); font-size: 1.05rem;">
-                Honoring students who left too soon. Forever in our hearts.
-            </p>
-            
-            <div class="feature">
-                <strong>🕯️ Create Memorial Tribute</strong>
-                <p style="margin-top: 12px;">
-                    Honor a student who passed away. Share their story, celebrate their life, 
-                    ensure they're never forgotten.
-                </p>
-                <button onclick="navigate('posting')" class="btn-warning">
-                    Create Tribute
-                </button>
-            </div>
-            
-            <h3>Recent Memorials</h3>
-            <div id="memorialContainer">
-                <div class="empty-state">
-                    <p>🕊️ No memorials yet. Be the first to honor a lost soul.</p>
+            <div id="feedContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading posts...</p>
                 </div>
             </div>
-            
-            <p style="text-align: center; margin-top: 28px; color: var(--text-tertiary); font-size: 0.9rem;">
-                All memorials are permanent and immutable once created on IPFS.
-            </p>
         </div>
+        
+        <!-- POST PAGE -->
+        <div id="postPage" class="page">
+            <h2 style="margin-bottom: 24px;">Share Anonymously</h2>
+            
+            <div class="post-form">
+                <div class="form-group">
+                    <label>Your Story</label>
+                    <textarea 
+                        id="postContent" 
+                        placeholder="Share anything - your struggles, experiences, questions, or support for others. You're completely anonymous."
+                        maxlength="1000"
+                        oninput="updateCharCount()"></textarea>
+                    <div class="char-count" id="charCount">0/1000</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>College (Required)</label>
+                    <select id="collegeSelect" onchange="handleCollegeChange()">
+                        <option value="">Select your college...</option>
+                        <optgroup label="IITs">
+                            <option value="IIT Delhi">IIT Delhi</option>
+                            <option value="IIT Bombay">IIT Bombay</option>
+                            <option value="IIT Madras">IIT Madras</option>
+                            <option value="IIT Kanpur">IIT Kanpur</option>
+                            <option value="IIT Kharagpur">IIT Kharagpur</option>
+                        </optgroup>
+                        <optgroup label="AIIMS">
+                            <option value="AIIMS Delhi">AIIMS Delhi</option>
+                            <option value="AIIMS Bhopal">AIIMS Bhopal</option>
+                            <option value="AIIMS Jodhpur">AIIMS Jodhpur</option>
+                        </optgroup>
+                        <optgroup label="NITs">
+                            <option value="NIT Trichy">NIT Trichy</option>
+                            <option value="NIT Warangal">NIT Warangal</option>
+                            <option value="NIT Surathkal">NIT Surathkal</option>
+                        </optgroup>
+                        <option value="other">Other College</option>
+                    </select>
+                    <input type="text" id="otherCollegeInput" placeholder="Enter college name" maxlength="100">
+                </div>
+                
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="categorySelect">
+                        <option value="">Choose category...</option>
+                        <option value="mental-health">💙 Mental Health</option>
+                        <option value="academics">📚 Academic Stress</option>
+                        <option value="ragging">🚨 Ragging/Harassment</option>
+                        <option value="corruption">⚖️ Corruption</option>
+                        <option value="success">✨ Success Story</option>
+                        <option value="review">⭐ College Review</option>
+                        <option value="memorial">🕯️ Memorial</option>
+                        <option value="general">💬 General</option>
+                    </select>
+                </div>
+                
+                <div class="file-upload">
+                    <label for="imageUpload" class="file-upload-label">
+                        <span>📷</span>
+                        <span>Add Image (Optional)</span>
+                    </label>
+                    <input type="file" id="imageUpload" accept="image/*" onchange="previewImage()">
+                    <img id="imagePreview" class="image-preview">
+                </div>
+                
+                <button class="btn" onclick="submitPost()">📤 Post Anonymously</button>
+            </div>
+        </div>
+        
+        <!-- HELPLINE PAGE -->
+        <div id="helplinePage" class="page">
+            <h2 style="margin-bottom: 24px;">24/7 Crisis Support</h2>
+            
+            <p style="text-align: center; margin-bottom: 32px; color: var(--text-secondary);">
+                You're not alone. Help is available right now.
+            </p>
+            
+            <div class="helpline-card">
+                <h3>Vandrevala Foundation</h3>
+                <a href="tel:18602662345">📞 1860-2662-345</a>
+                <p>24/7 • Mental health support & crisis intervention</p>
+            </div>
+            
+            <div class="helpline-card">
+                <h3>AASRA Mumbai</h3>
+                <a href="tel:+912227546669">📞 91-22-27546669</a>
+                <p>24/7 • Suicide prevention & counseling</p>
+            </div>
+            
+            <div class="helpline-card">
+                <h3>iCall (TISS)</h3>
+                <a href="tel:02225521111">📞 022-25521111</a>
+                <p>Mon-Sat, 8 AM-10 PM • Professional counseling</p>
+            </div>
+            
+            <div class="helpline-card">
+                <h3>NIMHANS Bangalore</h3>
+                <a href="tel:08026995000">📞 080-26995000</a>
+                <p>24/7 • Mental health emergency</p>
+            </div>
+            
+            <div class="crisis-banner" style="margin-top: 32px;">
+                <h3>⚠️ Emergency</h3>
+                <p>If you're in immediate danger:</p>
+                <a href="tel:112" class="crisis-btn">📞 Call 112 (National Emergency)</a>
+            </div>
+        </div>
+        
+        <!-- PROFILE PAGE -->
+        <div id="profilePage" class="page">
+            <h2 style="margin-bottom: 24px;">Anonymous Profile</h2>
+            
+            <div class="post-form">
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="width: 80px; height: 80px; margin: 0 auto 16px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+                        🎭
+                    </div>
+                    <h3 id="anonymousId">Student####</h3>
+                    <p style="color: var(--text-tertiary); font-size: 0.9rem;">Your identity is protected</p>
+                </div>
+                
+                <div class="form-group">
+                    <label>Wallet Address</label>
+                    <input type="text" id="walletAddress" value="Not connected" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label>$VOICE Balance</label>
+                    <input type="text" id="tokenBalance" value="0 VOICE" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label>Your Posts</label>
+                    <input type="text" id="postCount" value="0 posts" readonly>
+                </div>
+                
+                <button class="btn" onclick="connectWallet()">Connect Web3 Wallet</button>
+                
+                <p style="text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-tertiary);">
+                    Connecting wallet is optional. Platform remains anonymous.
+                </p>
+            </div>
+        </div>
+        
     </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+        <button class="nav-btn active" onclick="navigateTo('home')">
+            <span class="icon">🏠</span>
+            <span>Home</span>
+        </button>
+        <button class="nav-btn" onclick="navigateTo('post')">
+            <span class="icon">✍️</span>
+            <span>Post</span>
+        </button>
+        <button class="nav-btn" onclick="navigateTo('helpline')">
+            <span class="icon">🆘</span>
+            <span>Help</span>
+        </button>
+        <button class="nav-btn" onclick="navigateTo('profile')">
+            <span class="icon">👤</span>
+            <span>Profile</span>
+        </button>
+    </nav>
 
     <script>
-        // ========== CONFIGURATION ==========
+        // CONFIG
         const CONFIG = {
-            version: '2.1.0',
+            version: '3.0.0',
             maxPostLength: 1000,
             minPostLength: 10,
-            maxPosts: 100
+            storageKey: 'safevoice_posts_v3'
         };
-
-        // ========== STATE ==========
-        let soundEnabled = true;
-        let audioCtx;
-        let isPlayingSound = false;
+        
+        // STATE
+        let currentFeed = 'all';
         let currentImageData = null;
+        let userWallet = null;
         
-        const supportsVibration = 'vibrate' in navigator;
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-        
-        // ========== AUDIO SYSTEM ==========
-        function initAudio() {
-            if (!audioCtx) {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                audioCtx = new AudioContext();
-            }
-        }
-        
-        function vibrate(pattern) {
-            if (!supportsVibration || isIOS) return;
-            
-            const patterns = {
-                'click': 10,
-                'success': [50, 50, 50],
-                'navigate': 20,
-                'error': [100, 50, 100],
-                'helpline': [30, 30, 30, 30],
-                'memorial': [50, 100, 50]
-            };
-            
-            try {
-                navigator.vibrate(patterns[pattern] || 20);
-            } catch (e) {
-                console.log('Vibration not supported');
-            }
-        }
-        
-        function playSound(type) {
-            if (!soundEnabled || isPlayingSound) return;
-            
-            initAudio();
-            isPlayingSound = true;
-            
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            
-            const sounds = {
-                'click': { freq: 800, duration: 0.08, gain: 0.08 },
-                'success': { freq: 1200, duration: 0.25, gain: 0.1 },
-                'navigate': { freq: 600, duration: 0.15, gain: 0.06 },
-                'error': { freq: 400, duration: 0.15, gain: 0.08 },
-                'helpline': { freq: 900, duration: 0.2, gain: 0.09 },
-                'memorial': { freq: 550, duration: 0.4, gain: 0.07 }
-            };
-            
-            const sound = sounds[type] || sounds.click;
-            oscillator.frequency.value = sound.freq;
-            gainNode.gain.setValueAtTime(sound.gain, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + sound.duration);
-            oscillator.start(audioCtx.currentTime);
-            oscillator.stop(audioCtx.currentTime + sound.duration);
-            setTimeout(() => { isPlayingSound = false; }, sound.duration * 1000);
-            vibrate(type);
-        }
-        
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
-            document.getElementById('soundToggle').textContent = soundEnabled ? '🔊' : '🔇';
-            if (soundEnabled) playSound('click');
-            localStorage.setItem('soundEnabled', soundEnabled);
-        }
-        
-        // Load saved sound preference
-        const savedSound = localStorage.getItem('soundEnabled');
-        if (savedSound !== null) {
-            soundEnabled = savedSound === 'true';
-            document.getElementById('soundToggle').textContent = soundEnabled ? '🔊' : '🔇';
-        }
-        
-        // ========== NAVIGATION ==========
-        function navigate(page) {
-            if (page === 'helpline') playSound('helpline');
-            else if (page === 'memorial') playSound('memorial');
-            else playSound('navigate');
-            
-            // Hide all pages
-            document.getElementById('landingPage').style.display = 'none';
-            document.getElementById('postingInterface').style.display = 'none';
-            document.getElementById('helplinePage').style.display = 'none';
-            document.getElementById('memorialPage').style.display = 'none';
-            
-            // Show selected page
-            const pages = {
-                'landing': 'landingPage',
-                'posting': 'postingInterface',
-                'helpline': 'helplinePage',
-                'memorial': 'memorialPage'
-            };
-            
-            document.getElementById(pages[page]).style.display = 'block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            
-            // Load page-specific content
-            if (page === 'posting') loadFeed();
-            if (page === 'memorial') loadMemorials();
-        }
-        
-        // ========== CHARACTER COUNTER ==========
-        document.addEventListener('DOMContentLoaded', function() {
-            const textarea = document.getElementById('postContent');
-            if (textarea) {
-                textarea.addEventListener('input', function() {
-                    const count = this.value.length;
-                    const counter = document.getElementById('charCount');
-                    counter.textContent = count + '/' + CONFIG.maxPostLength;
-                    
-                    if (count > 900) {
-                        counter.style.color = '#d32f2f';
-                    } else if (count > 800) {
-                        counter.style.color = '#ff9800';
-                    } else {
-                        counter.style.color = 'var(--text-tertiary)';
-                    }
-                });
-            }
-            
-            // IMAGE PREVIEW
-            const imageUpload = document.getElementById('imageUpload');
-            if (imageUpload) {
-                imageUpload.addEventListener('change', function(e) {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            currentImageData = e.target.result;
-                            const preview = document.getElementById('imagePreview');
-                            preview.src = currentImageData;
-                            preview.style.display = 'block';
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-            }
-            
-            // COLLEGE SELECTOR - Other option handler
-            const collegeSelect = document.getElementById('collegeSelect');
-            const otherInput = document.getElementById('otherCollegeInput');
-            if (collegeSelect && otherInput) {
-                collegeSelect.addEventListener('change', function() {
-                    if (this.value === 'other') {
-                        otherInput.style.display = 'block';
-                        otherInput.required = true;
-                    } else {
-                        otherInput.style.display = 'none';
-                        otherInput.required = false;
-                        otherInput.value = '';
-                    }
-                });
-            }
+        // INITIALIZE
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFeed();
+            setupAnonymousId();
+            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - Decentralized & Uncensorable');
         });
         
-        // ========== POSTING FUNCTION ==========
-        function postAnonymously() {
-            try {
-                // Get values
-                let college = document.getElementById('collegeSelect').value;
-                const category = document.getElementById('categorySelect').value || 'other';
-                const content = document.getElementById('postContent').value.trim();
-                const otherCollege = document.getElementById('otherCollegeInput').value.trim();
-                
-                // Handle other college
-                if (college === 'other' && otherCollege) {
-                    college = otherCollege;
-                }
-                
-                // Validate
-                if (!college) {
-                    playSound('error');
-                    alert('⚠️ Please select your college!');
-                    return false;
-                }
-                
-                if (!content || content.length < CONFIG.minPostLength) {
-                    playSound('error');
-                    alert(`⚠️ Please write at least ${CONFIG.minPostLength} characters!`);
-                    return false;
-                }
-                
-                // Create post object
-                const post = {
-                    id: Date.now(),
-                    college: college,
-                    category: category,
-                    content: content,
-                    image: currentImageData,
-                    timestamp: new Date().toLocaleString('en-IN', {
-                        timeZone: 'Asia/Kolkata',
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }),
-                    anonymousId: 'Student' + Math.floor(Math.random() * 9999),
-                    reactions: { helpful: 0, support: 0, sad: 0 },
-                    version: CONFIG.version
-                };
-                
-                // Save to localStorage
-                let posts = JSON.parse(localStorage.getItem('safevoice_posts') || '[]');
-                posts.unshift(post);
-                if (posts.length > CONFIG.maxPosts) {
-                    posts = posts.slice(0, CONFIG.maxPosts);
-                }
-                localStorage.setItem('safevoice_posts', JSON.stringify(posts));
-                
-                // Clear form
-                document.getElementById('postContent').value = '';
-                document.getElementById('collegeSelect').selectedIndex = 0;
-                document.getElementById('categorySelect').selectedIndex = 0;
-                document.getElementById('charCount').textContent = '0/' + CONFIG.maxPostLength;
-                document.getElementById('charCount').style.color = 'var(--text-tertiary)';
-                document.getElementById('imagePreview').style.display = 'none';
-                document.getElementById('imageUpload').value = '';
-                document.getElementById('otherCollegeInput').style.display = 'none';
-                document.getElementById('otherCollegeInput').value = '';
-                currentImageData = null;
-                
-                // Reload and notify
-                loadFeed();
-                playSound('success');
-                alert('✅ Posted successfully!\n\nYour voice has been heard anonymously.\nYour identity is protected.');
-                
-                // Scroll to feed
-                setTimeout(() => {
-                    document.getElementById('feedContainer').scrollIntoView({ 
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }, 300);
-                
-                return true;
-            } catch(error) {
-                console.error('Post error:', error);
-                playSound('error');
-                alert('❌ Error posting. Please try again.');
-                return false;
-            }
+        // NAVIGATION
+        function navigateTo(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(page + 'Page').classList.add('active');
+            event.target.closest('.nav-btn').classList.add('active');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            if (page === 'home') loadFeed();
         }
         
-        // ========== LOAD FEED ==========
+        // FEED SWITCHING
+        function switchFeed(type) {
+            currentFeed = type;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            loadFeed();
+        }
+        
+        // LOAD FEED
         function loadFeed() {
-            const posts = JSON.parse(localStorage.getItem('safevoice_posts') || '[]');
-            const feedContainer = document.getElementById('feedContainer');
+            const container = document.getElementById('feedContainer');
+            const posts = getPosts();
             
             if (posts.length === 0) {
-                feedContainer.innerHTML = `
+                container.innerHTML = `
                     <div class="empty-state">
-                        <p>📭 No posts yet. Be the first brave soul to share!</p>
+                        <p>📭 No posts yet. Be the first to share!</p>
                     </div>
                 `;
                 return;
             }
             
-            feedContainer.innerHTML = posts.map((post, index) => `
-                <div class="post-card fade-in" style="animation-delay: ${index * 0.05}s;">
+            let filtered = posts;
+            if (currentFeed === 'crisis') {
+                filtered = posts.filter(p => p.category === 'mental-health' || p.category === 'ragging');
+            } else if (currentFeed === 'trending') {
+                filtered = posts.sort((a, b) => getTotalReactions(b) - getTotalReactions(a));
+            }
+            
+            container.innerHTML = filtered.map((post, i) => createPostHTML(post, i)).join('');
+        }
+        
+        function getTotalReactions(post) {
+            return (post.reactions?.helpful || 0) + (post.reactions?.support || 0) + (post.reactions?.solidarity || 0);
+        }
+        
+        // CREATE POST HTML
+        function createPostHTML(post, index) {
+            const isCrisis = post.category === 'mental-health' || post.category === 'ragging';
+            const categoryEmoji = getCategoryEmoji(post.category);
+            
+            return `
+                <div class="post ${isCrisis ? 'crisis' : ''}" style="animation-delay: ${index * 0.05}s">
                     <div class="post-header">
-                        <span class="post-category">${getCategoryLabel(post.category)}</span>
-                        <span class="post-college">🎓 ${post.college}</span>
+                        <span class="post-badge ${isCrisis ? 'crisis' : ''}">
+                            ${categoryEmoji} ${getCategoryName(post.category)}
+                        </span>
+                        <span class="post-college">🎓 ${escapeHtml(post.college)}</span>
                     </div>
+                    
                     <div class="post-content">${escapeHtml(post.content)}</div>
-                    ${post.image ? `<img src="${post.image}" class="post-image" alt="Post image">` : ''}
+                    
+                    ${post.image ? `<img src="${post.image}" class="post-image" loading="lazy">` : ''}
+                    
                     <div class="post-meta">
-                        <span class="post-author">🎭 ${post.anonymousId}</span>
-                        <span class="post-time">🕒 ${post.timestamp}</span>
-                    </div>
-                    <div class="post-reactions">
-                        <button class="reaction-btn" onclick="reactToPost(${post.id}, 'helpful'); event.stopPropagation();">
-                            👍 <span id="helpful-${post.id}">${post.reactions.helpful}</span>
-                        </button>
-                        <button class="reaction-btn" onclick="reactToPost(${post.id}, 'support'); event.stopPropagation();">
-                            ❤️ <span id="support-${post.id}">${post.reactions.support}</span>
-                        </button>
-                        <button class="reaction-btn" onclick="reactToPost(${post.id}, 'sad'); event.stopPropagation();">
-                            😢 <span id="sad-${post.id}">${post.reactions.sad}</span>
-                        </button>
+                        <div>
+                            <span class="post-author">🎭 ${escapeHtml(post.anonymousId)}</span>
+                            <span class="post-time"> • ${escapeHtml(post.timestamp)}</span>
+                        </div>
+                        <div class="post-reactions">
+                            <button class="reaction-btn" onclick="react(${post.id}, 'helpful')">
+                                👍 <span id="helpful-${post.id}">${post.reactions.helpful}</span>
+                            </button>
+                            <button class="reaction-btn" onclick="react(${post.id}, 'support')">
+                                ❤️ <span id="support-${post.id}">${post.reactions.support}</span>
+                            </button>
+                            <button class="reaction-btn" onclick="react(${post.id}, 'solidarity')">
+                                🤝 <span id="solidarity-${post.id}">${post.reactions.solidarity}</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            `).join('');
+            `;
         }
         
-        function getCategoryLabel(category) {
-            const labels = {
-                'mental-health': '💙 Mental Health',
-                'academics': '📚 Academics',
-                'ragging': '🚨 Safety',
-                'corruption': '⚖️ Justice',
-                'success': '✨ Success',
-                'review': '⭐ Review',
-                'memorial': '🕯️ Memorial',
-                'placement': '💼 Placements',
-                'hostel': '🏠 Hostel',
-                'other': '💬 General'
+        // SUBMIT POST
+        function submitPost() {
+            const content = document.getElementById('postContent').value.trim();
+            let college = document.getElementById('collegeSelect').value;
+            const category = document.getElementById('categorySelect').value || 'general';
+            const otherCollege = document.getElementById('otherCollegeInput').value.trim();
+            
+            if (college === 'other' && otherCollege) {
+                college = otherCollege;
+            }
+            
+            if (!college) {
+                alert('⚠️ Please select your college');
+                return;
+            }
+            
+            if (!content || content.length < CONFIG.minPostLength) {
+                alert(`⚠️ Please write at least ${CONFIG.minPostLength} characters`);
+                return;
+            }
+            
+            const post = {
+                id: Date.now(),
+                college,
+                category,
+                content,
+                image: currentImageData,
+                timestamp: new Date().toLocaleString('en-IN', {
+                    timeZone: 'Asia/Kolkata',
+                    day: 'numeric',
+                    month: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }),
+                anonymousId: getAnonymousId(),
+                reactions: { helpful: 0, support: 0, solidarity: 0 }
             };
-            return labels[category] || '💬 Post';
+            
+            const posts = getPosts();
+            posts.unshift(post);
+            savePosts(posts);
+            
+            // Clear form
+            document.getElementById('postContent').value = '';
+            document.getElementById('collegeSelect').value = '';
+            document.getElementById('categorySelect').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('imageUpload').value = '';
+            document.getElementById('otherCollegeInput').value = '';
+            document.getElementById('otherCollegeInput').style.display = 'none';
+            currentImageData = null;
+            updateCharCount();
+            
+            alert('✅ Posted anonymously!');
+            navigateTo('home');
+            loadFeed();
         }
         
-        function reactToPost(postId, reactionType) {
-            playSound('click');
-            let posts = JSON.parse(localStorage.getItem('safevoice_posts') || '[]');
+        // REACTIONS
+        function react(postId, type) {
+            const posts = getPosts();
             const post = posts.find(p => p.id === postId);
             if (post) {
-                post.reactions[reactionType]++;
-                localStorage.setItem('safevoice_posts', JSON.stringify(posts));
-                const elem = document.getElementById(`${reactionType}-${postId}`);
-                if (elem) {
-                    elem.textContent = post.reactions[reactionType];
-                }
+                post.reactions[type]++;
+                savePosts(posts);
+                document.getElementById(`${type}-${postId}`).textContent = post.reactions[type];
             }
         }
         
-        // ========== MEMORIALS ==========
-        function loadMemorials() {
-            const memorialContainer = document.getElementById('memorialContainer');
-            const posts = JSON.parse(localStorage.getItem('safevoice_posts') || '[]');
-            const memorials = posts.filter(p => p.category === 'memorial');
-            
-            if (memorials.length === 0) {
-                memorialContainer.innerHTML = `
-                    <div class="empty-state">
-                        <p>🕊️ No memorials yet. Be the first to honor a lost soul.</p>
-                    </div>
-                `;
-                return;
+        // WALLET
+        function connectWallet() {
+            if (typeof window.ethereum !== 'undefined') {
+                window.ethereum.request({ method: 'eth_requestAccounts' })
+                    .then(accounts => {
+                        userWallet = accounts[0];
+                        document.getElementById('walletText').textContent = userWallet.substr(0, 6) + '...' + userWallet.substr(-4);
+                        document.getElementById('walletAddress').value = userWallet;
+                        alert('✅ Wallet connected!');
+                    })
+                    .catch(err => {
+                        alert('❌ Wallet connection failed. Install MetaMask.');
+                    });
+            } else {
+                alert('⚠️ Please install MetaMask wallet');
+                window.open('https://metamask.io', '_blank');
             }
-            
-            memorialContainer.innerHTML = memorials.map((post, index) => `
-                <div class="post-card fade-in" style="animation-delay: ${index * 0.05}s;">
-                    <div class="post-header">
-                        <span class="post-category">🕯️ Memorial</span>
-                        <span class="post-college">🎓 ${post.college}</span>
-                    </div>
-                    <div class="post-content">${escapeHtml(post.content)}</div>
-                    ${post.image ? `<img src="${post.image}" class="post-image" alt="Memorial image">` : ''}
-                    <div class="post-meta">
-                        <span class="post-author">🎭 ${post.anonymousId}</span>
-                        <span class="post-time">🕒 ${post.timestamp}</span>
-                    </div>
-                </div>
-            `).join('');
         }
         
-        // ========== SECURITY ==========
+        // HELPERS
+        function getPosts() {
+            return JSON.parse(localStorage.getItem(CONFIG.storageKey) || '[]');
+        }
+        
+        function savePosts(posts) {
+            localStorage.setItem(CONFIG.storageKey, JSON.stringify(posts));
+        }
+        
+        function getAnonymousId() {
+            let id = localStorage.getItem('safevoice_anon_id');
+            if (!id) {
+                id = 'Student' + Math.floor(Math.random() * 9999);
+                localStorage.setItem('safevoice_anon_id', id);
+            }
+            return id;
+        }
+        
+        function setupAnonymousId() {
+            document.getElementById('anonymousId').textContent = getAnonymousId();
+        }
+        
+        function getCategoryEmoji(cat) {
+            const emojis = {
+                'mental-health': '💙',
+                'academics': '📚',
+                'ragging': '🚨',
+                'corruption': '⚖️',
+                'success': '✨',
+                'review': '⭐',
+                'memorial': '🕯️',
+                'general': '💬'
+            };
+            return emojis[cat] || '💬';
+        }
+        
+        function getCategoryName(cat) {
+            const names = {
+                'mental-health': 'Mental Health',
+                'academics': 'Academics',
+                'ragging': 'Safety',
+                'corruption': 'Justice',
+                'success': 'Success',
+                'review': 'Review',
+                'memorial': 'Memorial',
+                'general': 'General'
+            };
+            return names[cat] || 'Post';
+        }
+        
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
         
-        // ========== BUTTON CLICKS ==========
-        document.addEventListener('click', function(e) {
-            if (e.target.tagName === 'BUTTON' && !e.target.classList.contains('reaction-btn')) {
-                initAudio();
-                if (!e.target.classList.contains('btn-success') && !e.target.classList.contains('btn-warning')) {
-                    playSound('click');
-                }
-            }
-        });
+        function updateCharCount() {
+            const count = document.getElementById('postContent').value.length;
+            document.getElementById('charCount').textContent = `${count}/${CONFIG.maxPostLength}`;
+        }
         
-        // ========== INITIAL LOAD ==========
-        window.addEventListener('DOMContentLoaded', () => {
-            navigate('landing');
-            console.log(`SafeVoice ${CONFIG.version} - Platform Ready`);
-            console.log('GitHub: https://github.com/safevoice009/safevoice-platform');
-        });
+        function handleCollegeChange() {
+            const select = document.getElementById('collegeSelect');
+            const otherInput = document.getElementById('otherCollegeInput');
+            if (select.value === 'other') {
+                otherInput.style.display = 'block';
+                otherInput.focus();
+            } else {
+                otherInput.style.display = 'none';
+            }
+        }
+        
+        function previewImage() {
+            const file = document.getElementById('imageUpload').files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImageData = e.target.result;
+                    const preview = document.getElementById('imagePreview');
+                    preview.src = currentImageData;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function showFilters() {
+            alert('🔧 Advanced filters coming soon!\n\nFeatures:\n• Filter by college\n• Filter by category\n• Filter by date\n• Search posts');
+        }
     </script>
 
 </body>
