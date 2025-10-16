@@ -2,8 +2,9 @@
   "name": "SafeVoice - Anonymous Student Platform",
   "short_name": "SafeVoice",
   "description": "India's first decentralized anonymous student platform",
-  "start_url": "/safevoice-platform/",
+  "start_url": "/safevoice-platform/?utm_source=pwa",
   "scope": "/safevoice-platform/",
+  "id": "/safevoice-platform/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#0f0f1e",
@@ -11,22 +12,32 @@
   "lang": "en-IN",
   "dir": "ltr",
   "prefer_related_applications": false,
+  "display_override": ["window-controls-overlay", "standalone"],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "icons": [
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Ctext y='400' font-size='400'%3E🛡️%3C/text%3E%3C/svg%3E",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Ccircle cx='256' cy='256' r='256' fill='%23667eea'/%3E%3Ctext x='256' y='320' font-size='200' text-anchor='middle' fill='white'%3E🛡️%3C/text%3E%3C/svg%3E",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Ctext y='150' font-size='150'%3E🛡️%3C/text%3E%3C/svg%3E",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Ccircle cx='96' cy='96' r='96' fill='%23667eea'/%3E%3Ctext x='96' y='120' font-size='80' text-anchor='middle' fill='white'%3E🛡️%3C/text%3E%3C/svg%3E",
       "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 144 144'%3E%3Ctext y='110' font-size='110'%3E🛡️%3C/text%3E%3C/svg%3E",
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 144 144'%3E%3Ccircle cx='72' cy='72' r='72' fill='%23667eea'/%3E%3Ctext x='72' y='90' font-size='60' text-anchor='middle' fill='white'%3E🛡️%3C/text%3E%3C/svg%3E",
       "sizes": "144x144",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Ccircle cx='48' cy='48' r='48' fill='%23667eea'/%3E%3Ctext x='48' y='60' font-size='40' text-anchor='middle' fill='white'%3E🛡️%3C/text%3E%3C/svg%3E",
+      "sizes": "96x96",
       "type": "image/svg+xml",
       "purpose": "any"
     }
@@ -36,10 +47,11 @@
       "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='540' height='720'%3E%3Crect fill='%230f0f1e' width='540' height='720'/%3E%3Ctext x='270' y='360' font-size='48' text-anchor='middle' fill='%23667eea'%3ESafeVoice%3C/text%3E%3C/svg%3E",
       "sizes": "540x720",
       "type": "image/svg+xml",
-      "form_factor": "narrow"
+      "form_factor": "narrow",
+      "label": "SafeVoice Home Screen"
     }
   ],
-  "categories": ["social", "education", "health", "lifestyle"],
+  "categories": ["social", "education", "health", "lifestyle", "productivity"],
   "shortcuts": [
     {
       "name": "New Post",
@@ -53,19 +65,10 @@
           "type": "image/svg+xml"
         }
       ]
-    },
-    {
-      "name": "Crisis Help",
-      "short_name": "Help",
-      "description": "Get immediate support",
-      "url": "/safevoice-platform/?page=helpline",
-      "icons": [
-        {
-          "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'%3E%3Ctext y='75' font-size='75'%3E🆘%3C/text%3E%3C/svg%3E",
-          "sizes": "96x96",
-          "type": "image/svg+xml"
-        }
-      ]
     }
-  ]
+  ],
+  "handle_links": "preferred",
+  "edge_side_panel": {
+    "preferred_width": 400
+  }
 }
