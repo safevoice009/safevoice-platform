@@ -1003,38 +1003,101 @@
             margin-top: 8px;
         }
     
-        .photo-btn {
-            padding: 14px 20px;
-            background: linear-gradient(135deg, #5e35b1 0%, rgba(94,53,177,0.8) 100%);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-            margin: 8px 4px;
-            transition: all 0.3s ease;
-        }
-        .photo-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(94,53,177,0.3); }
-        .format-toolbar {
-            display: none;
-            gap: 6px;
-            padding: 10px;
-            background: rgba(255,255,255,0.95);
-            border-radius: 12px;
-            margin-bottom: 10px;
-        }
-        .format-toolbar.active { display: flex; }
-        .format-btn {
-            min-width: 38px;
-            height: 38px;
-            background: rgba(94,53,177,0.1);
-            border: 1px solid #5e35b1;
-            border-radius: 8px;
-            color: #5e35b1;
-            font-weight: 700;
-            cursor: pointer;
-        }
-        .format-btn:hover { background: #5e35b1; color: white; }
+
+/* SafeVoice v3.6.0 - New Features Styles */
+
+/* Formatting Toolbar */
+.format-toolbar {
+    display: none;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(94, 53, 177, 0.2);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+    .format-toolbar {
+        background: rgba(28, 28, 30, 0.95);
+        border-color: rgba(94, 53, 177, 0.4);
+    }
+}
+
+.format-btn {
+    min-width: 42px;
+    height: 42px;
+    padding: 10px;
+    background: rgba(94, 53, 177, 0.1);
+    border: 1.5px solid rgba(94, 53, 177, 0.4);
+    border-radius: 10px;
+    color: #5e35b1;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.format-btn:hover {
+    background: #5e35b1;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(94, 53, 177, 0.3);
+}
+
+.format-btn:active {
+    transform: scale(0.95);
+}
+
+/* Photo Buttons Group */
+.photo-buttons-group {
+    display: flex;
+    gap: 12px;
+    margin: 16px 0;
+    flex-wrap: wrap;
+}
+
+.photo-btn {
+    flex: 1;
+    min-width: 140px;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, rgba(94, 53, 177, 0.1) 0%, rgba(94, 53, 177, 0.05) 100%);
+    border: 2px solid rgba(94, 53, 177, 0.4);
+    border-radius: 14px;
+    color: #5e35b1;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.photo-btn.primary {
+    background: linear-gradient(135deg, #5e35b1 0%, rgba(94, 53, 177, 0.85) 100%);
+    color: white;
+    border-color: #5e35b1;
+}
+
+.photo-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(94, 53, 177, 0.25);
+}
+
+.photo-btn.primary:hover {
+    box-shadow: 0 8px 24px rgba(94, 53, 177, 0.4);
+}
+
+.photo-btn:active {
+    transform: scale(0.98);
+}
 </style>
 </head>
 <body>
@@ -1294,53 +1357,6 @@
     </nav>
 
     <script>
-        // iOS SCROLL POSITION FIX - v3.5.0
-        let savedScrollY = 0;
-        function preserveScrollOnAction(callback) {
-            savedScrollY = window.pageYOffset;
-            callback();
-            setTimeout(() => window.scrollTo(0, savedScrollY), 10);
-        }
-
-        // Wrap all vote/reaction handlers
-        const origUpvote = window.upvotePost;
-        const origDownvote = window.downvotePost;
-        const origReact = window.handleEmojiReaction;
-
-        if (origUpvote) window.upvotePost = function(...args) {
-            preserveScrollOnAction(() => origUpvote.apply(this, args));
-        };
-        if (origDownvote) window.downvotePost = function(...args) {
-            preserveScrollOnAction(() => origDownvote.apply(this, args));
-        };
-        if (origReact) window.handleEmojiReaction = function(...args) {
-            preserveScrollOnAction(() => origReact.apply(this, args));
-        };
-
-        // Formatting functions
-        function insertFormat(before, after) {
-            const t = document.getElementById('postContent');
-            if (!t) return;
-            const start = t.selectionStart, end = t.selectionEnd;
-            const text = t.value, sel = text.substring(start, end) || 'text';
-            t.value = text.substring(0, start) + before + sel + after + text.substring(end);
-            t.focus();
-            t.setSelectionRange(start + before.length + sel.length, start + before.length + sel.length);
-        }
-        function insertBullet() {
-            const t = document.getElementById('postContent');
-            if (!t) return;
-            const p = t.selectionStart;
-            t.value = t.value.substring(0, p) + '\n• ' + t.value.substring(p);
-            t.focus();
-        }
-        function insertLink() {
-            const url = prompt('URL:');
-            if (!url) return;
-            const txt = prompt('Text:') || url;
-            insertFormat(`[${txt}](`, url + ')');
-        }
-
         const CONFIG = {
             version: '3.4.0',
             maxPostLength: 1000,
@@ -1973,7 +1989,135 @@
         function showFilters() {
             alert('🔧 Advanced filters coming soon!\n\nFeatures:\n• Filter by college\n• Filter by category\n• Search posts');
         }
-    </script>
+    
+
+// ===== SafeVoice v3.6.0 - ALL FIXES =====
+
+// 1. iOS SCROLL POSITION FIX (prevents jump to top)
+let lastScrollY = 0;
+function saveScrollAndExecute(callback) {
+    lastScrollY = window.pageYOffset || document.documentElement.scrollTop;
+    callback();
+    requestAnimationFrame(() => {
+        window.scrollTo(0, lastScrollY);
+    });
+}
+
+// 2. TEXT FORMATTING FUNCTIONS
+function applyFormat(before, after) {
+    const textarea = document.getElementById('postContent');
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end) || 'text';
+    const before_text = textarea.value.substring(0, start);
+    const after_text = textarea.value.substring(end);
+    textarea.value = before_text + before + selectedText + after + after_text;
+    const newPos = start + before.length + selectedText.length;
+    textarea.focus();
+    textarea.setSelectionRange(newPos, newPos);
+}
+
+function addBullet() {
+    const textarea = document.getElementById('postContent');
+    if (!textarea) return;
+    const pos = textarea.selectionStart;
+    textarea.value = textarea.value.substring(0, pos) + '\n• ' + textarea.value.substring(pos);
+    textarea.focus();
+    textarea.setSelectionRange(pos + 3, pos + 3);
+}
+
+function addLink() {
+    const url = prompt('Enter URL:');
+    if (!url) return;
+    const text = prompt('Link text (optional):') || url;
+    applyFormat('[' + text + '](', url + ')');
+}
+
+// 3. INITIALIZE DYNAMIC ELEMENTS ON PAGE LOAD
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🛡️ SafeVoice v3.6.0 initialized');
+
+    // Add formatting toolbar dynamically
+    const postContent = document.getElementById('postContent');
+    if (postContent) {
+        const toolbar = document.createElement('div');
+        toolbar.id = 'formatToolbar';
+        toolbar.className = 'format-toolbar';
+        toolbar.innerHTML = `
+            <button type="button" class="format-btn" onclick="applyFormat('**', '**')" title="Bold"><strong>B</strong></button>
+            <button type="button" class="format-btn" onclick="applyFormat('*', '*')" title="Italic"><em>I</em></button>
+            <button type="button" class="format-btn" onclick="applyFormat('__', '__')" title="Underline"><u>U</u></button>
+            <button type="button" class="format-btn" onclick="addBullet()" title="Bullet">•</button>
+            <button type="button" class="format-btn" onclick="addLink()" title="Link">🔗</button>
+            <button type="button" class="format-btn" onclick="applyFormat('\`', '\`')" title="Code">&lt;/&gt;</button>
+        `;
+        postContent.parentNode.insertBefore(toolbar, postContent);
+
+        // Show toolbar on focus
+        postContent.addEventListener('focus', () => toolbar.style.display = 'flex');
+        postContent.addEventListener('blur', () => {
+            setTimeout(() => { if (document.activeElement !== postContent) toolbar.style.display = 'none'; }, 200);
+        });
+    }
+
+    // Add separate photo buttons dynamically
+    const imageInput = document.getElementById('imageInput');
+    if (imageInput && imageInput.parentNode) {
+        // Create camera input
+        const cameraInput = document.createElement('input');
+        cameraInput.type = 'file';
+        cameraInput.id = 'cameraInput';
+        cameraInput.accept = 'image/*';
+        cameraInput.capture = 'environment';
+        cameraInput.style.display = 'none';
+        imageInput.parentNode.appendChild(cameraInput);
+
+        // Create button container
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'photo-buttons-group';
+        buttonContainer.innerHTML = `
+            <button type="button" class="photo-btn primary" onclick="document.getElementById('imageInput').click()">
+                📷 Choose Photo
+            </button>
+            <button type="button" class="photo-btn" onclick="document.getElementById('cameraInput').click()">
+                📸 Take Photo
+            </button>
+        `;
+
+        // Find the "Add Image" button and replace it
+        const addImageBtn = document.querySelector('button[onclick*="imageInput"]');
+        if (addImageBtn && addImageBtn.parentNode) {
+            addImageBtn.parentNode.insertBefore(buttonContainer, addImageBtn);
+            addImageBtn.style.display = 'none';
+        }
+    }
+});
+
+// 4. WRAP EXISTING VOTE/REACT FUNCTIONS (if they exist)
+setTimeout(function() {
+    if (typeof window.upvotePost !== 'undefined') {
+        const origUpvote = window.upvotePost;
+        window.upvotePost = function(...args) {
+            saveScrollAndExecute(() => origUpvote.apply(this, args));
+        };
+    }
+    if (typeof window.downvotePost !== 'undefined') {
+        const origDownvote = window.downvotePost;
+        window.downvotePost = function(...args) {
+            saveScrollAndExecute(() => origDownvote.apply(this, args));
+        };
+    }
+    if (typeof window.handleEmojiReaction !== 'undefined') {
+        const origReact = window.handleEmojiReaction;
+        window.handleEmojiReaction = function(...args) {
+            saveScrollAndExecute(() => origReact.apply(this, args));
+        };
+    }
+}, 1000);
+
+console.log('✅ SafeVoice v3.6.0 - All features loaded!');
+</script>
 
 </body>
 </html>
