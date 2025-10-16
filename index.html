@@ -9,12 +9,20 @@
     <meta name="theme-color" content="#1a1a2e">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SafeVoice">
     
     <title>🛡️ SafeVoice - Decentralized Student Platform</title>
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
     
     <style>
         :root {
@@ -235,7 +243,7 @@
             color: var(--text-secondary);
         }
         
-        textarea, select, input {
+        textarea, select, input[type="text"] {
             width: 100%;
             padding: 14px 16px;
             background: var(--bg-elevated);
@@ -252,7 +260,7 @@
             min-height: 140px;
         }
         
-        textarea:focus, select:focus, input:focus {
+        textarea:focus, select:focus, input[type="text"]:focus {
             outline: none;
             border-color: var(--border-focus);
             background: var(--bg-card);
@@ -335,6 +343,16 @@
         
         .btn:active {
             transform: translateY(0);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            box-shadow: none;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-card);
         }
         
         /* FEED */
@@ -509,6 +527,11 @@
             background: rgba(102, 126, 234, 0.1);
         }
         
+        .reaction-btn.reacted {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        
         /* HELPLINE PAGE */
         .helpline-card {
             background: var(--bg-card);
@@ -633,6 +656,43 @@
             }
         }
         
+        /* ANALYTICS BADGE */
+        .analytics-badge {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            background: var(--bg-card);
+            padding: 12px 16px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            z-index: 999;
+        }
+        
+        /* FEEDBACK BUTTON */
+        .feedback-btn {
+            position: fixed;
+            bottom: 90px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            z-index: 999;
+        }
+        
+        .feedback-btn:hover {
+            transform: scale(1.1);
+        }
+        
         /* RESPONSIVE */
         @media (max-width: 768px) {
             .container {
@@ -651,6 +711,10 @@
             .tab {
                 padding: 10px 16px;
                 font-size: 0.85rem;
+            }
+            
+            .analytics-badge {
+                display: none;
             }
         }
         
@@ -683,6 +747,45 @@
         #otherCollegeInput {
             display: none;
         }
+
+        /* PWA INSTALL PROMPT */
+        .install-prompt {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 16px 24px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            color: white;
+            font-weight: 600;
+            z-index: 1001;
+            display: none;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .install-prompt button {
+            background: white;
+            color: var(--primary);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-left: 12px;
+        }
     </style>
 </head>
 <body>
@@ -695,6 +798,23 @@
             <span id="walletText">Connect Wallet</span>
         </button>
     </header>
+
+    <!-- ANALYTICS BADGE -->
+    <div class="analytics-badge" id="analyticsBadge">
+        👥 <span id="userCount">0</span> active users
+    </div>
+
+    <!-- FEEDBACK BUTTON -->
+    <button class="feedback-btn" onclick="showFeedback()" title="Send Feedback">
+        💬
+    </button>
+
+    <!-- PWA INSTALL PROMPT -->
+    <div class="install-prompt" id="installPrompt">
+        📱 Install SafeVoice as an app
+        <button onclick="installPWA()">Install</button>
+        <button onclick="dismissInstall()" style="background: transparent; color: white;">Later</button>
+    </div>
 
     <!-- CONTAINER -->
     <div class="container">
@@ -714,7 +834,7 @@
                 <button class="tab active" onclick="switchFeed('all')">All Posts</button>
                 <button class="tab" onclick="switchFeed('crisis')">🚨 Crisis</button>
                 <button class="tab" onclick="switchFeed('trending')">🔥 Trending</button>
-                <button class="tab" onclick="switchFeed('myCollege')">🎓 My College</button>
+                <button class="tab" onclick="switchFeed('memorial')">🕯️ Memorial</button>
             </div>
             
             <!-- FEED -->
@@ -756,6 +876,7 @@
                             <option value="IIT Madras">IIT Madras</option>
                             <option value="IIT Kanpur">IIT Kanpur</option>
                             <option value="IIT Kharagpur">IIT Kharagpur</option>
+                            <option value="IIT Roorkee">IIT Roorkee</option>
                         </optgroup>
                         <optgroup label="AIIMS">
                             <option value="AIIMS Delhi">AIIMS Delhi</option>
@@ -790,7 +911,7 @@
                 <div class="file-upload">
                     <label for="imageUpload" class="file-upload-label">
                         <span>📷</span>
-                        <span>Add Image (Optional)</span>
+                        <span id="uploadText">Add Image (Optional)</span>
                     </label>
                     <input type="file" id="imageUpload" accept="image/*" onchange="previewImage()">
                     <img id="imagePreview" class="image-preview">
@@ -869,6 +990,10 @@
                 
                 <button class="btn" onclick="connectWallet()">Connect Web3 Wallet</button>
                 
+                <button class="btn btn-secondary" style="margin-top: 12px;" onclick="showFeedback()">
+                    💬 Send Anonymous Feedback
+                </button>
+                
                 <p style="text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-tertiary);">
                     Connecting wallet is optional. Platform remains anonymous.
                 </p>
@@ -900,23 +1025,81 @@
     <script>
         // CONFIG
         const CONFIG = {
-            version: '3.0.0',
+            version: '3.1.0',
             maxPostLength: 1000,
             minPostLength: 10,
-            storageKey: 'safevoice_posts_v3'
+            storageKey: 'safevoice_posts_v3',
+            reactionsKey: 'safevoice_reactions'
         };
         
         // STATE
         let currentFeed = 'all';
         let currentImageData = null;
         let userWallet = null;
+        let deferredPrompt = null;
+        let deviceFingerprint = null;
+        
+        // DEVICE FINGERPRINT
+        function getDeviceFingerprint() {
+            if (!deviceFingerprint) {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillText('SafeVoice', 2, 2);
+                deviceFingerprint = canvas.toDataURL().slice(-50);
+            }
+            return deviceFingerprint;
+        }
         
         // INITIALIZE
         document.addEventListener('DOMContentLoaded', () => {
             loadFeed();
             setupAnonymousId();
-            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - Decentralized & Uncensorable');
+            updateAnalytics();
+            setupPWA();
+            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - THE FINAL MASTERPIECE');
         });
+        
+        // PWA SETUP
+        function setupPWA() {
+            // Listen for install prompt
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                // Show install prompt after 10 seconds
+                setTimeout(() => {
+                    document.getElementById('installPrompt').style.display = 'block';
+                }, 10000);
+            });
+            
+            // Register service worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').then(() => {
+                    console.log('Service Worker registered');
+                }).catch(err => {
+                    console.log('Service Worker registration failed:', err);
+                });
+            }
+        }
+        
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('PWA installed');
+                    }
+                    deferredPrompt = null;
+                    document.getElementById('installPrompt').style.display = 'none';
+                });
+            }
+        }
+        
+        function dismissInstall() {
+            document.getElementById('installPrompt').style.display = 'none';
+            localStorage.setItem('install_dismissed', Date.now());
+        }
         
         // NAVIGATION
         function navigateTo(page) {
@@ -929,6 +1112,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
             
             if (page === 'home') loadFeed();
+            if (page === 'profile') updateProfileStats();
         }
         
         // FEED SWITCHING
@@ -958,6 +1142,8 @@
                 filtered = posts.filter(p => p.category === 'mental-health' || p.category === 'ragging');
             } else if (currentFeed === 'trending') {
                 filtered = posts.sort((a, b) => getTotalReactions(b) - getTotalReactions(a));
+            } else if (currentFeed === 'memorial') {
+                filtered = posts.filter(p => p.category === 'memorial');
             }
             
             container.innerHTML = filtered.map((post, i) => createPostHTML(post, i)).join('');
@@ -971,6 +1157,8 @@
         function createPostHTML(post, index) {
             const isCrisis = post.category === 'mental-health' || post.category === 'ragging';
             const categoryEmoji = getCategoryEmoji(post.category);
+            const deviceFP = getDeviceFingerprint();
+            const hasReacted = hasUserReacted(post.id, deviceFP);
             
             return `
                 <div class="post ${isCrisis ? 'crisis' : ''}" style="animation-delay: ${index * 0.05}s">
@@ -983,7 +1171,7 @@
                     
                     <div class="post-content">${escapeHtml(post.content)}</div>
                     
-                    ${post.image ? `<img src="${post.image}" class="post-image" loading="lazy">` : ''}
+                    ${post.image ? `<img src="${post.image}" class="post-image" alt="Post image" loading="lazy">` : ''}
                     
                     <div class="post-meta">
                         <div>
@@ -991,19 +1179,31 @@
                             <span class="post-time"> • ${escapeHtml(post.timestamp)}</span>
                         </div>
                         <div class="post-reactions">
-                            <button class="reaction-btn" onclick="react(${post.id}, 'helpful')">
+                            <button class="reaction-btn ${hasReacted ? 'reacted' : ''}" onclick="react(${post.id}, 'helpful')">
                                 👍 <span id="helpful-${post.id}">${post.reactions.helpful}</span>
                             </button>
-                            <button class="reaction-btn" onclick="react(${post.id}, 'support')">
+                            <button class="reaction-btn ${hasReacted ? 'reacted' : ''}" onclick="react(${post.id}, 'support')">
                                 ❤️ <span id="support-${post.id}">${post.reactions.support}</span>
                             </button>
-                            <button class="reaction-btn" onclick="react(${post.id}, 'solidarity')">
+                            <button class="reaction-btn ${hasReacted ? 'reacted' : ''}" onclick="react(${post.id}, 'solidarity')">
                                 🤝 <span id="solidarity-${post.id}">${post.reactions.solidarity}</span>
                             </button>
                         </div>
                     </div>
                 </div>
             `;
+        }
+        
+        // CHECK IF USER REACTED
+        function hasUserReacted(postId, deviceFP) {
+            const reactions = JSON.parse(localStorage.getItem(CONFIG.reactionsKey) || '{}');
+            return reactions[postId] === deviceFP;
+        }
+        
+        function recordReaction(postId, deviceFP) {
+            const reactions = JSON.parse(localStorage.getItem(CONFIG.reactionsKey) || '{}');
+            reactions[postId] = deviceFP;
+            localStorage.setItem(CONFIG.reactionsKey, JSON.stringify(reactions));
         }
         
         // SUBMIT POST
@@ -1056,9 +1256,11 @@
             document.getElementById('imageUpload').value = '';
             document.getElementById('otherCollegeInput').value = '';
             document.getElementById('otherCollegeInput').style.display = 'none';
+            document.getElementById('uploadText').textContent = 'Add Image (Optional)';
             currentImageData = null;
             updateCharCount();
             
+            updateAnalytics();
             alert('✅ Posted anonymously!');
             navigateTo('home');
             loadFeed();
@@ -1066,12 +1268,26 @@
         
         // REACTIONS
         function react(postId, type) {
+            const deviceFP = getDeviceFingerprint();
+            
+            if (hasUserReacted(postId, deviceFP)) {
+                alert('⚠️ You already reacted to this post from this device');
+                return;
+            }
+            
             const posts = getPosts();
             const post = posts.find(p => p.id === postId);
             if (post) {
                 post.reactions[type]++;
                 savePosts(posts);
+                recordReaction(postId, deviceFP);
                 document.getElementById(`${type}-${postId}`).textContent = post.reactions[type];
+                
+                // Update button state
+                const buttons = document.querySelectorAll(`button[onclick*="react(${postId}"]`);
+                buttons.forEach(btn => {
+                    btn.classList.add('reacted');
+                });
             }
         }
         
@@ -1089,8 +1305,61 @@
                         alert('❌ Wallet connection failed. Install MetaMask.');
                     });
             } else {
-                alert('⚠️ Please install MetaMask wallet');
-                window.open('https://metamask.io', '_blank');
+                if (confirm('⚠️ MetaMask not detected. Install now?')) {
+                    window.open('https://metamask.io', '_blank');
+                }
+            }
+        }
+        
+        // IMAGE PREVIEW
+        function previewImage() {
+            const file = document.getElementById('imageUpload').files[0];
+            if (file) {
+                if (file.size > 5000000) { // 5MB limit
+                    alert('⚠️ Image too large. Max 5MB');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImageData = e.target.result;
+                    const preview = document.getElementById('imagePreview');
+                    preview.src = currentImageData;
+                    preview.style.display = 'block';
+                    document.getElementById('uploadText').textContent = '✅ Image added';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // ANALYTICS
+        function updateAnalytics() {
+            const posts = getPosts();
+            const uniqueUsers = new Set(posts.map(p => p.anonymousId)).size;
+            document.getElementById('userCount').textContent = uniqueUsers;
+        }
+        
+        function updateProfileStats() {
+            const posts = getPosts();
+            const userPosts = posts.filter(p => p.anonymousId === getAnonymousId());
+            document.getElementById('postCount').value = userPosts.length + ' posts';
+        }
+        
+        // FEEDBACK
+        function showFeedback() {
+            const feedback = prompt('💬 Send Anonymous Feedback:\n\nHelp us improve SafeVoice. Your feedback is anonymous and appreciated!');
+            if (feedback && feedback.trim()) {
+                const feedbacks = JSON.parse(localStorage.getItem('safevoice_feedback') || '[]');
+                feedbacks.push({
+                    feedback: feedback.trim(),
+                    timestamp: new Date().toLocaleString(),
+                    device: navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'
+                });
+                localStorage.setItem('safevoice_feedback', JSON.stringify(feedbacks));
+                alert('✅ Thank you! Your feedback helps us improve.');
+                
+                // Log to console for developers
+                console.log('📝 New Feedback:', feedback);
             }
         }
         
@@ -1163,20 +1432,6 @@
                 otherInput.focus();
             } else {
                 otherInput.style.display = 'none';
-            }
-        }
-        
-        function previewImage() {
-            const file = document.getElementById('imageUpload').files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    currentImageData = e.target.result;
-                    const preview = document.getElementById('imagePreview');
-                    preview.src = currentImageData;
-                    preview.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
             }
         }
         
