@@ -1,0 +1,23 @@
+{
+  "name": "SafeVoice - Anonymous Student Platform",
+  "short_name": "SafeVoice",
+  "description": "India's first decentralized anonymous student platform for mental health, justice, and freedom",
+  "start_url": "/safevoice-platform/",
+  "display": "standalone",
+  "background_color": "#0f0f1e",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["social", "education", "health"],
+  "lang": "en-IN",
+  "dir": "ltr",
+  "scope": "/safevoice-platform/",
+  "prefer_related_applications": false
+}
