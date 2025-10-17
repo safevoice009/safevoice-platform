@@ -1278,7 +1278,7 @@
 
     <script>
         const CONFIG = {
-            version: '5.0.0',
+            version: '6.0.0',
             maxPostLength: 1000,
             minPostLength: 10,
             storageKey: 'safevoice_posts_v3',
@@ -1312,7 +1312,7 @@
             setupAnonymousId();
             updateAnalytics();
             setupPWA();
-            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - iOS autoscroll FIXED + Submit button FIXED!' + ' - Ultimate Edition!');
+            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - ALL BUGS FIXED + Bookmarks!' + ' - Ultimate Edition!');
         });
         
         function setupPWA() {
@@ -1695,9 +1695,11 @@
         function submitPost(event) {
             // Show loading state
             const submitBtn = event ? event.target : document.querySelector('.btn');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = '⏳ Posting...';
-            submitBtn.disabled = true;
+            const originalText = submitBtn ? submitBtn.textContent : '📤 Post Anonymously';
+            if (submitBtn) {
+                submitBtn.textContent = '⏳ Posting...';
+                submitBtn.disabled = true;
+            }
 
             const content = document.getElementById('postContent').value.trim();
             let college = document.getElementById('collegeSelect').value;
@@ -1757,8 +1759,10 @@
             updateAnalytics();
 
             // Reset button
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
+            if (submitBtn) {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
 
             alert('✅ Posted anonymously!');
             navigateTo('home');
