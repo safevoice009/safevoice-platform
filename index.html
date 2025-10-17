@@ -7,6 +7,9 @@
     <meta name="keywords" content="anonymous, decentralized, blockchain, student, mental health, web3">
     <meta name="author" content="SafeVoice DAO">
     <meta name="theme-color" content="#1a1a2e">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SafeVoice">
@@ -1278,7 +1281,7 @@
 
     <script>
         const CONFIG = {
-            version: '3.6.0',
+            version: '4.0.0',
             maxPostLength: 1000,
             minPostLength: 10,
             storageKey: 'safevoice_posts_v3',
@@ -1312,7 +1315,7 @@
             setupAnonymousId();
             updateAnalytics();
             setupPWA();
-            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - iOS scroll fixed + Image controls!' + ' - Ultimate Edition!');
+            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - All fixes applied + Cache busting!' + ' - Ultimate Edition!');
         });
         
         function setupPWA() {
@@ -1532,9 +1535,7 @@
         }
         
         function setReaction(postId, emoji) {
-            // SAVE SCROLL POSITION (iOS fix)
             const scrollY = window.pageYOffset || document.documentElement.scrollTop;
-
             const deviceFP = getDeviceFingerprint();
             const reactions = JSON.parse(localStorage.getItem(CONFIG.reactionsKey) || '{}');
             
@@ -1569,9 +1570,7 @@
         
         // VOTING SYSTEM
         function vote(postId, type) {
-            // SAVE SCROLL POSITION (iOS fix)
             const scrollY = window.pageYOffset || document.documentElement.scrollTop;
-
             const deviceFP = getDeviceFingerprint();
             const votes = JSON.parse(localStorage.getItem(CONFIG.votesKey) || '{}');
             const currentVote = votes[postId];
@@ -1742,7 +1741,7 @@
             document.getElementById('cameraUpload').value = '';
             document.getElementById('galleryUpload').value = '';
             document.getElementById('imageInfo').style.display = 'none';
-            document.getElementById('imageActions').classList.remove('show');
+            document.getElementById('imageActions').style.display = 'none';
             document.getElementById('otherCollegeInput').value = '';
             document.getElementById('otherCollegeInput').style.display = 'none';
             currentImageData = null;
@@ -1809,7 +1808,7 @@
                             document.getElementById('imagePreview').style.display = 'block';
                             document.getElementById('imageInfo').textContent = '✅ Image ready (' + (file.size / 1024).toFixed(0) + 'KB)';
                             document.getElementById('imageInfo').style.display = 'block';
-                            document.getElementById('imageActions').classList.add('show');
+                            document.getElementById('imageActions').style.display = 'flex';
                         };
                         img.src = e.target.result;
                     } else {
@@ -1818,7 +1817,7 @@
                         document.getElementById('imagePreview').style.display = 'block';
                         document.getElementById('imageInfo').textContent = '✅ Image ready (' + (file.size / 1024).toFixed(0) + 'KB)';
                             document.getElementById('imageInfo').style.display = 'block';
-                            document.getElementById('imageActions').classList.add('show');
+                            document.getElementById('imageActions').style.display = 'flex';
                     }
                 };
                 reader.readAsDataURL(file);
@@ -1935,7 +1934,7 @@
 
             // Hide info and actions
             document.getElementById('imageInfo').style.display = 'none';
-            document.getElementById('imageActions').classList.remove('show');
+            document.getElementById('imageActions').style.display = 'none';
 
             // Clear data
             currentImageData = null;
