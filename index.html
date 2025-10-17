@@ -7,9 +7,6 @@
     <meta name="keywords" content="anonymous, decentralized, blockchain, student, mental health, web3">
     <meta name="author" content="SafeVoice DAO">
     <meta name="theme-color" content="#1a1a2e">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SafeVoice">
@@ -1175,7 +1172,7 @@
                     </div>
                 </div>
                 
-                <button class="btn" onclick="submitPost()">📤 Post Anonymously</button>
+                <button class="btn" onclick="submitPost(event)">📤 Post Anonymously</button>
             </div>
         </div>
         
@@ -1281,7 +1278,7 @@
 
     <script>
         const CONFIG = {
-            version: '4.0.0',
+            version: '5.0.0',
             maxPostLength: 1000,
             minPostLength: 10,
             storageKey: 'safevoice_posts_v3',
@@ -1315,7 +1312,7 @@
             setupAnonymousId();
             updateAnalytics();
             setupPWA();
-            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - All fixes applied + Cache busting!' + ' - Ultimate Edition!');
+            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - iOS autoscroll FIXED + Submit button FIXED!' + ' - Ultimate Edition!');
         });
         
         function setupPWA() {
@@ -1535,7 +1532,9 @@
         }
         
         function setReaction(postId, emoji) {
+            // SAVE SCROLL POSITION (iOS fix)
             const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+
             const deviceFP = getDeviceFingerprint();
             const reactions = JSON.parse(localStorage.getItem(CONFIG.reactionsKey) || '{}');
             
@@ -1570,7 +1569,9 @@
         
         // VOTING SYSTEM
         function vote(postId, type) {
+            // SAVE SCROLL POSITION (iOS fix)
             const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+
             const deviceFP = getDeviceFingerprint();
             const votes = JSON.parse(localStorage.getItem(CONFIG.votesKey) || '{}');
             const currentVote = votes[postId];
@@ -1691,7 +1692,13 @@
         }
         
         // SUBMIT POST
-        function submitPost() {
+        function submitPost(event) {
+            // Show loading state
+            const submitBtn = event ? event.target : document.querySelector('.btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '⏳ Posting...';
+            submitBtn.disabled = true;
+
             const content = document.getElementById('postContent').value.trim();
             let college = document.getElementById('collegeSelect').value;
             const category = document.getElementById('categorySelect').value || 'general';
@@ -1748,6 +1755,11 @@
             updateCharCount();
             
             updateAnalytics();
+
+            // Reset button
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+
             alert('✅ Posted anonymously!');
             navigateTo('home');
             loadFeed();
