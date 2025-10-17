@@ -1087,10 +1087,6 @@ body::after {
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-
-        <button onclick="forceUpdate()" style="position: fixed; top: 20px; right: 20px; z-index: 10000; padding: 10px 16px; background: rgba(94, 53, 177, 0.9); border: none; border-radius: 10px; color: white; font-weight: 600; font-size: 13px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); backdrop-filter: blur(10px);">
-            🔄 Update
-        </button>
 </head>
 <body>
 
@@ -1236,11 +1232,12 @@ body::after {
                 </div>
                 
                 <div class="file-upload">
-                    <label for="imageUpload" class="file-upload-label">
-                        <span>📷</span>
-                        <span id="uploadText">Add Image (Optional)</span>
-                    </label>
-                    <input type="file" id="imageUpload" accept="image/*,video/*" capture="environment" onchange="previewImage()">
+                    <div style="display:flex;gap:10px;margin-bottom:12px;">
+                        <button type="button" onclick="document.getElementById('photoChoose').click()" style="flex:1;padding:14px;background:linear-gradient(135deg,#5e35b1,#4527a0);border:none;border-radius:12px;color:white;font-weight:600;font-size:14px;">📷 Choose Photo</button>
+                        <button type="button" onclick="document.getElementById('photoTake').click()" style="flex:1;padding:14px;background:rgba(94,53,177,0.1);border:2px solid rgba(94,53,177,0.4);border-radius:12px;color:#5e35b1;font-weight:600;font-size:14px;">📸 Take Photo</button>
+                    </div>
+                    <input type="file" id="photoChoose" accept="image/*" style="display:none" onchange="previewImage()">
+                    <input type="file" id="photoTake" accept="image/*" capture="environment" style="display:none" onchange="previewImage()">
                     <img id="imagePreview" class="image-preview">
                 </div>
                 
@@ -1350,7 +1347,7 @@ body::after {
 
     <script>
         const CONFIG = {
-            version: '5.0_20251016_1946',
+            version: '3.4.0',
             maxPostLength: 1000,
             minPostLength: 10,
             storageKey: 'safevoice_posts_v3',
@@ -1865,14 +1862,14 @@ body::after {
                             ctx.drawImage(img, 0, 0, width, height);
                             currentImageData = canvas.toDataURL('image/jpeg', 0.8);
                             document.getElementById('imagePreview').src = currentImageData;
-                            document.getElementById('imagePreview').style.display = 'block'; document.getElementById('removeBtn').style.display = 'block';
+                            document.getElementById('imagePreview').style.display = 'block';
                             document.getElementById('uploadText').textContent = '✅ Compressed';
                         };
                         img.src = e.target.result;
                     } else {
                         currentImageData = e.target.result;
                         document.getElementById('imagePreview').src = currentImageData;
-                        document.getElementById('imagePreview').style.display = 'block'; document.getElementById('removeBtn').style.display = 'block';
+                        document.getElementById('imagePreview').style.display = 'block';
                         document.getElementById('uploadText').textContent = '✅ Added';
                     }
                 };
@@ -1880,15 +1877,6 @@ body::after {
             }
         }
         
-        
-function clearImg() {
-    document.getElementById('imgLib').value = '';
-    document.getElementById('imgCam').value = '';
-    document.getElementById('imagePreview').style.display = 'none';
-    document.getElementById('removeBtn').style.display = 'none';
-    currentImageData = null;
-}
-
         function updateAnalytics() {
             const posts = getPosts();
             const uniqueUsers = new Set(posts.map(p => p.anonymousId)).size;
@@ -2088,23 +2076,7 @@ window.addEventListener('load', function() {
 });
 
 console.log('✅ SafeVoice v3.7.0 loaded successfully');
-
-function forceUpdate() {
-    if (confirm('Force update SafeVoice? This will reload the page.')) {
-        // Clear all caches
-        if ('caches' in window) {
-            caches.keys().then(names => {
-                names.forEach(name => caches.delete(name));
-            });
-        }
-        // Clear localStorage
-        localStorage.clear();
-        // Hard reload
-        window.location.reload(true);
-    }
-}
-
-    </script>
+</script>
 
 </body>
 </html>
