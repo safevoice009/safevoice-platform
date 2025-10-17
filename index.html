@@ -1004,7 +1004,7 @@
         }
     
 
-/* SafeVoice v3.7.0 - Working Improvements */
+/* SafeVoice v3.5.0 - Working Improvements */
 
 /* Prevent text selection on long press globally */
 * {
@@ -1029,8 +1029,26 @@ button:active {
 }
 
 /* Version indicator (bottom right) */
+
+/* ===== v3.5.0 iOS GLASSMORPHISM ENHANCEMENTS ===== */
+@supports (backdrop-filter: blur(20px)) {
+    .post {
+        background: rgba(30, 30, 45, 0.65) !important;
+        backdrop-filter: blur(25px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .post-form {
+        background: rgba(26, 26, 46, 0.7) !important;
+        backdrop-filter: blur(20px) saturate(150%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+    }
+}
+
 body::after {
-    content: 'v3.7.0';
+    content: 'v3.5.0';
     position: fixed;
     bottom: 10px;
     right: 10px;
@@ -1039,7 +1057,7 @@ body::after {
     pointer-events: none;
     z-index: 9999;
 }
-/* ===== SafeVoice v3.8.0 - UI Improvements ===== */
+/* ===== SafeVoice v3.5.0 - UI Improvements ===== */
 
 /* Better photo upload section */
 .photo-upload-section {
@@ -1187,6 +1205,16 @@ body::after {
                         maxlength="1000"
                         oninput="updateCharCount()"></textarea>
                     <div class="char-count" id="charCount">0/1000</div>
+
+            <!-- v3.5.0 FORMATTING TOOLBAR -->
+            <div style="display: flex; gap: 8px; margin-top: 12px; margin-bottom: 12px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 10px; flex-wrap: wrap; backdrop-filter: blur(10px);">
+                <button type="button" onclick="insertFormat('#')" title="Hashtag" style="padding: 8px 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: white; cursor: pointer; font-size: 14px; font-weight: 600;">🏷️ #Tag</button>
+                <button type="button" onclick="insertFormat('@')" title="Mention" style="padding: 8px 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: white; cursor: pointer; font-size: 14px; font-weight: 600;">@ Mention</button>
+                <button type="button" onclick="insertFormat('**','**')" title="Bold" style="padding: 8px 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: white; cursor: pointer; font-size: 14px; font-weight: 700;">𝐁 Bold</button>
+                <button type="button" onclick="insertFormat('_','_')" title="Italic" style="padding: 8px 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: white; cursor: pointer; font-size: 14px; font-style: italic;">𝘐 Italic</button>
+                <button type="button" onclick="insertEmoji()" title="Emoji" style="padding: 8px 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: white; cursor: pointer; font-size: 14px; font-weight: 600;">😊 Emoji</button>
+            </div>
+
                 </div>
                 
                 <div class="form-group">
@@ -1232,13 +1260,21 @@ body::after {
                 </div>
                 
                 <div class="file-upload">
+                    <!-- Photo Buttons -->
                     <div style="display:flex;gap:10px;margin-bottom:12px;">
-                        <button type="button" onclick="document.getElementById('photoChoose').click()" style="flex:1;padding:14px;background:linear-gradient(135deg,#5e35b1,#4527a0);border:none;border-radius:12px;color:white;font-weight:600;font-size:14px;">📷 Choose Photo</button>
-                        <button type="button" onclick="document.getElementById('photoTake').click()" style="flex:1;padding:14px;background:rgba(94,53,177,0.1);border:2px solid rgba(94,53,177,0.4);border-radius:12px;color:#5e35b1;font-weight:600;font-size:14px;">📸 Take Photo</button>
+                        <button type="button" onclick="selectFromGallery()" style="flex:1;padding:14px;background:linear-gradient(135deg,#5e35b1,#4527a0);border:none;border-radius:12px;color:white;font-weight:600;font-size:14px;">📷 Choose Photo</button>
+                        <button type="button" onclick="takeNewPhoto()" style="flex:1;padding:14px;background:rgba(94,53,177,0.1);border:2px solid rgba(94,53,177,0.4);border-radius:12px;color:#5e35b1;font-weight:600;font-size:14px;">📸 Take Photo</button>
                     </div>
-                    <input type="file" id="photoChoose" accept="image/*" style="display:none" onchange="previewImage()">
-                    <input type="file" id="photoTake" accept="image/*" capture="environment" style="display:none" onchange="previewImage()">
-                    <img id="imagePreview" class="image-preview">
+
+                    <!-- Hidden Inputs -->
+                    <input type="file" id="galleryInput" accept="image/*" style="display:none">
+                    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none">
+
+                    <!-- Preview Area -->
+                    <div id="imagePreviewArea" style="display:none;margin-top:12px;">
+                        <img id="imagePreview" class="image-preview" style="max-width:100%;border-radius:12px;margin-bottom:10px;">
+                        <button type="button" onclick="clearImage()" style="width:100%;padding:10px;background:rgba(239,68,68,0.1);border:2px solid rgba(239,68,68,0.3);border-radius:10px;color:#ef4444;font-weight:600;cursor:pointer;">❌ Remove Image</button>
+                    </div>
                 </div>
                 
                 <button class="btn" onclick="submitPost()">📤 Post Anonymously</button>
@@ -1347,7 +1383,7 @@ body::after {
 
     <script>
         const CONFIG = {
-            version: '3.4.0',
+            version: '3.5.0',
             maxPostLength: 1000,
             minPostLength: 10,
             storageKey: 'safevoice_posts_v3',
@@ -1623,7 +1659,7 @@ body::after {
                 post.reactions.support++;
             }
             
-            localStorage.setItem(CONFIG.reactionsKey, JSON.stringify(reactions));
+            playSound('react'); localStorage.setItem(CONFIG.reactionsKey, JSON.stringify(reactions));
             savePosts(posts);
             loadFeed();
         }
@@ -1660,7 +1696,7 @@ body::after {
                 votes[postId] = type;
             }
             
-            localStorage.setItem(CONFIG.votesKey, JSON.stringify(votes));
+            playSound('click'); localStorage.setItem(CONFIG.votesKey, JSON.stringify(votes));
             savePosts(posts);
             loadFeed();
         }
@@ -1810,7 +1846,7 @@ body::after {
             updateCharCount();
             
             updateAnalytics();
-            alert('✅ Posted anonymously!');
+            playSound('post'); alert('✅ Posted anonymously!');
             navigateTo('home');
             loadFeed();
         }
@@ -1832,6 +1868,51 @@ body::after {
             }
         }
         
+        
+// Photo upload system
+let currentImageData = null;
+
+function selectFromGallery() {
+    document.getElementById('galleryInput').click();
+}
+
+function takeNewPhoto() {
+    document.getElementById('cameraInput').click();
+}
+
+document.getElementById('galleryInput').addEventListener('change', function(e) {
+    handleImageUpload(e.target.files[0]);
+});
+
+document.getElementById('cameraInput').addEventListener('change', function(e) {
+    handleImageUpload(e.target.files[0]);
+});
+
+function handleImageUpload(file) {
+    if (!file) return;
+
+    if (file.size > 10000000) {
+        alert('⚠️ Image too large! Maximum 10MB.');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        currentImageData = e.target.result;
+        document.getElementById('imagePreview').src = currentImageData;
+        document.getElementById('imagePreviewArea').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearImage() {
+    currentImageData = null;
+    document.getElementById('galleryInput').value = '';
+    document.getElementById('cameraInput').value = '';
+    document.getElementById('imagePreview').src = '';
+    document.getElementById('imagePreviewArea').style.display = 'none';
+}
+
         function previewImage() {
             const file = document.getElementById('imageUpload').files[0];
             if (file) {
@@ -1980,8 +2061,8 @@ body::after {
         }
     
 
-// ===== SAFEVOICE v3.7.0 - TESTED WORKING FIXES =====
-console.log('🛡️ SafeVoice v3.7.0 loading...');
+// ===== SAFEVOICE v3.5.0 - TESTED WORKING FIXES =====
+console.log('🛡️ SafeVoice v3.5.0 loading...');
 
 // Store for scroll position
 window.safevoice_scrollY = 0;
@@ -1995,11 +2076,11 @@ document.querySelectorAll('input, textarea').forEach(el => {
     el.style.webkitUserSelect = 'text';
     el.style.userSelect = 'text';
 });
-// ===== SafeVoice v3.8.0 - UI Improvements =====
+// ===== SafeVoice v3.5.0 - UI Improvements =====
 
 // Replace single image button with two separate buttons
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🛡️ SafeVoice v3.8.0 initializing...');
+    console.log('🛡️ SafeVoice v3.5.0 initializing...');
     
     // Find the "Add Image" button
     const addImageBtn = document.querySelector('button[onclick*="imageInput"]');
@@ -2045,7 +2126,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    console.log('✅ SafeVoice v3.8.0 loaded successfully!');
+    console.log('✅ SafeVoice v3.5.0 loaded successfully!');
 });
 
 // iOS SCROLL FIX - Wrapper function
@@ -2075,7 +2156,183 @@ window.addEventListener('load', function() {
     console.log('✅ Scroll fix applied');
 });
 
-console.log('✅ SafeVoice v3.7.0 loaded successfully');
+console.log('✅ SafeVoice v3.5.0 loaded successfully');
+
+// Text formatting
+function formatText(type) {
+    const textarea = document.getElementById('postContent');
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end) || 'text';
+    let formatted = '';
+
+    switch(type) {
+        case 'bold': formatted = `**${selectedText}**`; break;
+        case 'italic': formatted = `*${selectedText}*`; break;
+        case 'bullet': formatted = `• ${selectedText}`; break;
+        case 'number': formatted = `1. ${selectedText}`; break;
+        case 'link':
+            const url = prompt('Enter URL:');
+            formatted = url ? `[${selectedText}](${url})` : selectedText;
+            break;
+    }
+
+    textarea.value = textarea.value.substring(0, start) + formatted + textarea.value.substring(end);
+    textarea.focus();
+    textarea.setSelectionRange(start + formatted.length, start + formatted.length);
+}
+
+// Auto-save draft
+setInterval(() => {
+    const content = document.getElementById('postContent')?.value;
+    if (content && content.length > 10) {
+        localStorage.setItem('safevoice_draft', content);
+        localStorage.setItem('safevoice_draft_time', Date.now());
+    }
+}, 15000);
+
+// Restore draft
+function restoreDraft() {
+    const draft = localStorage.getItem('safevoice_draft');
+    const draftTime = localStorage.getItem('safevoice_draft_time');
+    const textarea = document.getElementById('postContent');
+
+    if (draft && textarea && !textarea.value) {
+        const age = Date.now() - parseInt(draftTime || 0);
+        if (age < 86400000 && confirm('📝 Restore unsaved draft?')) {
+            textarea.value = draft;
+        }
+    }
+}
+
+// Enhanced character counter
+document.addEventListener('input', function(e) {
+    if (e.target.id === 'postContent') {
+        const remaining = 1000 - e.target.value.length;
+        const counter = document.querySelector('[id*="count"], .char-count');
+        if (counter) {
+            counter.textContent = `${remaining}/1000`;
+            counter.style.color = remaining < 100 ? '#ef4444' : remaining < 200 ? '#f59e0b' : '#10b981';
+        }
+    }
+});
+
+console.log('🛡️ SafeVoice v7.0 Enterprise loaded - All systems operational');
+
+    
+
+// ===== v3.5.0 NEW FEATURES =====
+
+// Notification Sounds (Base64 encoded)
+const SOUNDS = {
+    post: new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBzGA0fPTgjMGHm7A7+OZTA0PVqzn77BdGAg+ltryxnMlBSh+zPLaizsIGGS67OihUBALTKXh8bllHAc2jdXyzn0vBQ=='),
+    react: new Audio('data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBAAAAABAAEBAC4DAAAuAwAAAQAIAGRhdGEOAAAAiIiIiIiIiA=='),
+    click: new Audio('data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBAAAAABAAABAC4DAAAuAwAAAQAIAGRhdGEOAAAAiIiIiA=='),
+    remove: new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACAhYiFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEA==')
+};
+
+function playSound(type) {
+    if (SOUNDS[type]) {
+        SOUNDS[type].currentTime = 0;
+        SOUNDS[type].volume = 0.3;
+        SOUNDS[type].play().catch(e => {});
+    }
+}
+
+// Text formatting functions
+function insertFormat(before, after = '') {
+    const textarea = document.getElementById('postContent');
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const selectedText = text.substring(start, end);
+
+    const newText = text.substring(0, start) + before + selectedText + after + text.substring(end);
+    textarea.value = newText;
+    textarea.focus();
+    textarea.setSelectionRange(start + before.length, end + before.length);
+    playSound('click');
+    updateCharCount();
+}
+
+function insertEmoji() {
+    const emojis = ['😊', '😂', '😍', '🎉', '💪', '🙏', '❤️', '🔥', '👏', '💯', '🌟', '✨', '🤗', '😎', '🥳', '😢', '🤔', '👍', '🙌', '💙'];
+    const emoji = emojis[Math.floor(Math.random() * emojis.length)];
+    insertFormat(emoji);
+}
+
+// Double swipe to exit
+let backPressCount = 0;
+let backPressTimer = null;
+let currentPage = 'home';
+
+window.addEventListener('popstate', (event) => {
+    const activePage = document.querySelector('.page.active');
+    const isHomePage = activePage && activePage.id === 'homePage';
+
+    if (isHomePage) {
+        backPressCount++;
+
+        if (backPressCount === 1) {
+            alert('👋 Swipe again to exit');
+            playSound('click');
+
+            backPressTimer = setTimeout(() => {
+                backPressCount = 0;
+            }, 2000);
+
+            event.preventDefault();
+            history.pushState(null, null, location.href);
+        } else if (backPressCount === 2) {
+            clearTimeout(backPressTimer);
+            playSound('remove');
+            return true;
+        }
+    }
+});
+
+// Initialize on load
+window.addEventListener('load', () => {
+    history.pushState(null, null, location.href);
+    console.log('🛡️ SafeVoice v3.5.0 ULTRA - All features loaded!');
+});
+
+// Auto-update detection
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+        reg.addEventListener('updatefound', () => {
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    showUpdateNotification();
+                }
+            });
+        });
+    });
+}
+
+function showUpdateNotification() {
+    const notification = document.createElement('div');
+    notification.innerHTML = `
+        <div style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 18px 28px; border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,0.4); z-index: 100000; backdrop-filter: blur(20px); animation: slideDown 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); max-width: 90%;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <span style="font-size: 28px;">🎉</span>
+                <div>
+                    <div style="font-weight: 700; margin-bottom: 6px; font-size: 16px;">New Update Available!</div>
+                    <div style="font-size: 13px; opacity: 0.95;">v3.5.0 with new features!</div>
+                </div>
+                <button onclick="location.reload(true)" style="background: white; color: #667eea; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 14px;">Update Now</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(notification);
+    playSound('post');
+}
+
+console.log('✨ SafeVoice v3.5.0 ULTRA Enhanced - Ready!');
+
 </script>
 
 </body>
