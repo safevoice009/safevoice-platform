@@ -1149,30 +1149,26 @@
                 
                 <div class="file-upload">
                     <div style="display: flex; gap: 12px; margin-bottom: 12px;">
-                        <label for="cameraUpload" class="file-upload-label" style="flex: 1; cursor: pointer;">
+                        <label for="cameraUpload" class="file-upload-label" style="flex: 1;">
                             <span>📷</span>
                             <span>Camera</span>
                         </label>
-                        <label for="galleryUpload" class="file-upload-label" style="flex: 1; cursor: pointer;">
+                        <label for="galleryUpload" class="file-upload-label" style="flex: 1;">
                             <span>🖼️</span>
                             <span>Gallery</span>
                         </label>
                     </div>
-                    <input type="file" id="cameraUpload" accept="image/*" capture="environment" onchange="previewImage('camera')" style="display: none;">
-                    <input type="file" id="galleryUpload" accept="image/*" onchange="previewImage('gallery')" style="display: none;">
+                    <input type="file" id="cameraUpload" accept="image/*" capture="environment" onchange="previewImage(this)" style="display: none;">
+                    <input type="file" id="galleryUpload" accept="image/*" onchange="previewImage(this)" style="display: none;">
                     <img id="imagePreview" class="image-preview">
                     <div id="imageInfo" style="display: none; text-align: center; font-size: 0.9rem; color: var(--text-tertiary); margin-top: 8px;"></div>
                     <div id="imageActions" style="display: none; gap: 12px; margin-top: 12px;">
-                        <button type="button" onclick="removeImage()" class="btn btn-secondary" style="flex: 1; padding: 12px; margin: 0;">
-                            🗑️ Remove
-                        </button>
-                        <button type="button" onclick="changeImage()" class="btn btn-secondary" style="flex: 1; padding: 12px; margin: 0;">
-                            🔄 Change
-                        </button>
+                        <button type="button" onclick="removeImage()" class="btn btn-secondary" style="flex: 1;">🗑️ Remove</button>
+                        <button type="button" onclick="changeImage()" class="btn btn-secondary" style="flex: 1;">🔄 Change</button>
                     </div>
                 </div>
                 
-                <button class="btn" onclick="submitPost(event)">📤 Post Anonymously</button>
+                <button class="btn" onclick="submitPost()">📤 Post Anonymously</button>
             </div>
         </div>
         
@@ -1278,7 +1274,7 @@
 
     <script>
         const CONFIG = {
-            version: '6.0.0',
+            version: '7.0.0',
             maxPostLength: 1000,
             minPostLength: 10,
             storageKey: 'safevoice_posts_v3',
@@ -1312,7 +1308,7 @@
             setupAnonymousId();
             updateAnalytics();
             setupPWA();
-            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - ALL BUGS FIXED + Bookmarks!' + ' - Ultimate Edition!');
+            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - Production Ready - All Bugs Fixed!' + ' - Ultimate Edition!');
         });
         
         function setupPWA() {
@@ -1532,9 +1528,7 @@
         }
         
         function setReaction(postId, emoji) {
-            // SAVE SCROLL POSITION (iOS fix)
             const scrollY = window.pageYOffset || document.documentElement.scrollTop;
-
             const deviceFP = getDeviceFingerprint();
             const reactions = JSON.parse(localStorage.getItem(CONFIG.reactionsKey) || '{}');
             
@@ -1569,9 +1563,7 @@
         
         // VOTING SYSTEM
         function vote(postId, type) {
-            // SAVE SCROLL POSITION (iOS fix)
             const scrollY = window.pageYOffset || document.documentElement.scrollTop;
-
             const deviceFP = getDeviceFingerprint();
             const votes = JSON.parse(localStorage.getItem(CONFIG.votesKey) || '{}');
             const currentVote = votes[postId];
@@ -1692,15 +1684,7 @@
         }
         
         // SUBMIT POST
-        function submitPost(event) {
-            // Show loading state
-            const submitBtn = event ? event.target : document.querySelector('.btn');
-            const originalText = submitBtn ? submitBtn.textContent : '📤 Post Anonymously';
-            if (submitBtn) {
-                submitBtn.textContent = '⏳ Posting...';
-                submitBtn.disabled = true;
-            }
-
+        function submitPost() {
             const content = document.getElementById('postContent').value.trim();
             let college = document.getElementById('collegeSelect').value;
             const category = document.getElementById('categorySelect').value || 'general';
@@ -1757,13 +1741,6 @@
             updateCharCount();
             
             updateAnalytics();
-
-            // Reset button
-            if (submitBtn) {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            }
-
             alert('✅ Posted anonymously!');
             navigateTo('home');
             loadFeed();
@@ -1786,13 +1763,8 @@
             }
         }
         
-        let lastImageSource = 'gallery';
-
-        function previewImage(source) {
-            lastImageSource = source || 'gallery';
-            const file = source === 'camera' 
-                ? document.getElementById('cameraUpload').files[0]
-                : document.getElementById('galleryUpload').files[0];
+        function previewImage(input) {
+            const file = input.files[0];
             if (file) {
                 if (file.size > 10000000) {
                     alert('⚠️ Max 10MB');
@@ -1939,20 +1911,13 @@
         }
         
         function removeImage() {
-            // Clear file inputs
             document.getElementById('cameraUpload').value = '';
             document.getElementById('galleryUpload').value = '';
-
-            // Hide preview
             const preview = document.getElementById('imagePreview');
             preview.src = '';
             preview.style.display = 'none';
-
-            // Hide info and actions
             document.getElementById('imageInfo').style.display = 'none';
             document.getElementById('imageActions').style.display = 'none';
-
-            // Clear data
             currentImageData = null;
         }
 
