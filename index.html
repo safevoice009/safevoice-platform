@@ -1168,7 +1168,7 @@
                     </div>
                 </div>
                 
-                <button class="btn" onclick="submitPost()">📤 Post Anonymously</button>
+                <button class="btn" type="button" onclick="submitPost(); return false;">📤 Post Anonymously</button>
             </div>
         </div>
         
@@ -1274,7 +1274,7 @@
 
     <script>
         const CONFIG = {
-            version: '7.0.0',
+            version: '8.0.0',
             maxPostLength: 1000,
             minPostLength: 10,
             storageKey: 'safevoice_posts_v3',
@@ -1308,7 +1308,7 @@
             setupAnonymousId();
             updateAnalytics();
             setupPWA();
-            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - Production Ready - All Bugs Fixed!' + ' - Ultimate Edition!');
+            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - Ultimate - All Bugs Fixed + Toast!' + ' - Ultimate Edition!');
         });
         
         function setupPWA() {
@@ -1741,7 +1741,7 @@
             updateCharCount();
             
             updateAnalytics();
-            alert('✅ Posted anonymously!');
+            showToast('✅ Posted anonymously!');
             navigateTo('home');
             loadFeed();
         }
@@ -1767,7 +1767,7 @@
             const file = input.files[0];
             if (file) {
                 if (file.size > 10000000) {
-                    alert('⚠️ Max 10MB');
+                    showToast('⚠️ Image too large (max 10MB)');
                     return;
                 }
 
@@ -1923,11 +1923,11 @@
 
         function changeImage() {
             removeImage();
-            alert('📷 Choose Camera or Gallery to upload new image');
+            showToast('📷 Choose Camera or Gallery to upload new image');
         }
 
         function showFilters() {
-            alert('🔧 Advanced filters coming soon!\n\nFeatures:\n• Filter by college\n• Filter by category\n• Search posts');
+            showToast('🔧 Advanced filters coming soon!');
         }
     </script>
 
