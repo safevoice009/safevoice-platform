@@ -1134,7 +1134,7 @@
                 
                 <div class="form-group">
                     <label>Category</label>
-                    <select id="categorySelect">
+                    <select id="categorySelect" onchange="handleCategoryChange()">
                         <option value="">Choose category...</option>
                         <option value="mental-health">💙 Mental Health</option>
                         <option value="academics">📚 Academic Stress</option>
@@ -1144,16 +1144,26 @@
                         <option value="review">⭐ College Review</option>
                         <option value="memorial">🕯️ Memorial</option>
                         <option value="general">💬 General</option>
+                        <option value="other">✨ Other (Custom)</option>
                     </select>
+                    <input type="text" id="otherCategoryInput" placeholder="Enter custom category" maxlength="50" style="display: none; margin-top: 12px; width: 100%; padding: 14px 16px; background: var(--bg-elevated); border: 2px solid var(--border); border-radius: 12px; color: var(--text-primary); font-size: 1rem; font-family: inherit;">
                 </div>
                 
                 <div class="file-upload">
-                    <label for="imageUpload" class="file-upload-label">
-                        <span>📷</span>
-                        <span id="uploadText">Add Image (Optional)</span>
-                    </label>
-                    <input type="file" id="imageUpload" accept="image/*,video/*" capture="environment" onchange="previewImage()">
+                    <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                        <label for="cameraUpload" class="file-upload-label" style="flex: 1;">
+                            <span>📷</span>
+                            <span>Camera</span>
+                        </label>
+                        <label for="galleryUpload" class="file-upload-label" style="flex: 1;">
+                            <span>🖼️</span>
+                            <span>Gallery</span>
+                        </label>
+                    </div>
+                    <input type="file" id="cameraUpload" accept="image/*" capture="environment" onchange="previewImage()" style="display: none;">
+                    <input type="file" id="galleryUpload" accept="image/*" onchange="previewImage()" style="display: none;">
                     <img id="imagePreview" class="image-preview">
+                    <div id="imageInfo" style="display: none; text-align: center; font-size: 0.85rem; color: var(--text-tertiary); margin-top: 8px;"></div>
                 </div>
                 
                 <button class="btn" onclick="submitPost()">📤 Post Anonymously</button>
@@ -1262,7 +1272,7 @@
 
     <script>
         const CONFIG = {
-            version: '3.4.0',
+            version: '3.5.0',
             maxPostLength: 1000,
             minPostLength: 10,
             storageKey: 'safevoice_posts_v3',
@@ -1296,7 +1306,7 @@
             setupAnonymousId();
             updateAnalytics();
             setupPWA();
-            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - All bugs fixed!' + ' - Ultimate Edition!');
+            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - Image Upload Fixed!' + ' - Ultimate Edition!');
         });
         
         function setupPWA() {
@@ -1673,8 +1683,13 @@
         function submitPost() {
             const content = document.getElementById('postContent').value.trim();
             let college = document.getElementById('collegeSelect').value;
-            const category = document.getElementById('categorySelect').value || 'general';
+            let category = document.getElementById('categorySelect').value || 'general';
             const otherCollege = document.getElementById('otherCollegeInput').value.trim();
+            const otherCategory = document.getElementById('otherCategoryInput').value.trim();
+
+            if (category === 'other' && otherCategory) {
+                category = otherCategory;
+            }
             
             if (college === 'other' && otherCollege) {
                 college = otherCollege;
@@ -1690,6 +1705,12 @@
                 return;
             }
             
+            // Show loading state
+            const submitBtn = event.target;
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '📤 Posting...';
+            submitBtn.disabled = true;
+
             const post = {
                 id: Date.now(),
                 college,
@@ -1716,15 +1737,23 @@
             document.getElementById('postContent').value = '';
             document.getElementById('collegeSelect').value = '';
             document.getElementById('categorySelect').value = '';
+            document.getElementById('otherCategoryInput').value = '';
+            document.getElementById('otherCategoryInput').style.display = 'none';
             document.getElementById('imagePreview').style.display = 'none';
-            document.getElementById('imageUpload').value = '';
+            document.getElementById('cameraUpload').value = '';
+            document.getElementById('galleryUpload').value = '';
+            document.getElementById('imageInfo').style.display = 'none';
             document.getElementById('otherCollegeInput').value = '';
             document.getElementById('otherCollegeInput').style.display = 'none';
-            document.getElementById('uploadText').textContent = 'Add Image (Optional)';
+            
             currentImageData = null;
             updateCharCount();
             
             updateAnalytics();
+            // Reset button
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+
             alert('✅ Posted anonymously!');
             navigateTo('home');
             loadFeed();
@@ -1748,7 +1777,7 @@
         }
         
         function previewImage() {
-            const file = document.getElementById('imageUpload').files[0];
+            const file = document.getElementById('cameraUpload').files[0] || document.getElementById('galleryUpload').files[0];
             if (file) {
                 if (file.size > 10000000) {
                     alert('⚠️ Max 10MB');
@@ -1778,14 +1807,16 @@
                             currentImageData = canvas.toDataURL('image/jpeg', 0.8);
                             document.getElementById('imagePreview').src = currentImageData;
                             document.getElementById('imagePreview').style.display = 'block';
-                            document.getElementById('uploadText').textContent = '✅ Compressed';
+                            document.getElementById('imageInfo').textContent = `✅ Image compressed (${(file.size / 1024).toFixed(0)}KB)`;
+                            document.getElementById('imageInfo').style.display = 'block';
                         };
                         img.src = e.target.result;
                     } else {
                         currentImageData = e.target.result;
                         document.getElementById('imagePreview').src = currentImageData;
                         document.getElementById('imagePreview').style.display = 'block';
-                        document.getElementById('uploadText').textContent = '✅ Added';
+                        document.getElementById('imageInfo').textContent = `✅ Image ready (${(file.size / 1024).toFixed(0)}KB)`;
+                            document.getElementById('imageInfo').style.display = 'block';
                     }
                 };
                 reader.readAsDataURL(file);
@@ -1882,6 +1913,17 @@
         function handleCollegeChange() {
             const select = document.getElementById('collegeSelect');
             const otherInput = document.getElementById('otherCollegeInput');
+            if (select.value === 'other') {
+                otherInput.style.display = 'block';
+                otherInput.focus();
+            } else {
+                otherInput.style.display = 'none';
+            }
+        }
+
+        function handleCategoryChange() {
+            const select = document.getElementById('categorySelect');
+            const otherInput = document.getElementById('otherCategoryInput');
             if (select.value === 'other') {
                 otherInput.style.display = 'block';
                 otherInput.focus();
