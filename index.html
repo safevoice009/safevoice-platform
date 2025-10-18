@@ -1002,6 +1002,38 @@
             margin-left: 12px;
             margin-top: 8px;
         }
+        
+        /* Simple Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 16px 28px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            z-index: 10000;
+            font-weight: 700;
+            font-size: 1.05rem;
+            animation: slideUp 0.4s ease-out;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        @keyframes slideUp {
+            from { bottom: -100px; opacity: 0; }
+            to { bottom: 100px; opacity: 1; }
+        }
+
+        .toast.hide {
+            animation: slideDown 0.3s ease-in forwards;
+        }
+
+        @keyframes slideDown {
+            to { bottom: -100px; opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -1303,6 +1335,24 @@
             return deviceFingerprint;
         }
         
+        function showToast(message, duration = 4000) {
+            // Remove existing toast if any
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+
+            // Create toast
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            // Auto-remove
+            setTimeout(() => {
+                toast.classList.add('hide');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             loadFeed();
             setupAnonymousId();
@@ -1746,25 +1796,23 @@
             
             updateAnalytics();
 
-            // Clear the form
-            document.getElementById('postContent').value = '';
-            document.getElementById('imagePreview').style.display = 'none';
-            document.getElementById('cameraUpload').value = '';
-            document.getElementById('galleryUpload').value = '';
-            document.getElementById('imageInfo').style.display = 'none';
-            document.getElementById('imageActions').style.display = 'none';
-            document.getElementById('otherCollegeInput').value = '';
-            document.getElementById('otherCollegeInput').style.display = 'none';
-            currentImageData = null;
-
             // Navigate to home
             navigateTo('home');
             loadFeed();
 
-            // Show clear, visible toast after navigation completes
+            // Show success toast after navigation
             setTimeout(() => {
                 showToast('✅ Posted anonymously! Your voice matters.', 5000);
-            }, 700);
+            }, 800);
+        }
+
+        function old_unused_code_below() {
+            // Removed broken code
+            setTimeout(() => {
+                    hidePostingIndicator();
+                    showToast('✅ Posted anonymously!');
+                }, 2000);
+            }, 500);
         }
         
         function connectWallet() {
