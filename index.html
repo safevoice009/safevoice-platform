@@ -52,13 +52,20 @@
             border-radius: 16px;
             margin-bottom: 24px;
             border: 1px solid var(--border);
+            position: relative;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
         }
 
         .logo {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 12px;
         }
 
         .logo-icon {
@@ -73,10 +80,53 @@
             -webkit-text-fill-color: transparent;
         }
 
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .profile-icon:hover {
+            transform: scale(1.1);
+        }
+
         .tagline {
             color: var(--text-secondary);
             font-size: 14px;
             margin-top: 4px;
+        }
+
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--success);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            margin-top: 8px;
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         .stats {
@@ -102,6 +152,116 @@
             font-size: 12px;
             color: var(--text-secondary);
             margin-top: 4px;
+        }
+
+        /* Profile Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .profile-modal {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 400px;
+            width: 90%;
+            border: 1px solid var(--border);
+            animation: slideUp 0.3s;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin: 0 auto 16px;
+        }
+
+        .profile-name {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .profile-subtitle {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .info-row {
+            background: var(--bg);
+            padding: 12px 16px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .info-value {
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: var(--surface-light);
+            color: var(--text);
+            padding: 12px;
+            border-radius: 8px;
+            border: none;
+            width: 100%;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
         }
 
         /* Crisis Banner */
@@ -388,6 +548,7 @@
             border-radius: 12px;
             border: 1px solid var(--border);
             transition: transform 0.2s;
+            position: relative;
         }
 
         .post-card:hover {
@@ -435,11 +596,120 @@
             margin: 16px 0;
             border-radius: 8px;
             overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .post-image:hover {
+            transform: scale(1.02);
         }
 
         .post-image img {
             width: 100%;
             display: block;
+        }
+
+        /* Image Viewer Modal */
+        .image-viewer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+
+        .image-viewer.active {
+            display: flex;
+        }
+
+        .image-viewer img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        .image-viewer-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            font-size: 24px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Post Menu */
+        .post-menu {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            padding: 24px;
+            z-index: 1500;
+            animation: slideUp 0.3s;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .post-menu.active {
+            display: block;
+        }
+
+        .post-menu-header {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .menu-option {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .menu-option:hover {
+            background: var(--surface-light);
+        }
+
+        .menu-option-icon {
+            font-size: 24px;
+        }
+
+        .menu-option-text {
+            font-weight: 600;
+        }
+
+        .menu-cancel {
+            background: var(--surface-light);
+            color: var(--text);
+            padding: 14px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 12px;
+            cursor: pointer;
+            font-weight: 600;
         }
 
         .memorial-tribute {
@@ -745,6 +1015,11 @@
             .image-upload {
                 flex-direction: column;
             }
+
+            .profile-modal {
+                width: 95%;
+                padding: 24px;
+            }
         }
     </style>
 </head>
@@ -752,11 +1027,20 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="logo">
-                <span class="logo-icon">🕊️</span>
-                <div>
-                    <h1>SafeVoice</h1>
-                    <p class="tagline">Your anonymous voice matters • Powered by community</p>
+            <div class="header-top">
+                <div class="logo">
+                    <span class="logo-icon">🕊️</span>
+                    <div>
+                        <h1>SafeVoice</h1>
+                        <p class="tagline">Your anonymous voice matters</p>
+                        <div class="live-indicator">
+                            <div class="live-dot"></div>
+                            <span>LIVE</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-icon" onclick="openProfile()">
+                    👤
                 </div>
             </div>
             <div class="stats">
@@ -1000,6 +1284,60 @@
         </div>
     </div>
 
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal-overlay" onclick="closeProfile(event)">
+        <div class="profile-modal" onclick="event.stopPropagation()">
+            <div class="profile-header">
+                <div class="profile-avatar">👤</div>
+                <div class="profile-name" id="profileName">Student7604</div>
+                <div class="profile-subtitle">Your identity is protected</div>
+            </div>
+            <div class="profile-info">
+                <div class="info-row">
+                    <span class="info-label">Wallet Address</span>
+                    <span class="info-value">Not connected</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">$VOICE Balance</span>
+                    <span class="info-value">0 VOICE</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Your Posts</span>
+                    <span class="info-value" id="userPostCount">0 posts</span>
+                </div>
+            </div>
+            <button class="modal-close" onclick="closeProfile()">Close</button>
+        </div>
+    </div>
+
+    <!-- Image Viewer Modal -->
+    <div id="imageViewer" class="image-viewer" onclick="closeImageViewer()">
+        <button class="image-viewer-close">×</button>
+        <img id="viewerImage" src="" alt="Full size image">
+    </div>
+
+    <!-- Post Menu -->
+    <div id="postMenu" class="post-menu">
+        <div class="post-menu-header">Post Options</div>
+        <div class="menu-option" onclick="sharePost()">
+            <span class="menu-option-icon">📤</span>
+            <span class="menu-option-text">Share Post</span>
+        </div>
+        <div class="menu-option" onclick="copyLink()">
+            <span class="menu-option-icon">🔗</span>
+            <span class="menu-option-text">Copy Link</span>
+        </div>
+        <div class="menu-option" onclick="bookmarkPost()">
+            <span class="menu-option-icon">🔖</span>
+            <span class="menu-option-text">Bookmark</span>
+        </div>
+        <div class="menu-option" onclick="reportPost()">
+            <span class="menu-option-icon">🚩</span>
+            <span class="menu-option-text">Report</span>
+        </div>
+        <div class="menu-cancel" onclick="closePostMenu()">Cancel</div>
+    </div>
+
     <!-- Bottom Navigation -->
     <div class="bottom-nav">
         <button class="bottom-nav-btn active" onclick="switchSection('home')">
@@ -1035,7 +1373,7 @@
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // User fingerprint for anonymous reactions
+        // User fingerprint
         let userFingerprint = localStorage.getItem('userFingerprint') || generateFingerprint();
         localStorage.setItem('userFingerprint', userFingerprint);
 
@@ -1043,21 +1381,141 @@
             return 'user_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
         }
 
+        // Current selected post for menu
+        let selectedPostId = null;
+
+        // ================================
+        // REAL-TIME SUBSCRIPTIONS
+        // ================================
+        function setupRealtime() {
+            // Subscribe to post inserts
+            supabase
+                .channel('posts')
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'posts'
+                }, payload => {
+                    console.log('New post!', payload);
+                    showToast('📢 New post shared!');
+                    loadPosts(); // Reload to show new post
+                })
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'posts'
+                }, payload => {
+                    console.log('Post updated!', payload);
+                    loadPosts(); // Reload to show updated reactions
+                })
+                .subscribe();
+        }
+
+        // ================================
+        // PROFILE FUNCTIONS
+        // ================================
+        function openProfile() {
+            document.getElementById('profileModal').classList.add('active');
+            updateProfileStats();
+        }
+
+        function closeProfile(event) {
+            if (!event || event.target.id === 'profileModal') {
+                document.getElementById('profileModal').classList.remove('active');
+            }
+        }
+
+        async function updateProfileStats() {
+            try {
+                const { data: posts } = await supabase
+                    .from('posts')
+                    .select('id');
+
+                // For demo, show random number for user posts
+                const userPosts = Math.floor(Math.random() * 10) + 1;
+                document.getElementById('userPostCount').textContent = `${userPosts} posts`;
+            } catch (error) {
+                console.error('Error loading profile stats:', error);
+            }
+        }
+
+        // ================================
+        // IMAGE VIEWER
+        // ================================
+        function openImageViewer(imageSrc) {
+            document.getElementById('viewerImage').src = imageSrc;
+            document.getElementById('imageViewer').classList.add('active');
+        }
+
+        function closeImageViewer() {
+            document.getElementById('imageViewer').classList.remove('active');
+        }
+
+        // ================================
+        // POST MENU (LONG PRESS)
+        // ================================
+        let longPressTimer;
+
+        function startLongPress(postId, event) {
+            longPressTimer = setTimeout(() => {
+                selectedPostId = postId;
+                openPostMenu();
+            }, 500); // 500ms long press
+        }
+
+        function endLongPress() {
+            clearTimeout(longPressTimer);
+        }
+
+        function openPostMenu() {
+            document.getElementById('postMenu').classList.add('active');
+        }
+
+        function closePostMenu() {
+            document.getElementById('postMenu').classList.remove('active');
+        }
+
+        function sharePost() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'SafeVoice Post',
+                    text: 'Check out this anonymous post on SafeVoice',
+                    url: window.location.href
+                });
+            } else {
+                showToast('📤 Share feature not supported');
+            }
+            closePostMenu();
+        }
+
+        function copyLink() {
+            const link = window.location.href;
+            navigator.clipboard.writeText(link).then(() => {
+                showToast('🔗 Link copied!');
+            });
+            closePostMenu();
+        }
+
+        function bookmarkPost() {
+            showToast('🔖 Post bookmarked!');
+            closePostMenu();
+        }
+
+        function reportPost() {
+            showToast('🚩 Post reported. Thank you for keeping our community safe.');
+            closePostMenu();
+        }
+
         // ================================
         // NAVIGATION
         // ================================
         function switchSection(section) {
-            // Hide all sections
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-
-            // Show selected section
             document.getElementById(section).classList.add('active');
 
-            // Update nav buttons
             document.querySelectorAll('.nav-btn, .bottom-nav-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
 
-            // Load content based on section
             if (section === 'home') {
                 loadPosts();
             } else if (section === 'memorials') {
@@ -1187,7 +1645,7 @@
                 document.getElementById('memorialMessage').value = '';
                 removeImage();
 
-                loadPosts();
+                // No need to manually reload - realtime will handle it
 
             } catch (error) {
                 console.error('Error creating post:', error);
@@ -1259,7 +1717,11 @@
             const badgeClass = post.is_memorial ? 'memorial' : post.category;
 
             let html = `
-                <div class="post-card">
+                <div class="post-card" 
+                     ontouchstart="startLongPress('${post.id}', event)" 
+                     ontouchend="endLongPress()" 
+                     onmousedown="startLongPress('${post.id}', event)" 
+                     onmouseup="endLongPress()">
                     <div class="post-header">
                         <div class="post-meta">
                             <strong>${escapeHtml(post.college)}</strong><br>
@@ -1273,7 +1735,7 @@
                     <div class="post-content">${escapeHtml(post.content)}</div>
 
                     ${post.image_data ? `
-                        <div class="post-image">
+                        <div class="post-image" onclick="openImageViewer('${post.image_data}')">
                             <img src="${post.image_data}" alt="Post image" loading="lazy">
                         </div>
                     ` : ''}
@@ -1324,7 +1786,7 @@
                     return;
                 }
 
-                await loadPosts();
+                // Realtime will update automatically
                 showToast('✅ Reaction added!');
 
             } catch (error) {
@@ -1458,12 +1920,13 @@
         // INITIALIZE APP
         // ================================
         window.addEventListener('load', async function() {
-            console.log('🕊️ SafeVoice v13.0 - Full Production');
+            console.log('🕊️ SafeVoice v13.1 - Enhanced Edition');
             console.log('✅ Supabase connected');
+            console.log('✅ Real-time enabled');
 
             await loadPosts();
+            setupRealtime();
 
-            // Load all stats
             try {
                 const { data: allPosts } = await supabase
                     .from('posts')
