@@ -1003,7 +1003,7 @@
             margin-top: 8px;
         }
         
-        /* Toast Notification */
+        /* Simple Toast Only */
         .toast {
             position: fixed;
             bottom: 100px;
@@ -1011,64 +1011,32 @@
             transform: translateX(-50%);
             background: linear-gradient(135deg, #10b981, #059669);
             color: white;
-            padding: 16px 28px;
+            padding: 18px 32px;
             border-radius: 16px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.4);
             z-index: 10000;
             font-weight: 700;
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             max-width: 90%;
             text-align: center;
-            animation: slideUpToast 0.4s ease-out;
+            animation: slideUp 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
-        @keyframes slideUpToast {
-            from { bottom: -100px; opacity: 0; }
-            to { bottom: 100px; opacity: 1; }
+        @keyframes slideUp {
+            from { bottom: -100px; opacity: 0; transform: translateX(-50%) scale(0.8); }
+            to { bottom: 100px; opacity: 1; transform: translateX(-50%) scale(1); }
         }
 
         .toast.hide {
-            animation: slideDownToast 0.3s ease-in forwards;
+            animation: slideDown 0.3s ease-in forwards;
         }
 
-        @keyframes slideDownToast {
-            to { bottom: -100px; opacity: 0; }
-        }
-
-        /* Posting Indicator */
-        .posting-indicator {
-            position: fixed;
-            top: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(139, 92, 246, 0.95);
-            backdrop-filter: blur(20px);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            z-index: 10001;
-            font-weight: 600;
-            display: none;
-        }
-
-        .posting-indicator.show {
-            display: block;
-            animation: slideDownIndicator 0.3s ease-out;
-        }
-
-        @keyframes slideDownIndicator {
-            from { top: -50px; opacity: 0; }
-            to { top: 80px; opacity: 1; }
+        @keyframes slideDown {
+            to { bottom: -100px; opacity: 0; transform: translateX(-50%) scale(0.8); }
         }
     </style>
 </head>
 <body>
-    <!-- Posting Indicator -->
-    <div class="posting-indicator" id="postingIndicator">
-        <span id="postingText">Posting...</span>
-    </div>
-    
 
     <header class="header">
         <div class="logo">🛡️ SafeVoice</div>
@@ -1338,7 +1306,7 @@
 
     <script>
         const CONFIG = {
-            version: '11.1.0',
+            version: '11.2.0',
             maxPostLength: 1000,
             minPostLength: 10,
             storageKey: 'safevoice_posts_v3',
@@ -1367,8 +1335,8 @@
             return deviceFingerprint;
         }
         
-        // Toast Notification
-        function showToast(message, duration = 4000) {
+        // Simple Toast Function
+        function showToast(message, duration = 5000) {
             const existing = document.querySelector('.toast');
             if (existing) existing.remove();
 
@@ -1383,38 +1351,11 @@
             }, duration);
         }
 
-        // Posting Indicator
-        function showPostingIndicator(message) {
-            const indicator = document.getElementById('postingIndicator');
-            if (indicator) {
-                document.getElementById('postingText').textContent = message;
-                indicator.classList.add('show');
-            }
-        }
-
-        function hidePostingIndicator() {
-            const indicator = document.getElementById('postingIndicator');
-            if (indicator) {
-                indicator.classList.remove('show');
-            }
-        }
-
-        // Sound System (silent fallback - no errors)
-        function playSound(type) {
-            // Silent - can be enhanced later
-            try {
-                // Future: add actual sounds
-            } catch(e) {}
-        }
-
-        // Vibration (works on Android)
-        function vibrate(pattern) {
-            try {
-                if ('vibrate' in navigator) {
-                    navigator.vibrate(pattern);
-                }
-            } catch(e) {}
-        }
+        // Silent functions (no errors)
+        function showPostingIndicator(msg) {}
+        function hidePostingIndicator() {}
+        function playSound(type) {}
+        function vibrate(pattern) {}
 
         document.addEventListener('DOMContentLoaded', () => {
             loadFeed();
@@ -1859,27 +1800,14 @@
             
             updateAnalytics();
 
-            // Show posting indicator
-            showPostingIndicator('Posting...');
-            playSound('post');
-            vibrate([50, 30, 50]);
-
-            // Navigate and load
+            // Navigate to home
             navigateTo('home');
             loadFeed();
 
-            // Show success after brief delay
+            // Show success toast after navigation
             setTimeout(() => {
-                hidePostingIndicator();
-                showPostingIndicator('✅ Posted!');
-                document.getElementById('postingText').textContent = '✅ Posted successfully!';
-                playSound('success');
-                vibrate([100, 50, 100]);
-                setTimeout(() => {
-                    hidePostingIndicator();
-                    showToast('✅ Posted anonymously!');
-                }, 2000);
-            }, 500);
+                showToast('✅ Posted anonymously! Your voice matters.', 5000);
+            }, 800);
         }
         
         function connectWallet() {
