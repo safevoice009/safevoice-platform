@@ -1002,6 +1002,38 @@
             margin-left: 12px;
             margin-top: 8px;
         }
+        
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 18px 32px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            z-index: 10000;
+            font-weight: 700;
+            font-size: 1.1rem;
+            max-width: 90%;
+            text-align: center;
+            animation: toastSlideUp 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes toastSlideUp {
+            from { bottom: -100px; opacity: 0; transform: translateX(-50%) scale(0.8); }
+            to { bottom: 100px; opacity: 1; transform: translateX(-50%) scale(1); }
+        }
+
+        .toast.hide {
+            animation: toastSlideDown 0.3s ease-in forwards;
+        }
+
+        @keyframes toastSlideDown {
+            to { bottom: -100px; opacity: 0; transform: translateX(-50%) scale(0.8); }
+        }
     </style>
 </head>
 <body>
@@ -1149,11 +1181,11 @@
                 
                 <div class="file-upload">
                     <div style="display: flex; gap: 12px; margin-bottom: 12px;">
-                        <label for="cameraUpload" class="file-upload-label" style="flex: 1;">
+                        <label for="cameraUpload" style="cursor: pointer; -webkit-tap-highlight-color: transparent;" class="file-upload-label" style="flex: 1;">
                             <span>📷</span>
                             <span>Camera</span>
                         </label>
-                        <label for="galleryUpload" class="file-upload-label" style="flex: 1;">
+                        <label for="galleryUpload" style="cursor: pointer; -webkit-tap-highlight-color: transparent;" class="file-upload-label" style="flex: 1;">
                             <span>🖼️</span>
                             <span>Gallery</span>
                         </label>
@@ -1274,7 +1306,7 @@
 
     <script>
         const CONFIG = {
-            version: '11.0.0',
+            version: '11.3.0',
             maxPostLength: 1000,
             minPostLength: 10,
             storageKey: 'safevoice_posts_v3',
@@ -1303,6 +1335,28 @@
             return deviceFingerprint;
         }
         
+        // Toast notification
+        function showToast(message, duration = 5000) {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('hide');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // Stub functions (prevent errors)
+        function showPostingIndicator(msg) {}
+        function hidePostingIndicator() {}
+        function playSound(type) {}
+        function vibrate(pattern) {}
+
         document.addEventListener('DOMContentLoaded', () => {
             loadFeed();
             setupAnonymousId();
@@ -1430,11 +1484,11 @@
                         </div>
                         <div class="post-reactions">
                             <div class="reaction-group">
-                                <button class="reaction-btn vote-btn ${userVote === 'up' ? 'upvoted active' : ''}" onclick="vote(${post.id}, 'up')">
+                                <button class="reaction-btn vote-btn ${userVote === 'up' ? 'upvoted active' : ''}" onclick="event.preventDefault(); event.stopPropagation(); vote(${post.id}, 'up');">
                                     ▲
                                 </button>
                                 <span class="reaction-count" id="score-${post.id}">${score}</span>
-                                <button class="reaction-btn vote-btn ${userVote === 'down' ? 'downvoted active' : ''}" onclick="vote(${post.id}, 'down')">
+                                <button class="reaction-btn vote-btn ${userVote === 'down' ? 'downvoted active' : ''}" onclick="event.preventDefault(); event.stopPropagation(); vote(${post.id}, 'down');">
                                     ▼
                                 </button>
                             </div>
@@ -1746,27 +1800,14 @@
             
             updateAnalytics();
 
-            // Show posting indicator
-            showPostingIndicator('Posting...');
-            playSound('post');
-            vibrate([50, 30, 50]);
-
-            // Navigate and load
+            // Navigate to home
             navigateTo('home');
             loadFeed();
 
-            // Show success after brief delay
+            // Show toast confirmation
             setTimeout(() => {
-                hidePostingIndicator();
-                showPostingIndicator('✅ Posted!');
-                document.getElementById('postingText').textContent = '✅ Posted successfully!';
-                playSound('success');
-                vibrate([100, 50, 100]);
-                setTimeout(() => {
-                    hidePostingIndicator();
-                    showToast('✅ Posted anonymously!');
-                }, 2000);
-            }, 500);
+                showToast('✅ Posted anonymously! Your voice matters.', 5000);
+            }, 800);
         }
         
         function connectWallet() {
@@ -1787,6 +1828,14 @@
         }
         
         function previewImage(input) {
+            // iOS Safari fix - ensure input element is valid
+            if (!input) {
+                input = event.target;
+            }
+            if (!input || !input.files || !input.files[0]) {
+                console.log('No file selected');
+                return;
+            }
             const file = input.files[0];
             if (file) {
                 if (file.size > 10000000) {
