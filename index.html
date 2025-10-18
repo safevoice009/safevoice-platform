@@ -1148,27 +1148,15 @@
                 </div>
                 
                 <div class="file-upload">
-                    <div style="display: flex; gap: 12px; margin-bottom: 12px;">
-                        <label for="cameraUpload" class="file-upload-label" style="flex: 1;">
-                            <span>📷</span>
-                            <span>Camera</span>
-                        </label>
-                        <label for="galleryUpload" class="file-upload-label" style="flex: 1;">
-                            <span>🖼️</span>
-                            <span>Gallery</span>
-                        </label>
-                    </div>
-                    <input type="file" id="cameraUpload" accept="image/*" capture="environment" onchange="previewImage(this)" style="display: none;">
-                    <input type="file" id="galleryUpload" accept="image/*" onchange="previewImage(this)" style="display: none;">
+                    <label for="imageUpload" class="file-upload-label">
+                        <span>📷</span>
+                        <span id="uploadText">Add Image (Optional)</span>
+                    </label>
+                    <input type="file" id="imageUpload" accept="image/*,video/*" capture="environment" onchange="previewImage()">
                     <img id="imagePreview" class="image-preview">
-                    <div id="imageInfo" style="display: none; text-align: center; font-size: 0.9rem; color: var(--text-tertiary); margin-top: 8px;"></div>
-                    <div id="imageActions" style="display: none; gap: 12px; margin-top: 12px;">
-                        <button type="button" onclick="removeImage()" class="btn btn-secondary" style="flex: 1;">🗑️ Remove</button>
-                        <button type="button" onclick="changeImage()" class="btn btn-secondary" style="flex: 1;">🔄 Change</button>
-                    </div>
                 </div>
                 
-                <button class="btn" type="button" onclick="submitPost(); return false;">📤 Post Anonymously</button>
+                <button class="btn" onclick="submitPost()">📤 Post Anonymously</button>
             </div>
         </div>
         
@@ -1274,7 +1262,7 @@
 
     <script>
         const CONFIG = {
-            version: '11.0.0',
+            version: '12.0.0',
             maxPostLength: 1000,
             minPostLength: 10,
             storageKey: 'safevoice_posts_v3',
@@ -1308,7 +1296,7 @@
             setupAnonymousId();
             updateAnalytics();
             setupPWA();
-            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - Ultimate Edition - Sound + Vibration + All!' + ' - Ultimate Edition!');
+            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - Complete Edition - All Fixed + Toast!' + ' - Ultimate Edition!');
         });
         
         function setupPWA() {
@@ -1528,8 +1516,6 @@
         }
         
         function setReaction(postId, emoji) {
-            vibrate([30, 20]);
-            playSound('click');
             const scrollY = window.pageYOffset || document.documentElement.scrollTop;
             const deviceFP = getDeviceFingerprint();
             const reactions = JSON.parse(localStorage.getItem(CONFIG.reactionsKey) || '{}');
@@ -1556,8 +1542,15 @@
             localStorage.setItem(CONFIG.reactionsKey, JSON.stringify(reactions));
             savePosts(posts);
             loadFeed();
+            setTimeout(() => {
+                window.scrollTo(0, scrollY);
+                requestAnimationFrame(() => {
+                    window.scrollTo(0, scrollY);
+                    setTimeout(() => window.scrollTo(0, scrollY), 100);
+                });
+            }, 50);
         }
-        
+
         function getUserReaction(postId, deviceFP) {
             const reactions = JSON.parse(localStorage.getItem(CONFIG.reactionsKey) || '{}');
             return reactions[postId] || null;
@@ -1565,8 +1558,6 @@
         
         // VOTING SYSTEM
         function vote(postId, type) {
-            vibrate(30);
-            playSound('click');
             const scrollY = window.pageYOffset || document.documentElement.scrollTop;
             const deviceFP = getDeviceFingerprint();
             const votes = JSON.parse(localStorage.getItem(CONFIG.votesKey) || '{}');
@@ -1596,8 +1587,15 @@
             localStorage.setItem(CONFIG.votesKey, JSON.stringify(votes));
             savePosts(posts);
             loadFeed();
+            setTimeout(() => {
+                window.scrollTo(0, scrollY);
+                requestAnimationFrame(() => {
+                    window.scrollTo(0, scrollY);
+                    setTimeout(() => window.scrollTo(0, scrollY), 100);
+                });
+            }, 50);
         }
-        
+
         function getUserVote(postId, deviceFP) {
             const votes = JSON.parse(localStorage.getItem(CONFIG.votesKey) || '{}');
             return votes[postId] || null;
@@ -1735,38 +1733,45 @@
             document.getElementById('collegeSelect').value = '';
             document.getElementById('categorySelect').value = '';
             document.getElementById('imagePreview').style.display = 'none';
-            document.getElementById('cameraUpload').value = '';
-            document.getElementById('galleryUpload').value = '';
-            document.getElementById('imageInfo').style.display = 'none';
-            document.getElementById('imageActions').style.display = 'none';
+            document.getElementById('imageUpload').value = '';
             document.getElementById('otherCollegeInput').value = '';
             document.getElementById('otherCollegeInput').style.display = 'none';
+            document.getElementById('uploadText').textContent = 'Add Image (Optional)';
             currentImageData = null;
             updateCharCount();
             
             updateAnalytics();
 
-            // Show posting indicator
-            showPostingIndicator('Posting...');
-            playSound('post');
-            vibrate([50, 30, 50]);
+            // Clear form
+            document.getElementById('postContent').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            if (document.getElementById('cameraUpload')) {
+                document.getElementById('cameraUpload').value = '';
+                document.getElementById('galleryUpload').value = '';
+            } else {
+                document.getElementById('imageUpload').value = '';
+            }
+            if (document.getElementById('imageInfo')) {
+                document.getElementById('imageInfo').style.display = 'none';
+            }
+            if (document.getElementById('imageActions')) {
+                document.getElementById('imageActions').style.display = 'none';
+            }
+            if (document.getElementById('uploadText')) {
+                document.getElementById('uploadText').textContent = 'Add Image (Optional)';
+            }
+            document.getElementById('otherCollegeInput').value = '';
+            document.getElementById('otherCollegeInput').style.display = 'none';
+            currentImageData = null;
 
-            // Navigate and load
+            // Navigate to home
             navigateTo('home');
             loadFeed();
 
-            // Show success after brief delay
+            // Show success toast with delay for visibility
             setTimeout(() => {
-                hidePostingIndicator();
-                showPostingIndicator('✅ Posted!');
-                document.getElementById('postingText').textContent = '✅ Posted successfully!';
-                playSound('success');
-                vibrate([100, 50, 100]);
-                setTimeout(() => {
-                    hidePostingIndicator();
-                    showToast('✅ Posted anonymously!');
-                }, 2000);
-            }, 500);
+                showToast('✅ Posted anonymously! Your voice matters.', 5000);
+            }, 600);
         }
         
         function connectWallet() {
@@ -1786,8 +1791,8 @@
             }
         }
         
-        function previewImage(input) {
-            const file = input.files[0];
+        function previewImage() {
+            const file = document.getElementById('imageUpload').files[0];
             if (file) {
                 if (file.size > 10000000) {
                     showToast('⚠️ Image too large (max 10MB)');
@@ -1817,18 +1822,14 @@
                             currentImageData = canvas.toDataURL('image/jpeg', 0.8);
                             document.getElementById('imagePreview').src = currentImageData;
                             document.getElementById('imagePreview').style.display = 'block';
-                            document.getElementById('imageInfo').textContent = '✅ Image ready (' + (file.size / 1024).toFixed(0) + 'KB)';
-                            document.getElementById('imageInfo').style.display = 'block';
-                            document.getElementById('imageActions').style.display = 'flex';
+                            document.getElementById('uploadText').textContent = '✅ Compressed';
                         };
                         img.src = e.target.result;
                     } else {
                         currentImageData = e.target.result;
                         document.getElementById('imagePreview').src = currentImageData;
                         document.getElementById('imagePreview').style.display = 'block';
-                        document.getElementById('imageInfo').textContent = '✅ Image ready (' + (file.size / 1024).toFixed(0) + 'KB)';
-                            document.getElementById('imageInfo').style.display = 'block';
-                            document.getElementById('imageActions').style.display = 'flex';
+                        document.getElementById('uploadText').textContent = '✅ Added';
                     }
                 };
                 reader.readAsDataURL(file);
@@ -1933,25 +1934,8 @@
             }
         }
         
-        function removeImage() {
-            document.getElementById('cameraUpload').value = '';
-            document.getElementById('galleryUpload').value = '';
-            const preview = document.getElementById('imagePreview');
-            preview.src = '';
-            preview.style.display = 'none';
-            document.getElementById('imageInfo').style.display = 'none';
-            document.getElementById('imageActions').style.display = 'none';
-            currentImageData = null;
-            playSound('click');
-        }
-
-        function changeImage() {
-            removeImage();
-            showToast('📷 Choose Camera or Gallery to upload new image');
-        }
-
         function showFilters() {
-            showToast('🔧 Advanced filters coming soon!');
+            alert('🔧 Advanced filters coming soon!\n\nFeatures:\n• Filter by college\n• Filter by category\n• Search posts');
         }
     </script>
 
