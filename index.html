@@ -1274,7 +1274,7 @@
 
     <script>
         const CONFIG = {
-            version: '9.0.0',
+            version: '10.0.0',
             maxPostLength: 1000,
             minPostLength: 10,
             storageKey: 'safevoice_posts_v3',
@@ -1308,7 +1308,7 @@
             setupAnonymousId();
             updateAnalytics();
             setupPWA();
-            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - Production Ready - Toast + iOS Fix!' + ' - Ultimate Edition!');
+            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - Ultimate - iOS Fixed + Toast + All!' + ' - Ultimate Edition!');
         });
         
         function setupPWA() {
@@ -1528,7 +1528,6 @@
         }
         
         function setReaction(postId, emoji) {
-            // Save scroll position BEFORE any changes
             const scrollY = window.pageYOffset || document.documentElement.scrollTop;
             const deviceFP = getDeviceFingerprint();
             const reactions = JSON.parse(localStorage.getItem(CONFIG.reactionsKey) || '{}');
@@ -1564,7 +1563,6 @@
         
         // VOTING SYSTEM
         function vote(postId, type) {
-            // Save scroll position BEFORE any changes
             const scrollY = window.pageYOffset || document.documentElement.scrollTop;
             const deviceFP = getDeviceFingerprint();
             const votes = JSON.parse(localStorage.getItem(CONFIG.votesKey) || '{}');
@@ -1743,9 +1741,9 @@
             updateCharCount();
             
             updateAnalytics();
-            showToast('✅ Posted anonymously!');
             navigateTo('home');
             loadFeed();
+            setTimeout(() => showToast('✅ Posted anonymously!'), 300);
         }
         
         function connectWallet() {
