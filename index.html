@@ -1003,7 +1003,7 @@
             margin-top: 8px;
         }
         
-        /* Simple Toast Notification */
+        /* Toast Notification */
         .toast {
             position: fixed;
             bottom: 100px;
@@ -1017,26 +1017,58 @@
             z-index: 10000;
             font-weight: 700;
             font-size: 1.05rem;
-            animation: slideUp 0.4s ease-out;
             max-width: 90%;
             text-align: center;
+            animation: slideUpToast 0.4s ease-out;
         }
 
-        @keyframes slideUp {
+        @keyframes slideUpToast {
             from { bottom: -100px; opacity: 0; }
             to { bottom: 100px; opacity: 1; }
         }
 
         .toast.hide {
-            animation: slideDown 0.3s ease-in forwards;
+            animation: slideDownToast 0.3s ease-in forwards;
         }
 
-        @keyframes slideDown {
+        @keyframes slideDownToast {
             to { bottom: -100px; opacity: 0; }
+        }
+
+        /* Posting Indicator */
+        .posting-indicator {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(139, 92, 246, 0.95);
+            backdrop-filter: blur(20px);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 10001;
+            font-weight: 600;
+            display: none;
+        }
+
+        .posting-indicator.show {
+            display: block;
+            animation: slideDownIndicator 0.3s ease-out;
+        }
+
+        @keyframes slideDownIndicator {
+            from { top: -50px; opacity: 0; }
+            to { top: 80px; opacity: 1; }
         }
     </style>
 </head>
 <body>
+    <!-- Posting Indicator -->
+    <div class="posting-indicator" id="postingIndicator">
+        <span id="postingText">Posting...</span>
+    </div>
+    
 
     <header class="header">
         <div class="logo">🛡️ SafeVoice</div>
@@ -1335,22 +1367,53 @@
             return deviceFingerprint;
         }
         
+        // Toast Notification
         function showToast(message, duration = 4000) {
-            // Remove existing toast if any
             const existing = document.querySelector('.toast');
             if (existing) existing.remove();
 
-            // Create toast
             const toast = document.createElement('div');
             toast.className = 'toast';
             toast.textContent = message;
             document.body.appendChild(toast);
 
-            // Auto-remove
             setTimeout(() => {
                 toast.classList.add('hide');
                 setTimeout(() => toast.remove(), 300);
             }, duration);
+        }
+
+        // Posting Indicator
+        function showPostingIndicator(message) {
+            const indicator = document.getElementById('postingIndicator');
+            if (indicator) {
+                document.getElementById('postingText').textContent = message;
+                indicator.classList.add('show');
+            }
+        }
+
+        function hidePostingIndicator() {
+            const indicator = document.getElementById('postingIndicator');
+            if (indicator) {
+                indicator.classList.remove('show');
+            }
+        }
+
+        // Sound System (silent fallback - no errors)
+        function playSound(type) {
+            // Silent - can be enhanced later
+            try {
+                // Future: add actual sounds
+            } catch(e) {}
+        }
+
+        // Vibration (works on Android)
+        function vibrate(pattern) {
+            try {
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(pattern);
+                }
+            } catch(e) {}
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1796,19 +1859,23 @@
             
             updateAnalytics();
 
-            // Navigate to home
+            // Show posting indicator
+            showPostingIndicator('Posting...');
+            playSound('post');
+            vibrate([50, 30, 50]);
+
+            // Navigate and load
             navigateTo('home');
             loadFeed();
 
-            // Show success toast after navigation
+            // Show success after brief delay
             setTimeout(() => {
-                showToast('✅ Posted anonymously! Your voice matters.', 5000);
-            }, 800);
-        }
-
-        function old_unused_code_below() {
-            // Removed broken code
-            setTimeout(() => {
+                hidePostingIndicator();
+                showPostingIndicator('✅ Posted!');
+                document.getElementById('postingText').textContent = '✅ Posted successfully!';
+                playSound('success');
+                vibrate([100, 50, 100]);
+                setTimeout(() => {
                     hidePostingIndicator();
                     showToast('✅ Posted anonymously!');
                 }, 2000);
