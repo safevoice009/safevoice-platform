@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="description" content="SafeVoice - India's First Decentralized Anonymous Student Platform">
@@ -1002,38 +1005,6 @@
             margin-left: 12px;
             margin-top: 8px;
         }
-        
-        /* Toast Notification */
-        .toast {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            padding: 18px 32px;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-            z-index: 10000;
-            font-weight: 700;
-            font-size: 1.1rem;
-            max-width: 90%;
-            text-align: center;
-            animation: toastSlideUp 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        @keyframes toastSlideUp {
-            from { bottom: -100px; opacity: 0; transform: translateX(-50%) scale(0.8); }
-            to { bottom: 100px; opacity: 1; transform: translateX(-50%) scale(1); }
-        }
-
-        .toast.hide {
-            animation: toastSlideDown 0.3s ease-in forwards;
-        }
-
-        @keyframes toastSlideDown {
-            to { bottom: -100px; opacity: 0; transform: translateX(-50%) scale(0.8); }
-        }
     </style>
 </head>
 <body>
@@ -1181,11 +1152,11 @@
                 
                 <div class="file-upload">
                     <div style="display: flex; gap: 12px; margin-bottom: 12px;">
-                        <label for="cameraUpload" style="cursor: pointer; -webkit-tap-highlight-color: transparent;" class="file-upload-label" style="flex: 1;">
+                        <label for="cameraUpload" class="file-upload-label" style="flex: 1;">
                             <span>📷</span>
                             <span>Camera</span>
                         </label>
-                        <label for="galleryUpload" style="cursor: pointer; -webkit-tap-highlight-color: transparent;" class="file-upload-label" style="flex: 1;">
+                        <label for="galleryUpload" class="file-upload-label" style="flex: 1;">
                             <span>🖼️</span>
                             <span>Gallery</span>
                         </label>
@@ -1305,8 +1276,51 @@
     </nav>
 
     <script>
+        // IndexedDB for iOS image support (larger than localStorage)
+        let db;
+
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open('SafeVoiceDB', 1);
+
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    db = request.result;
+                    resolve(db);
+                };
+
+                request.onupgradeneeded = (event) => {
+                    db = event.target.result;
+                    if (!db.objectStoreNames.contains('posts')) {
+                        db.createObjectStore('posts', { keyPath: 'id' });
+                    }
+                };
+            });
+        }
+
+        function savePostsToDB(posts) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(['posts'], 'readwrite');
+                const store = transaction.objectStore('posts');
+                store.clear(); // Clear old data
+                posts.forEach(post => store.add(post));
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = () => reject(transaction.error);
+            });
+        }
+
+        function getPostsFromDB() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction(['posts'], 'readonly');
+                const store = transaction.objectStore('posts');
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result || []);
+                request.onerror = () => reject(request.error);
+            });
+        }
+
         const CONFIG = {
-            version: '11.3.0',
+            version: '12.0.0',
             maxPostLength: 1000,
             minPostLength: 10,
             storageKey: 'safevoice_posts_v3',
@@ -1335,29 +1349,25 @@
             return deviceFingerprint;
         }
         
-        // Toast notification
-        function showToast(message, duration = 5000) {
-            const existing = document.querySelector('.toast');
-            if (existing) existing.remove();
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initialize IndexedDB
+            try {
+                await initDB();
+                console.log('✅ IndexedDB initialized');
+            } catch (e) {
+                console.warn('⚠️  IndexedDB failed, using localStorage:', e);
+            }
 
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-
-            setTimeout(() => {
-                toast.classList.add('hide');
-                setTimeout(() => toast.remove(), 300);
-            }, duration);
-        }
-
-        // Stub functions (prevent errors)
-        function showPostingIndicator(msg) {}
-        function hidePostingIndicator() {}
-        function playSound(type) {}
-        function vibrate(pattern) {}
-
-        document.addEventListener('DOMContentLoaded', () => {
+            // Register Service Worker
+            if ('serviceWorker' in navigator) {
+                try {
+                    await navigator.serviceWorker.register('/sw.js');
+                    console.log('✅ Service Worker registered');
+                } catch (e) {
+                    console.warn('⚠️  Service Worker failed:', e);
+                }
+            }
+            
             loadFeed();
             setupAnonymousId();
             updateAnalytics();
@@ -1484,11 +1494,11 @@
                         </div>
                         <div class="post-reactions">
                             <div class="reaction-group">
-                                <button class="reaction-btn vote-btn ${userVote === 'up' ? 'upvoted active' : ''}" onclick="event.preventDefault(); event.stopPropagation(); vote(${post.id}, 'up');">
+                                <button class="reaction-btn vote-btn ${userVote === 'up' ? 'upvoted active' : ''}" onclick="vote(${post.id}, 'up')">
                                     ▲
                                 </button>
                                 <span class="reaction-count" id="score-${post.id}">${score}</span>
-                                <button class="reaction-btn vote-btn ${userVote === 'down' ? 'downvoted active' : ''}" onclick="event.preventDefault(); event.stopPropagation(); vote(${post.id}, 'down');">
+                                <button class="reaction-btn vote-btn ${userVote === 'down' ? 'downvoted active' : ''}" onclick="vote(${post.id}, 'down')">
                                     ▼
                                 </button>
                             </div>
@@ -1742,7 +1752,7 @@
         }
         
         // SUBMIT POST
-        function submitPost() {
+        async function submitPost() {
             const content = document.getElementById('postContent').value.trim();
             let college = document.getElementById('collegeSelect').value;
             const category = document.getElementById('categorySelect').value || 'general';
@@ -1800,14 +1810,27 @@
             
             updateAnalytics();
 
-            // Navigate to home
+            // Show posting indicator
+            showPostingIndicator('Posting...');
+            playSound('post');
+            vibrate([50, 30, 50]);
+
+            // Navigate and load
             navigateTo('home');
             loadFeed();
 
-            // Show toast confirmation
+            // Show success after brief delay
             setTimeout(() => {
-                showToast('✅ Posted anonymously! Your voice matters.', 5000);
-            }, 800);
+                hidePostingIndicator();
+                showPostingIndicator('✅ Posted!');
+                document.getElementById('postingText').textContent = '✅ Posted successfully!';
+                playSound('success');
+                vibrate([100, 50, 100]);
+                setTimeout(() => {
+                    hidePostingIndicator();
+                    showToast('✅ Posted anonymously!');
+                }, 2000);
+            }, 500);
         }
         
         function connectWallet() {
@@ -1828,14 +1851,6 @@
         }
         
         function previewImage(input) {
-            // iOS Safari fix - ensure input element is valid
-            if (!input) {
-                input = event.target;
-            }
-            if (!input || !input.files || !input.files[0]) {
-                console.log('No file selected');
-                return;
-            }
             const file = input.files[0];
             if (file) {
                 if (file.size > 10000000) {
