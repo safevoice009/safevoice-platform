@@ -1274,7 +1274,7 @@
 
     <script>
         const CONFIG = {
-            version: '10.0.0',
+            version: '11.0.0',
             maxPostLength: 1000,
             minPostLength: 10,
             storageKey: 'safevoice_posts_v3',
@@ -1308,7 +1308,7 @@
             setupAnonymousId();
             updateAnalytics();
             setupPWA();
-            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - Ultimate - iOS Fixed + Toast + All!' + ' - Ultimate Edition!');
+            console.log('🛡️ SafeVoice v' + CONFIG.version + ' - Ultimate Edition - Sound + Vibration + All!' + ' - Ultimate Edition!');
         });
         
         function setupPWA() {
@@ -1528,6 +1528,8 @@
         }
         
         function setReaction(postId, emoji) {
+            vibrate([30, 20]);
+            playSound('click');
             const scrollY = window.pageYOffset || document.documentElement.scrollTop;
             const deviceFP = getDeviceFingerprint();
             const reactions = JSON.parse(localStorage.getItem(CONFIG.reactionsKey) || '{}');
@@ -1563,6 +1565,8 @@
         
         // VOTING SYSTEM
         function vote(postId, type) {
+            vibrate(30);
+            playSound('click');
             const scrollY = window.pageYOffset || document.documentElement.scrollTop;
             const deviceFP = getDeviceFingerprint();
             const votes = JSON.parse(localStorage.getItem(CONFIG.votesKey) || '{}');
@@ -1741,9 +1745,28 @@
             updateCharCount();
             
             updateAnalytics();
+
+            // Show posting indicator
+            showPostingIndicator('Posting...');
+            playSound('post');
+            vibrate([50, 30, 50]);
+
+            // Navigate and load
             navigateTo('home');
             loadFeed();
-            setTimeout(() => showToast('✅ Posted anonymously!'), 300);
+
+            // Show success after brief delay
+            setTimeout(() => {
+                hidePostingIndicator();
+                showPostingIndicator('✅ Posted!');
+                document.getElementById('postingText').textContent = '✅ Posted successfully!';
+                playSound('success');
+                vibrate([100, 50, 100]);
+                setTimeout(() => {
+                    hidePostingIndicator();
+                    showToast('✅ Posted anonymously!');
+                }, 2000);
+            }, 500);
         }
         
         function connectWallet() {
@@ -1919,6 +1942,7 @@
             document.getElementById('imageInfo').style.display = 'none';
             document.getElementById('imageActions').style.display = 'none';
             currentImageData = null;
+            playSound('click');
         }
 
         function changeImage() {
