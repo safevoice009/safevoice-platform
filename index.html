@@ -45,7 +45,7 @@
             padding: 20px;
         }
 
-        /* Header */
+        /* Header Styles */
         .header {
             background: var(--surface);
             padding: 24px;
@@ -68,9 +68,7 @@
             gap: 12px;
         }
 
-        .logo-icon {
-            font-size: 36px;
-        }
+        .logo-icon { font-size: 36px; }
 
         .logo h1 {
             font-size: 28px;
@@ -93,9 +91,7 @@
             transition: transform 0.2s;
         }
 
-        .profile-icon:hover {
-            transform: scale(1.1);
-        }
+        .profile-icon:hover { transform: scale(1.1); }
 
         .tagline {
             color: var(--text-secondary);
@@ -154,7 +150,7 @@
             margin-top: 4px;
         }
 
-        /* Profile Modal */
+        /* Modals */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -248,9 +244,7 @@
             font-size: 13px;
         }
 
-        .info-value {
-            font-weight: 600;
-        }
+        .info-value { font-weight: 600; }
 
         .modal-close {
             background: var(--surface-light);
@@ -284,9 +278,7 @@
             gap: 16px;
         }
 
-        .crisis-icon {
-            font-size: 32px;
-        }
+        .crisis-icon { font-size: 32px; }
 
         .crisis-text h3 {
             color: white;
@@ -341,7 +333,6 @@
             color: white;
         }
 
-        /* Sections */
         .section {
             display: none;
         }
@@ -392,7 +383,6 @@
             border-color: var(--primary);
         }
 
-        /* Image Upload */
         .image-upload {
             display: flex;
             gap: 12px;
@@ -448,7 +438,6 @@
             font-weight: bold;
         }
 
-        /* Memorial Toggle */
         .memorial-toggle {
             display: flex;
             align-items: center;
@@ -476,7 +465,6 @@
             margin-top: 16px;
         }
 
-        /* Button */
         .btn {
             background: linear-gradient(135deg, var(--primary), #8b5cf6);
             color: white;
@@ -494,18 +482,9 @@
             gap: 8px;
         }
 
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn:active { transform: translateY(0); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
         /* Filters */
         .filters {
@@ -551,9 +530,7 @@
             position: relative;
         }
 
-        .post-card:hover {
-            transform: translateY(-2px);
-        }
+        .post-card:hover { transform: translateY(-2px); }
 
         .post-header {
             display: flex;
@@ -600,16 +577,12 @@
             transition: transform 0.2s;
         }
 
-        .post-image:hover {
-            transform: scale(1.02);
-        }
-
+        .post-image:hover { transform: scale(1.02); }
         .post-image img {
             width: 100%;
             display: block;
         }
 
-        /* Image Viewer Modal */
         .image-viewer {
             display: none;
             position: fixed;
@@ -624,9 +597,7 @@
             animation: fadeIn 0.3s;
         }
 
-        .image-viewer.active {
-            display: flex;
-        }
+        .image-viewer.active { display: flex; }
 
         .image-viewer img {
             max-width: 90%;
@@ -649,7 +620,6 @@
             backdrop-filter: blur(10px);
         }
 
-        /* Post Menu */
         .post-menu {
             display: none;
             position: fixed;
@@ -666,9 +636,7 @@
             margin: 0 auto;
         }
 
-        .post-menu.active {
-            display: block;
-        }
+        .post-menu.active { display: block; }
 
         .post-menu-header {
             text-align: center;
@@ -689,17 +657,10 @@
             transition: all 0.2s;
         }
 
-        .menu-option:hover {
-            background: var(--surface-light);
-        }
+        .menu-option:hover { background: var(--surface-light); }
 
-        .menu-option-icon {
-            font-size: 24px;
-        }
-
-        .menu-option-text {
-            font-weight: 600;
-        }
+        .menu-option-icon { font-size: 24px; }
+        .menu-option-text { font-weight: 600; }
 
         .menu-cancel {
             background: var(--surface-light);
@@ -759,9 +720,7 @@
             color: white;
         }
 
-        .reaction-count {
-            font-size: 14px;
-        }
+        .reaction-count { font-size: 14px; }
 
         /* Helplines */
         .helplines-grid {
@@ -783,9 +742,7 @@
             margin-bottom: 12px;
         }
 
-        .helpline-icon {
-            font-size: 32px;
-        }
+        .helpline-icon { font-size: 32px; }
 
         .helpline-title {
             font-size: 18px;
@@ -829,7 +786,6 @@
             margin-top: 8px;
         }
 
-        /* Memorial Section */
         .memorial-intro {
             background: linear-gradient(135deg, #f59e0b, #d97706);
             padding: 24px;
@@ -844,7 +800,6 @@
             margin-bottom: 8px;
         }
 
-        /* Community Info */
         .community-grid {
             display: grid;
             gap: 16px;
@@ -889,7 +844,6 @@
             font-weight: bold;
         }
 
-        /* Loading */
         .loading {
             text-align: center;
             padding: 60px 20px;
@@ -906,7 +860,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 80px 20px;
@@ -925,7 +878,6 @@
             color: var(--text);
         }
 
-        /* Toast */
         .toast {
             position: fixed;
             bottom: 100px;
@@ -943,11 +895,8 @@
             font-weight: 600;
         }
 
-        .toast.show {
-            opacity: 1;
-        }
+        .toast.show { opacity: 1; }
 
-        /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -981,41 +930,19 @@
             font-weight: 600;
         }
 
-        .bottom-nav-btn.active {
-            color: var(--primary);
-        }
+        .bottom-nav-btn.active { color: var(--primary); }
 
-        /* Responsive */
         @media (max-width: 640px) {
-            .container {
-                padding: 12px;
-            }
-
-            .header {
-                padding: 20px;
-            }
-
-            .post-form {
-                padding: 20px;
-            }
-
-            .stats {
-                gap: 12px;
-            }
-
-            .stat-value {
-                font-size: 20px;
-            }
-
+            .container { padding: 12px; }
+            .header { padding: 20px; }
+            .post-form { padding: 20px; }
+            .stats { gap: 12px; }
+            .stat-value { font-size: 20px; }
             .crisis-content {
                 flex-direction: column;
                 text-align: center;
             }
-
-            .image-upload {
-                flex-direction: column;
-            }
-
+            .image-upload { flex-direction: column; }
             .profile-modal {
                 width: 95%;
                 padding: 24px;
@@ -1040,9 +967,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="profile-icon" onclick="openProfile()">
-                    👤
-                </div>
+                <div class="profile-icon" onclick="openProfile()">👤</div>
             </div>
             <div class="stats">
                 <div class="stat-item">
@@ -1147,7 +1072,7 @@
             </div>
 
             <!-- Filters -->
-            <div class="filters" id="postFilters">
+            <div class="filters">
                 <button class="filter-btn active" onclick="filterPosts('all')">All Posts</button>
                 <button class="filter-btn" onclick="filterPosts('mental')">💭 Mental Health</button>
                 <button class="filter-btn" onclick="filterPosts('academic')">📚 Academic</button>
@@ -1234,8 +1159,8 @@
                 <p>Honoring those we've lost • Celebrating their lives</p>
             </div>
 
-            <div class="filters" id="memorialFilters">
-                <button class="filter-btn active" onclick="filterPosts('memorial')">All Memorials</button>
+            <div class="filters">
+                <button class="filter-btn active" onclick="loadMemorials()">All Memorials</button>
             </div>
 
             <div id="memorialsContainer" class="posts-container">
@@ -1366,6 +1291,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
+
         // ================================
         // SUPABASE CONFIGURATION - FIXED CREDENTIALS
         // ================================
@@ -1375,11 +1301,11 @@
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // User fingerprint for anonymity
-        let userFingerprint = localStorage.getItem('userFingerprint') || generateFingerprint();
-        localStorage.setItem('userFingerprint', userFingerprint);
+        let anonymousId = localStorage.getItem('anonymousId') || generateFingerprint();
+        localStorage.setItem('anonymousId', anonymousId);
 
         function generateFingerprint() {
-            return 'user_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+            return 'anon_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
         }
 
         // Current filter and selected image
@@ -1507,7 +1433,7 @@
             if (section === 'home') {
                 loadPosts();
             } else if (section === 'memorials') {
-                filterPosts('memorial');
+                loadMemorials();
             }
         }
 
@@ -1565,7 +1491,7 @@
         });
 
         // ================================
-        // CREATE POST
+        // CREATE POST (FIXED FIELD NAMES: topic, image_url, anonymous_id)
         // ================================
         async function createPost() {
             const college = document.getElementById('collegeInput').value.trim();
@@ -1597,16 +1523,13 @@
             try {
                 const postData = {
                     college: college,
-                    category: category,
+                    topic: category,  // FIXED: topic instead of category
                     content: content,
-                    image_data: selectedImage,
+                    image_url: selectedImage,  // FIXED: image_url instead of image_data
                     is_memorial: isMemorial,
                     memorial_name: isMemorial ? memorialName : null,
                     memorial_message: isMemorial ? memorialMessage : null,
-                    user_fingerprint: userFingerprint,
-                    reaction_support: 0,
-                    reaction_helpful: 0,
-                    reaction_solidarity: 0,
+                    anonymous_id: anonymousId,  // FIXED: anonymous_id instead of user_fingerprint
                     created_at: new Date().toISOString()
                 };
 
@@ -1622,6 +1545,8 @@
                 document.getElementById('charCount').textContent = '0';
                 document.getElementById('memorialToggle').checked = false;
                 document.getElementById('memorialFields').style.display = 'none';
+                document.getElementById('memorialName').value = '';
+                document.getElementById('memorialMessage').value = '';
                 removeImage();
 
                 // Reset button
@@ -1639,7 +1564,7 @@
         }
 
         // ================================
-        // LOAD POSTS
+        // LOAD POSTS (FIXED FIELD NAMES)
         // ================================
         async function loadPosts() {
             const container = document.getElementById('postsContainer');
@@ -1649,7 +1574,7 @@
                 let query = supabase.from('posts').select('*').order('created_at', { ascending: false });
 
                 if (currentFilter !== 'all' && currentFilter !== 'memorial') {
-                    query = query.eq('category', currentFilter);
+                    query = query.eq('topic', currentFilter);  // FIXED: topic instead of category
                 }
 
                 if (currentFilter === 'memorial') {
@@ -1687,14 +1612,14 @@
         }
 
         // ================================
-        // RENDER POST
+        // RENDER POST (FIXED FIELD NAMES)
         // ================================
         function renderPost(post) {
             const isMemorial = post.is_memorial;
-            const badgeClass = `badge-${post.category}`;
-            const badgeText = getCategoryLabel(post.category);
+            const badgeClass = `badge-${post.topic || 'other'}`;  // FIXED: topic instead of category
+            const badgeText = getCategoryLabel(post.topic || 'other');  // FIXED
             const timeAgo = getTimeAgo(new Date(post.created_at));
-            const hasImage = post.image_data;
+            const hasImage = post.image_url;  // FIXED: image_url instead of image_data
 
             let html = `
                 <div class="post-card" data-post-id="${post.id}" ontouchstart="startLongPress('${post.id}', event)" ontouchend="endLongPress()" oncontextmenu="startLongPress('${post.id}', event); return false;">
@@ -1711,22 +1636,22 @@
                     ${isMemorial && post.memorial_name ? `
                         <div class="memorial-tribute">
                             <h4>In memory of ${post.memorial_name}</h4>
-                            <p>${escapeHtml(post.memorial_message)}</p>
+                            <p>${escapeHtml(post.memorial_message || '')}</p>
                         </div>
                     ` : ''}
-                    ${hasImage ? `<div class="post-image" onclick="openImageViewer('${post.image_data}')"><img src="${post.image_data}" alt="Post image"></div>` : ''}
+                    ${hasImage ? `<div class="post-image" onclick="openImageViewer('${post.image_url}')"><img src="${post.image_url}" alt="Post image"></div>` : ''}
                     <div class="reactions">
                         <button class="reaction-btn" onclick="react('${post.id}', 'support')">
                             <span>💚</span>
-                            <span class="reaction-count">${post.reaction_support || 0}</span>
+                            <span class="reaction-count">Support</span>
                         </button>
                         <button class="reaction-btn" onclick="react('${post.id}', 'helpful')">
                             <span>🙌</span>
-                            <span class="reaction-count">${post.reaction_helpful || 0}</span>
+                            <span class="reaction-count">Helpful</span>
                         </button>
                         <button class="reaction-btn" onclick="react('${post.id}', 'solidarity')">
                             <span>🤝</span>
-                            <span class="reaction-count">${post.reaction_solidarity || 0}</span>
+                            <span class="reaction-count">Together</span>
                         </button>
                     </div>
                 </div>
@@ -1736,37 +1661,24 @@
         }
 
         // ================================
-        // REACTIONS
+        // REACTIONS (FIXED FIELD NAMES)
         // ================================
         async function react(postId, reactionType) {
             try {
                 // Check if user already reacted
-                const reactionKey = `reaction_${postId}_${userFingerprint}`;
+                const reactionKey = `reaction_${postId}_${anonymousId}`;
                 if (localStorage.getItem(reactionKey)) {
                     showToast('ℹ️ You already reacted to this post');
                     return;
                 }
 
-                // Get current reaction count
-                const { data: post, error: fetchError } = await supabase
-                    .from('posts')
-                    .select('reaction_support, reaction_helpful, reaction_solidarity')
-                    .eq('id', postId)
-                    .single();
+                const { error } = await supabase.from('reactions').insert([{
+                    post_id: postId,
+                    type: reactionType,
+                    anonymous_id: anonymousId  // FIXED: anonymous_id instead of user_fingerprint
+                }]);
 
-                if (fetchError) throw fetchError;
-
-                // Increment reaction
-                const updateData = {
-                    [`reaction_${reactionType}`]: (post[`reaction_${reactionType}`] || 0) + 1
-                };
-
-                const { error: updateError } = await supabase
-                    .from('posts')
-                    .update(updateData)
-                    .eq('id', postId);
-
-                if (updateError) throw updateError;
+                if (error) throw error;
 
                 // Mark as reacted
                 localStorage.setItem(reactionKey, reactionType);
@@ -1791,16 +1703,12 @@
             });
             event.target.classList.add('active');
 
-            if (filter === 'memorial') {
-                document.getElementById('memorialsContainer').innerHTML = '<div class="loading"><div class="loading-spinner">🕯️</div><p>Loading memorials...</p></div>';
-                loadMemorials();
-            } else {
-                loadPosts();
-            }
+            loadPosts();
         }
 
         async function loadMemorials() {
             const container = document.getElementById('memorialsContainer');
+            container.innerHTML = '<div class="loading"><div class="loading-spinner">🕯️</div><p>Loading memorials...</p></div>';
 
             try {
                 const { data: posts, error } = await supabase
@@ -1842,19 +1750,28 @@
         async function updateStats(posts) {
             const totalPosts = posts.length;
             const totalMemorials = posts.filter(p => p.is_memorial).length;
-            const totalReactions = posts.reduce((sum, p) => 
-                sum + (p.reaction_support || 0) + (p.reaction_helpful || 0) + (p.reaction_solidarity || 0), 0
-            );
 
             document.getElementById('totalPosts').textContent = totalPosts;
-            document.getElementById('totalReactions').textContent = totalReactions;
             document.getElementById('totalMemorials').textContent = totalMemorials;
+
+            // Get total reactions
+            try {
+                const { count, error } = await supabase
+                    .from('reactions')
+                    .select('*', { count: 'exact', head: true });
+
+                if (!error) {
+                    document.getElementById('totalReactions').textContent = count || 0;
+                }
+            } catch (e) {
+                console.error('Stats error:', e);
+            }
         }
 
         // ================================
         // HELPER FUNCTIONS
         // ================================
-        function getCategoryLabel(category) {
+        function getCategoryLabel(topic) {
             const labels = {
                 mental: '💭 Mental Health',
                 academic: '📚 Academic',
@@ -1862,7 +1779,7 @@
                 bullying: '🚫 Bullying',
                 other: '💬 Other'
             };
-            return labels[category] || category;
+            return labels[topic] || '💬 Other';
         }
 
         function getTimeAgo(date) {
@@ -1905,9 +1822,10 @@
         // INITIALIZE APP
         // ================================
         window.addEventListener('load', async function() {
-            console.log('🕊️ SafeVoice v13.1 FIXED - Correct Supabase Credentials');
+            console.log('🕊️ SafeVoice v13.2 - PRODUCTION READY');
             console.log('✅ Supabase connected:', SUPABASE_URL);
             console.log('✅ Real-time enabled (single subscription)');
+            console.log('✅ Field mapping: topic, image_url, anonymous_id');
 
             await loadPosts();
             setupRealtime();
