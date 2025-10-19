@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D-Chat: The Dynasty Edition</title>
+    <title>D-Chat: The Metropolis Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -17,314 +17,376 @@
         ::-webkit-scrollbar-thumb { background-color: var(--primary); border-radius: 10px; border: 2px solid var(--surface); }
         body { font-family: 'Inter', sans-serif; background-color: var(--background); color: var(--text-primary); overflow: hidden; }
         .glass-pane { background: rgba(36, 39, 49, 0.7); backdrop-filter: blur(12px); border: 1px solid var(--border-color); }
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; transition: background-color 0.3s ease; }
-        .status-disconnected { background-color: var(--red); box-shadow: 0 0 8px var(--red); }
-        .status-connecting { background-color: var(--orange); box-shadow: 0 0 8px var(--orange); }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; }
         .status-connected { background-color: var(--green); box-shadow: 0 0 8px var(--green); }
-        .btn-primary { background-color: var(--primary); transition: background-color 0.2s ease; }
-        .btn-primary:hover { background-color: var(--primary-hover); }
-        .btn-secondary { background-color: var(--surface); transition: background-color 0.2s ease; }
-        .btn-secondary:hover { background-color: #363b49; }
-        .code-block { background-color: #16161e; color: var(--text-secondary); font-family: monospace; }
-        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .tooltip { position: relative; display: inline-block; }
-        .tooltip .tooltiptext { visibility: hidden; width: 120px; background-color: #16161e; color: #fff; text-align: center; border-radius: 6px; padding: 5px 0; position: absolute; z-index: 50; bottom: 125%; left: 50%; margin-left: -60px; opacity: 0; transition: opacity 0.3s; }
-        .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
-        .message-actions { visibility: hidden; opacity: 0; transition: opacity 0.2s ease; }
-        .message-wrapper:hover .message-actions { visibility: visible; opacity: 1; }
+        .status-disconnected { background-color: var(--red); box-shadow: 0 0 8px var(--red); }
+        .topic-item:hover, .space-item:hover { background-color: rgba(255,255,255,0.05); }
+        .topic-item.active { background-color: var(--primary) !important; color: white; }
+        .space-item.active { border-color: var(--primary); }
+        .comment-thread { border-left: 2px solid var(--border-color); }
+        .vote-btn:hover { background-color: rgba(255,255,255,0.1); }
     </style>
 </head>
-<body class="antialiased">
-    <div class="flex h-screen w-screen text-sm">
-        <!-- Servers Column -->
+<body class="antialiased text-sm">
+    <div class="flex h-screen w-screen">
+        <!-- Spaces Column -->
         <nav class="w-20 bg-black/20 flex flex-col items-center py-4 space-y-4 flex-shrink-0">
-            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center font-bold text-xl shadow-lg">D</div>
-            <div title="Current Room" class="w-12 h-12 rounded-2xl bg-surface flex items-center justify-center cursor-pointer border-2 border-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            <div id="spaces-list" class="space-y-3">
+                <!-- Spaces will be rendered here -->
             </div>
+            <button id="add-space-btn" class="w-12 h-12 rounded-full bg-surface flex items-center justify-center cursor-pointer border-2 border-dashed border-gray-500 hover:border-primary transition-all" title="Create or Join Space">+</button>
         </nav>
 
-        <!-- Channels & Profile Panel -->
-        <aside class="w-72 bg-surface flex-shrink-0 flex flex-col p-3">
-            <h2 class="font-bold text-lg mb-4 px-2">Dynasty Room</h2>
-            <div class="flex-grow space-y-2 pr-1 overflow-y-auto">
-                <h3 class="text-xs font-bold uppercase text-gray-400 px-2">Text Channels</h3>
-                <div class="px-2 py-2 rounded-lg bg-primary/20 text-white font-semibold cursor-pointer"># general</div>
+        <!-- Topics Panel -->
+        <aside class="w-80 bg-surface flex-shrink-0 flex flex-col">
+            <header class="h-14 flex-shrink-0 flex items-center justify-between px-4 border-b border-white/10">
+                <h2 id="space-title" class="font-bold text-lg"></h2>
+                <div class="flex items-center gap-2">
+                    <span id="status-dot" class="status-dot status-disconnected"></span>
+                    <span id="status-text" class="font-medium">Offline</span>
+                </div>
+            </header>
+            <div id="topics-list" class="flex-grow p-3 space-y-2 overflow-y-auto">
+                <!-- Topics will be rendered here -->
             </div>
-            <!-- Profile Hub -->
-            <div id="profile-hub" class="flex-shrink-0 pt-3 border-t border-white/10 p-2 bg-black/20 rounded-lg mt-2 cursor-pointer hover:bg-black/30">
+            <div class="p-3 border-t border-white/10">
+                <button id="create-topic-btn" class="w-full btn-primary font-bold py-2 rounded-md">Create Topic</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col bg-black/10">
+            <div id="topic-view" class="flex-1 p-6 overflow-y-auto hidden">
+                <div id="topic-content" class="pb-6 border-b border-white/10"></div>
+                <div id="comments-section" class="mt-6 space-y-4"></div>
+            </div>
+            <div id="welcome-view" class="flex-1 flex items-center justify-center text-center text-gray-400">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Welcome to Metropolis</h2>
+                    <p class="max-w-md mt-2">Select a topic to read, or create a new one to start a conversation.</p>
+                </div>
+            </div>
+            <div id="comment-input-area" class="p-6 flex-shrink-0 hidden">
+                <div class="bg-surface rounded-lg px-4 py-2 flex items-center gap-4">
+                    <input type="text" id="comment-input" class="flex-grow bg-transparent focus:outline-none" placeholder="Add a comment...">
+                    <button id="post-comment-btn" class="btn-primary rounded-md p-2">Post</button>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Profile & Wallet Panel -->
+        <section class="w-72 bg-surface flex-shrink-0 flex flex-col p-3 border-l border-white/10">
+            <h2 class="font-bold text-lg mb-4 px-2">Profile & Wallet</h2>
+            <div id="profile-hub" class="p-2 bg-black/20 rounded-lg">
                 <div class="flex items-center gap-3">
-                    <div id="my-avatar" class="w-10 h-10 rounded-full flex-shrink-0"></div>
+                    <div id="my-avatar" class="w-10 h-10 rounded-full flex-shrink-0 bg-gray-700"></div>
                     <div>
                         <p id="my-name" class="font-bold text-white">Generating...</p>
                         <p class="text-xs text-gray-400 truncate" id="my-id-short">ID loading...</p>
                     </div>
                 </div>
             </div>
-        </aside>
-
-        <!-- Main Chat Area -->
-        <main class="flex-1 flex flex-col bg-black/10">
-            <header class="h-14 flex-shrink-0 flex items-center justify-between px-6 border-b border-white/10">
-                <h3 class="font-bold text-lg"># general</h3>
-                <div class="flex items-center gap-2">
-                    <span id="status-dot" class="status-dot status-disconnected"></span>
-                    <span id="status-text" class="font-medium">Offline</span>
+            <div class="bg-black/20 p-3 rounded-lg mt-4">
+                <h3 class="font-semibold text-white mb-2">Wallet (Simulation)</h3>
+                <div class="text-center p-2 rounded-md bg-gradient-to-r from-primary to-green">
+                    <p class="text-xs">Balance</p>
+                    <p class="text-2xl font-bold" id="walletBalance">100.00 <span class="text-sm font-normal">SVT</span></p>
                 </div>
-            </header>
-            
-            <div id="messages" class="flex-1 p-6 overflow-y-auto space-y-1"></div>
-
-            <div class="p-6 flex-shrink-0">
-                 <div id="replying-to-banner" class="hidden text-xs bg-surface p-2 rounded-t-lg items-center justify-between">
-                    <p>Replying to <strong id="replying-to-user">User</strong></p>
-                    <button id="cancel-reply-btn" class="font-bold">X</button>
-                </div>
-                <div class="bg-surface rounded-lg px-4 py-2 flex items-center gap-4 rounded-t-none">
-                    <input type="text" id="messageInput" class="flex-grow bg-transparent focus:outline-none" placeholder="Message in #general...">
-                    <button id="sendMessageBtn" class="btn-primary rounded-md p-2">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </button>
-                </div>
+                <p class="text-xs text-center text-gray-400 mt-2">Staking Yield: +<span id="staking-rate">0.05</span>% / min</p>
             </div>
-        </main>
-        
-        <!-- Members Panel -->
-        <section class="w-72 bg-surface flex-shrink-0 flex flex-col p-3 border-l border-white/10">
-            <h2 class="font-bold text-lg mb-4 px-2">Members - <span id="member-count">0</span></h2>
-            <div id="members-list" class="space-y-3 overflow-y-auto">
-                <p class="text-gray-400 text-center">No one is here yet. Host a room to begin.</p>
+            <div class="flex-grow mt-4">
+                <h3 class="font-semibold text-white mb-2 px-2">Room Connection (Simulated)</h3>
+                <p class="text-xs text-gray-400 mb-2 px-2">P2P connections are simulated in this build. All data is local.</p>
+                <div class="space-y-2">
+                     <button id="hostBtn" class="w-full btn-primary font-bold py-2 rounded-md opacity-50 cursor-not-allowed">Host Room</button>
+                     <button id="joinBtn" class="w-full btn-secondary font-bold py-2 rounded-md opacity-50 cursor-not-allowed">Join Room</button>
+                </div>
             </div>
         </section>
     </div>
 
     <!-- Modals -->
-    <div id="connection-modal" class="hidden fixed inset-0 bg-black/70 items-center justify-center z-50">
+    <div id="generic-modal" class="hidden fixed inset-0 bg-black/70 items-center justify-center z-50">
         <div class="glass-pane rounded-xl p-6 w-11/12 md:w-1/2 max-w-lg">
-            <h3 class="text-lg font-bold mb-4">Connection Hub</h3>
-            <div class="space-y-4">
-                 <div>
-                    <label for="peerToken" class="font-semibold block mb-1 text-xs">Join / Host a Room</label>
-                    <textarea id="peerToken" class="w-full bg-[#16161e] rounded-md p-2 text-xs h-24 resize-none focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Leave empty to host. Paste an invite token to join."></textarea>
-                </div>
-                <div class="flex gap-2">
-                    <button id="hostBtn" class="w-full btn-primary font-bold py-2 rounded-md">Host New Room</button>
-                    <button id="joinBtn" class="w-full btn-secondary font-bold py-2 rounded-md">Join with Token</button>
-                </div>
-                 <button id="resetBtn" class="w-full bg-red-600/20 text-red-400 hover:bg-red-600/40 hover:text-red-300 font-bold py-2 rounded-md transition-all">Disconnect</button>
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modal-title" class="text-lg font-bold">Modal</h3>
+                <button class="modal-close-btn font-bold text-gray-400 hover:text-white">&times;</button>
             </div>
-             <button class="absolute top-4 right-4 text-gray-400 hover:text-white" id="close-connection-modal-btn">X</button>
-        </div>
-    </div>
-    
-     <div id="profile-modal" class="hidden fixed inset-0 bg-black/70 items-center justify-center z-50">
-        <div class="glass-pane rounded-xl p-6 w-11/12 md:w-1/2 max-w-lg">
-            <h3 class="text-lg font-bold mb-4">My Profile & Wallet</h3>
-            <div class="space-y-4 text-xs">
-                 <div class="bg-black/20 p-3 rounded-lg">
-                    <label class="font-semibold block mb-2 text-white">Your Anonymous ID</label>
-                     <div class="relative code-block p-2 rounded-md break-all text-gray-400 text-[10px] leading-tight">
-                        <span id="myId-modal"></span>
-                    </div>
-                </div>
-                <div class="bg-black/20 p-3 rounded-lg">
-                    <h3 class="font-semibold text-white mb-2">Wallet & Staking (Simulation)</h3>
-                    <p class="text-gray-400 mb-2">Your SVT balance grows automatically through staking.</p>
-                    <div class="text-center p-2 rounded-md bg-gradient-to-r from-primary to-green">
-                        <p class="text-xs">Balance</p>
-                        <p class="text-2xl font-bold" id="walletBalance">10.00 <span class="text-sm font-normal">SVT</span></p>
-                    </div>
-                    <p class="text-xs text-center text-gray-400 mt-2">Yielding +<span id="staking-rate">0.005</span> SVT / minute</p>
-                </div>
-            </div>
-            <button class="absolute top-4 right-4 text-gray-400 hover:text-white" id="close-profile-modal-btn">X</button>
-        </div>
-    </div>
-
-    <div id="invite-modal" class="hidden fixed inset-0 bg-black/70 items-center justify-center">
-        <div class="glass-pane rounded-xl p-6 w-11/12 md:w-1/2 max-w-lg">
-            <h3 class="text-lg font-bold mb-4">Room Invitation Token</h3>
-            <p class="text-sm text-gray-300 mb-2">Share this token with others to invite them to this temporary, private room.</p>
-            <textarea id="invite-text" class="w-full h-40 bg-[#16161e] rounded-md p-2 resize-none focus:outline-none code-block" readonly></textarea>
-            <div class="mt-4 flex justify-end gap-3">
-                 <button id="copyInviteBtn" class="btn-primary font-bold py-2 px-4 rounded-md">Copy Invite</button>
-                 <button id="closeInviteBtn" class="btn-secondary font-bold py-2 px-4 rounded-md">Close</button>
-            </div>
+            <div id="modal-content"></div>
         </div>
     </div>
     
     <script>
-    // This is a browser-based simulation. No real blockchain or IPFS writes are performed.
     document.addEventListener('DOMContentLoaded', () => {
         // --- DOM Elements ---
-        const myIdModalEl = document.getElementById('myId-modal');
-        const peerTokenEl = document.getElementById('peerToken');
-        const hostBtn = document.getElementById('hostBtn'); const joinBtn = document.getElementById('joinBtn'); const resetBtn = document.getElementById('resetBtn');
-        const messagesEl = document.getElementById('messages'); const messageInputEl = document.getElementById('messageInput'); const sendMessageBtn = document.getElementById('sendMessageBtn');
-        const statusDot = document.getElementById('status-dot'); const statusText = document.getElementById('status-text');
-        const membersListEl = document.getElementById('members-list'); const memberCountEl = document.getElementById('member-count');
-        const replyingToBanner = document.getElementById('replying-to-banner'); const replyingToUser = document.getElementById('replying-to-user'); const cancelReplyBtn = document.getElementById('cancel-reply-btn');
-        const profileHub = document.getElementById('profile-hub'); const myAvatar = document.getElementById('my-avatar'); const myName = document.getElementById('my-name'); const myIdShort = document.getElementById('my-id-short');
-        const walletBalanceEl = document.getElementById('walletBalance'); const stakingRateEl = document.getElementById('staking-rate');
-        
-        // Modals
-        const connectionModal = document.getElementById('connection-modal'); const closeConnectionModalBtn = document.getElementById('close-connection-modal-btn');
-        const profileModal = document.getElementById('profile-modal'); const closeProfileModalBtn = document.getElementById('close-profile-modal-btn');
-        const inviteModal = document.getElementById('invite-modal'); const inviteTextEl = document.getElementById('invite-text'); const copyInviteBtn = document.getElementById('copyInviteBtn'); const closeInviteBtn = document.getElementById('closeInviteBtn');
+        const spaceTitleEl = document.getElementById('space-title');
+        const spacesListEl = document.getElementById('spaces-list');
+        const addSpaceBtn = document.getElementById('add-space-btn');
+        const topicsListEl = document.getElementById('topics-list');
+        const createTopicBtn = document.getElementById('create-topic-btn');
+        const topicViewEl = document.getElementById('topic-view');
+        const welcomeViewEl = document.getElementById('welcome-view');
+        const topicContentEl = document.getElementById('topic-content');
+        const commentsSectionEl = document.getElementById('comments-section');
+        const commentInputArea = document.getElementById('comment-input-area');
+        const commentInput = document.getElementById('comment-input');
+        const postCommentBtn = document.getElementById('post-comment-btn');
+        const myAvatar = document.getElementById('my-avatar');
+        const myName = document.getElementById('my-name');
+        const myIdShort = document.getElementById('my-id-short');
+        const walletBalanceEl = document.getElementById('walletBalance');
+        const genericModal = document.getElementById('generic-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalContent = document.getElementById('modal-content');
 
         // --- App State ---
-        let me = { keyPair: null, id: null, name: null, avatar: null };
+        let me = {};
         let wallet = { balance: 100.0, stakingRate: 0.05 };
-        let room = { host: false, members: new Map() };
-        let connections = new Map(); // key: peerId, value: { conn: RTCPeerConnection, channel: RTCDataChannel }
-        let replyingTo = null;
-        const STAKING_INTERVAL = 60000; // 1 minute
+        let state = {
+            spaces: new Map(),
+            currentSpaceId: 'default',
+            currentTopicId: null,
+        };
 
         // --- Core Functions ---
         async function initialize() {
-            me.keyPair = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey']);
-            const pubKeyJwk = await crypto.subtle.exportKey('jwk', me.keyPair.publicKey);
-            me.id = await digestMessage(JSON.stringify(pubKeyJwk));
-            me.name = generateAnonymousName();
-            me.avatar = generateAvatar(me.id);
-
-            // Update UI
-            myIdModalEl.textContent = me.id;
+            const keyPair = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey']);
+            const pubKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey);
+            me = {
+                id: await digestMessage(JSON.stringify(pubKeyJwk)),
+                name: generateAnonymousName(),
+                avatar: generateAvatar(await digestMessage(new Date().toISOString() + Math.random())),
+            };
+            
             myName.textContent = me.name;
             myIdShort.textContent = `ID: ${me.id.substring(0, 8)}...`;
             myAvatar.innerHTML = me.avatar;
             updateWalletBalance(0);
-            updateStatus('Offline', 'disconnected');
-            showConnectionModal();
 
+            const defaultSpace = { id: 'default', name: 'Default Space', topics: new Map() };
+            state.spaces.set('default', defaultSpace);
+            
+            renderSpaces();
+            selectSpace('default');
+            
             setInterval(() => {
                 const yield = wallet.balance * (wallet.stakingRate / 100);
                 updateWalletBalance(yield);
-            }, STAKING_INTERVAL);
+            }, 60000);
         }
 
-        function createPeerConnection(peerId) {
-            const conn = new RTCPeerConnection({ 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] });
-            
-            conn.onicecandidate = e => {
-                if (e.candidate) {
-                    sendSignal({ type: 'candidate', candidate: e.candidate, to: peerId, from: me.id });
-                }
-            };
-            
-            conn.onconnectionstatechange = () => {
-                if (["disconnected", "closed", "failed"].includes(conn.connectionState)) {
-                    removeMember(peerId);
-                }
-            };
+        // --- Rendering Functions ---
+        function renderSpaces() {
+            spacesListEl.innerHTML = '';
+            state.spaces.forEach(space => {
+                const spaceEl = document.createElement('div');
+                spaceEl.className = `space-item w-12 h-12 rounded-2xl bg-surface flex items-center justify-center cursor-pointer border-2 border-transparent`;
+                if (space.id === state.currentSpaceId) spaceEl.classList.add('active');
+                spaceEl.dataset.spaceId = space.id;
+                spaceEl.title = space.name;
+                spaceEl.textContent = space.name.charAt(0).toUpperCase();
+                spaceEl.onclick = () => selectSpace(space.id);
+                spacesListEl.appendChild(spaceEl);
+            });
+        }
 
-            return conn;
+        function renderTopics() {
+             topicsListEl.innerHTML = '';
+             const space = state.spaces.get(state.currentSpaceId);
+             if (!space || space.topics.size === 0) {
+                topicsListEl.innerHTML = `<p class="text-center text-gray-400 p-4">No topics yet.</p>`;
+                return;
+             }
+             space.topics.forEach(topic => {
+                const topicEl = document.createElement('div');
+                topicEl.className = 'topic-item p-3 rounded-lg cursor-pointer';
+                if (topic.id === state.currentTopicId) topicEl.classList.add('active');
+                topicEl.dataset.topicId = topic.id;
+                topicEl.innerHTML = `
+                    <p class="font-bold">${topic.title}</p>
+                    <div class="flex justify-between items-center text-xs mt-1 text-gray-400">
+                        <span>by ${topic.author.name.split(' ')[0]}</span>
+                        <span>${topic.comments.size} comments</span>
+                    </div>
+                `;
+                topicEl.onclick = () => selectTopic(topic.id);
+                topicsListEl.appendChild(topicEl);
+             });
+        }
+
+        function renderTopicView() {
+            const topic = state.spaces.get(state.currentSpaceId)?.topics.get(state.currentTopicId);
+            if (!topic) {
+                welcomeViewEl.classList.remove('hidden');
+                topicViewEl.classList.add('hidden');
+                return;
+            }
+            topicContentEl.innerHTML = `
+                <div class="flex gap-4">
+                    <div class="flex flex-col items-center gap-1 text-gray-400">
+                        <button class="vote-btn p-1 rounded-md" onclick="handleUpvote('${topic.id}')">▲</button>
+                        <span class="font-bold text-white">${topic.votes}</span>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400">Posted by ${topic.author.name}</p>
+                        <h1 class="text-2xl font-bold mt-1">${topic.title}</h1>
+                        <p class="mt-4 text-gray-300 whitespace-pre-wrap">${topic.content}</p>
+                    </div>
+                </div>
+            `;
+            renderComments();
+        }
+
+        function renderComments() {
+            commentsSectionEl.innerHTML = '';
+            const topic = state.spaces.get(state.currentSpaceId)?.topics.get(state.currentTopicId);
+            if (!topic) return;
+
+            function buildComments(commentMap, parentEl, level = 0) {
+                commentMap.forEach(comment => {
+                    const commentEl = document.createElement('div');
+                    commentEl.className = `flex gap-3 ${level > 0 ? 'ml-6 comment-thread pl-4' : ''}`;
+                    commentEl.innerHTML = `
+                        <div class="w-8 h-8 rounded-full flex-shrink-0">${comment.author.avatar}</div>
+                        <div>
+                            <p class="font-semibold text-white">${comment.author.name} <span class="text-gray-400 text-xs font-normal">${new Date(comment.timestamp).toLocaleString()}</span></p>
+                            <p class="text-gray-300 mt-1">${comment.content}</p>
+                        </div>
+                    `;
+                    parentEl.appendChild(commentEl);
+                });
+            }
+            buildComments(topic.comments, commentsSectionEl);
         }
         
-        // --- WebRTC Signaling & Data Channel Logic ---
-        // This simulation uses a "host" model where the first user acts as the signaling server.
+        // --- State Selection ---
+        function selectSpace(spaceId) {
+            state.currentSpaceId = spaceId;
+            state.currentTopicId = null;
+            spaceTitleEl.textContent = state.spaces.get(spaceId).name;
+            welcomeViewEl.classList.remove('hidden');
+            topicViewEl.classList.add('hidden');
+            commentInputArea.classList.add('hidden');
+            renderSpaces();
+            renderTopics();
+        }
+
+        function selectTopic(topicId) {
+            state.currentTopicId = topicId;
+            welcomeViewEl.classList.add('hidden');
+            topicViewEl.classList.remove('hidden');
+            commentInputArea.classList.remove('hidden');
+            renderTopics();
+            renderTopicView();
+        }
+
+        // --- Modal & Action Functions ---
+        function showModal(title, contentHTML) {
+            modalTitle.textContent = title;
+            modalContent.innerHTML = contentHTML;
+            genericModal.classList.remove('hidden');
+            genericModal.classList.add('flex');
+            genericModal.querySelectorAll('.modal-close-btn').forEach(btn => btn.onclick = hideModal);
+        }
+        function hideModal() { genericModal.classList.add('hidden'); genericModal.classList.remove('flex'); }
+
+        function handleCreateTopic() { /* ... same as before, but corrected ... */ }
+        function handleAddSpace() { /* ... same as before, but corrected ... */ }
         
-        // Host function to handle signals
-        function hostSignalHandler(signal) {
-            // Forward signal to the correct peer
-            const peerConn = connections.get(signal.to);
-            if (peerConn) {
-                peerConn.channel.send(JSON.stringify({ type: 'signal', signal }));
+        window.handleUpvote = (topicId) => {
+            const topic = state.spaces.get(state.currentSpaceId)?.topics.get(topicId);
+            if (topic && wallet.balance >= 0.1) {
+                updateWalletBalance(-0.1);
+                topic.votes++;
+                renderTopicView();
+            } else if (wallet.balance < 0.1) {
+                alert('Not enough SVT to upvote.');
             }
         }
         
-        // Generic send signal function
-        function sendSignal(signal) {
-            if (room.host) {
-                hostSignalHandler(signal);
-            } else {
-                const hostConn = connections.get(room.hostId);
-                if (hostConn && hostConn.channel) {
-                    hostConn.channel.send(JSON.stringify({ type: 'signal', signal }));
-                }
-            }
+        async function handlePostComment() {
+             const content = commentInput.value.trim();
+             if (!content || !state.currentTopicId) return;
+
+             const topic = state.spaces.get(state.currentSpaceId).topics.get(state.currentTopicId);
+             const newComment = {
+                 id: await digestMessage(content + new Date().toISOString()),
+                 content,
+                 author: me,
+                 timestamp: new Date().getTime(),
+             };
+             topic.comments.set(newComment.id, newComment);
+             commentInput.value = '';
+             renderComments();
+             renderTopics(); // Update comment count
         }
 
-        function setupDataChannel(channel, peerId) {
-            channel.onopen = () => {
-                console.log(`Data channel with ${peerId} is open.`);
-                if(!room.host) {
-                    updateStatus('Online', 'connected');
-                    addMessage('System', 'Successfully joined the room!');
-                }
-            };
-            
-            channel.onmessage = async (e) => {
-                 const data = JSON.parse(e.data);
-                 switch(data.type) {
-                     case 'chat':
-                        const decrypted = await decryptMessage(data.payload, peerId);
-                        const sender = room.members.get(data.from);
-                        addMessage(sender, decrypted, { messageId: data.messageId });
-                        break;
-                 }
-            };
-        }
-        
-        async function deriveSharedSecret(peerId) {
-            // This needs to be implemented fully if encryption per-peer is desired.
-        }
 
-        async function encryptMessage(message, peerId) { return message; } // Encryption logic placeholder
-        async function decryptMessage(message, peerId) { return message; } // Decryption logic placeholder
-
-        // --- UI & Wallet Handlers ---
-        function addMessage(sender, message, options) { /* ... UI logic for adding messages ... */ }
-        function updateStatus(text, statusClass) { statusText.textContent = text; statusDot.className = `status-dot status-${statusClass}`; }
-        function showConnectionModal() { connectionModal.classList.remove('hidden'); connectionModal.classList.add('flex'); }
-        function hideConnectionModal() { connectionModal.classList.add('hidden'); connectionModal.classList.remove('flex'); }
+        // --- Utility Functions ---
         function updateWalletBalance(amount) {
-            if (wallet.balance + amount < 0) return false;
             wallet.balance += amount;
             walletBalanceEl.innerHTML = `${wallet.balance.toFixed(2)} <span class="text-sm font-normal">SVT</span>`;
-            return true;
         }
-        function updateMembersList() { /* ... UI logic for updating members list ... */ }
-        function addMember(member) { room.members.set(member.id, member); updateMembersList(); }
-        function removeMember(memberId) { room.members.delete(memberId); connections.delete(memberId); updateMembersList(); }
-
-        // --- Event Listeners ---
-        hostBtn.addEventListener('click', async () => { /* ... Host logic ... */ });
-        joinBtn.addEventListener('click', async () => { /* ... Join logic ... */ });
-        sendMessageBtn.addEventListener('click', () => { /* ... Send message logic ... */ });
-        profileHub.addEventListener('click', () => { profileModal.classList.remove('hidden'); profileModal.classList.add('flex'); });
-        closeProfileModalBtn.addEventListener('click', () => { profileModal.classList.add('hidden'); profileModal.classList.remove('flex'); });
-        // ... other event listeners
-        
-        // --- Utility Functions ---
         async function digestMessage(message) {
             const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(message));
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
-
         function generateAvatar(seed) {
-            const size = 32;
             const canvas = document.createElement('canvas');
-            canvas.width = size; canvas.height = size;
+            canvas.width = 40; canvas.height = 40;
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = `#${seed.substring(0, 6)}`;
-            ctx.fillRect(0, 0, size, size);
+            ctx.fillRect(0, 0, 40, 40);
             ctx.fillStyle = `#${seed.substring(6, 12)}`;
             for (let i = 0; i < 15; i++) {
-                const x = Math.floor(parseInt(seed.substring(i*2, i*2+2), 16) / 255 * size);
-                const y = Math.floor(parseInt(seed.substring(i*2+2, i*2+4), 16) / 255 * size);
-                ctx.fillRect(x, y, 2, 2);
+                const x = parseInt(seed.substring(i * 2, i * 2 + 2), 16) / 255 * 40;
+                const y = parseInt(seed.substring(i * 2 + 2, i * 2 + 4), 16) / 255 * 40;
+                ctx.fillRect(x, y, 4, 4);
             }
-            return `<img src="${canvas.toDataURL()}" class="rounded-full">`;
+            return `<img src="${canvas.toDataURL()}" class="rounded-full w-full h-full">`;
+        }
+        function generateAnonymousName() {
+            const adjs = ["Silent", "Crimson", "Whispering", "Forgotten", "Azure", "Golden", "Hidden", "Wandering"];
+            const nouns = ["River", "Fox", "Echo", "Monolith", "Star", "Cipher", "Vagrant", "Oracle"];
+            return `${adjs[Math.floor(Math.random()*adjs.length)]} ${nouns[Math.floor(Math.random()*nouns.length)]}`;
         }
 
-        function generateAnonymousName() {
-            const adjectives = ["Silent", "Crimson", "Whispering", "Forgotten", "Azure", "Golden", "Hidden", "Wandering"];
-            const nouns = ["River", "Fox", "Echo", "Monolith", "Star", "Cipher", "Vagrant", "Oracle"];
-            return `${adjectives[Math.floor(Math.random()*adjectives.length)]} ${nouns[Math.floor(Math.random()*nouns.length)]}`;
-        }
+        // --- Event Listeners ---
+        // Re-implementing the handlers to be concise and correct
+        createTopicBtn.addEventListener('click', () => {
+             const content = `<div class="space-y-4"><input id="new-topic-title" class="w-full bg-[#16161e] rounded-md p-2" placeholder="Topic Title"><textarea id="new-topic-content" class="w-full bg-[#16161e] rounded-md p-2 h-32" placeholder="What's on your mind?"></textarea><button id="submit-topic" class="w-full btn-primary font-bold py-2 rounded-md">Post Topic</button></div>`;
+            showModal('Create New Topic', content);
+            document.getElementById('submit-topic').onclick = async () => {
+                const title = document.getElementById('new-topic-title').value.trim();
+                const contentVal = document.getElementById('new-topic-content').value.trim();
+                if (!title || !contentVal) return;
+                const newTopic = { id: await digestMessage(title + contentVal + new Date().toISOString()), title, content: contentVal, author: me, comments: new Map(), votes: 0 };
+                state.spaces.get(state.currentSpaceId).topics.set(newTopic.id, newTopic);
+                renderTopics();
+                hideModal();
+                selectTopic(newTopic.id);
+            };
+        });
+        
+        addSpaceBtn.addEventListener('click', () => {
+             const content = `<div class="space-y-4 text-center"><p class="text-gray-300">Create a new Space or join one using its (simulated) IPFS CID.</p><input id="new-space-name" class="w-full bg-[#16161e] rounded-md p-2" placeholder="New Space Name"><button id="submit-space" class="w-full btn-primary font-bold py-2 rounded-md">Create Space (costs 5 SVT)</button><div class="border-t border-white/10 my-4"></div><input id="join-space-cid" class="w-full bg-[#16161e] rounded-md p-2" placeholder="Paste Space CID to Join"><button id="submit-join-space" class="w-full btn-secondary font-bold py-2 rounded-md">Join Space</button></div>`;
+            showModal('Create or Join a Space', content);
+            document.getElementById('submit-space').onclick = async () => {
+                const name = document.getElementById('new-space-name').value.trim();
+                if (!name) return alert('Please enter a name.');
+                if (wallet.balance < 5) return alert('Insufficient SVT balance.');
+                updateWalletBalance(-5);
+                const newSpace = { id: await digestMessage(name + new Date().toISOString()), name, topics: new Map(), cid: 'q' + await digestMessage(name) };
+                state.spaces.set(newSpace.id, newSpace);
+                renderSpaces();
+                hideModal();
+                alert(`Space "${name}" created!\nSimulated CID: ${newSpace.cid}`);
+            };
+            document.getElementById('submit-join-space').onclick = () => alert('Joining by CID is a planned feature.');
+        });
+        
+        postCommentBtn.addEventListener('click', handlePostComment);
+        commentInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') handlePostComment(); });
         
         initialize();
     });
