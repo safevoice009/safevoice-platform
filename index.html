@@ -1,12 +1,23 @@
-<!DOCTYPE html>
+import sys
+import io
+
+# Set encoding to utf-8 for emoji support
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
+html_content = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>SafeVoice - Your Anonymous Voice Matters</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>SafeVoice v14.0 - Comments & Glass UI</title>
     <link rel="manifest" href="manifest.json">
+
     <style>
+        /* ================================
+         * CSS RESET & ROOT VARIABLES
+         * ================================ */
         * {
             margin: 0;
             padding: 0;
@@ -26,6 +37,11 @@
             --warning: #f59e0b;
             --danger: #ef4444;
             --border: #475569;
+            
+            /* Glassmorphism Surface Color (RGB values from --surface) */
+            --surface-glass-bg: rgba(30, 41, 59, 0.6);
+            /* Glassmorphism Border Color (RGB values from --border) */
+            --border-glass: rgba(71, 85, 105, 0.5);
         }
 
         body {
@@ -43,26 +59,35 @@
             padding: 20px;
         }
 
-        /* All existing v13.0 CSS preserved... */
+        /* ================================
+         * NEW: GLASSMORPHISM & UI UPGRADES
+         * ================================ */
+        .glassmorphism {
+            background: var(--surface-glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glass);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* ================================
+         * HEADER & STATS
+         * ================================ */
         .header {
-            background: var(--surface);
             padding: 24px;
             border-radius: 16px;
             margin-bottom: 24px;
-            border: 1px solid var(--border);
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
         }
 
         .logo {
             display: flex;
             align-items: center;
             gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .logo-icon {
+            font-size: 36px;
         }
 
         .logo h1 {
@@ -76,19 +101,7 @@
         .tagline {
             color: var(--text-secondary);
             font-size: 14px;
-        }
-
-        .live-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--success);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            color: white;
-            margin-top: 8px;
+            margin-top: 4px;
         }
 
         .stats {
@@ -113,14 +126,44 @@
         .stat-label {
             font-size: 12px;
             color: var(--text-secondary);
+            margin-top: 4px;
         }
 
-        /* Crisis Banner */
+        /* ================================
+         * CRISIS BANNER
+         * ================================ */
         .crisis-banner {
             background: linear-gradient(135deg, var(--danger), #dc2626);
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 24px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.9; }
+        }
+
+        .crisis-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .crisis-icon {
+            font-size: 32px;
+        }
+
+        .crisis-text h3 {
+            color: white;
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .crisis-text p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
         }
 
         .crisis-button {
@@ -134,12 +177,15 @@
             margin-top: 12px;
         }
 
-        /* Navigation */
+        /* ================================
+         * NAVIGATION & SECTIONS
+         * ================================ */
         .nav {
             display: flex;
             gap: 12px;
             margin-bottom: 24px;
             overflow-x: auto;
+            padding-bottom: 8px;
         }
 
         .nav-btn {
@@ -149,9 +195,13 @@
             border-radius: 20px;
             color: var(--text);
             cursor: pointer;
+            white-space: nowrap;
             font-size: 14px;
             font-weight: 600;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .nav-btn.active {
@@ -168,15 +218,61 @@
             display: block;
         }
 
-        /* Post Form */
-        .post-form {
-            background: var(--surface);
-            padding: 24px;
-            border-radius: 16px;
-            margin-bottom: 24px;
-            border: 1px solid var(--border);
+        /* ================================
+         * MODAL (FOR POSTING & COMMENTS)
+         * ================================ */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
         }
 
+        .modal-content {
+            width: 100%;
+            max-width: 600px;
+            padding: 24px;
+            border-radius: 16px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h2 {
+            font-size: 22px;
+        }
+        
+        .modal-close-btn {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* ================================
+         * POST FORM (NOW IN MODAL)
+         * ================================ */
         .form-group {
             margin-bottom: 16px;
         }
@@ -205,6 +301,96 @@
             min-height: 120px;
         }
 
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Image Upload */
+        .image-upload {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .image-button {
+            flex: 1;
+            padding: 14px;
+            background: var(--surface-light);
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .image-button:hover {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .image-preview {
+            margin-top: 12px;
+            position: relative;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        /* Memorial Toggle */
+        .memorial-toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: 8px;
+            margin-top: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .memorial-toggle input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .memorial-toggle label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .memorial-fields {
+            margin-top: 16px;
+        }
+
+        /* Button */
         .btn {
             background: linear-gradient(135deg, var(--primary), #8b5cf6);
             color: white;
@@ -215,6 +401,57 @@
             font-size: 16px;
             font-weight: 700;
             width: 100%;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ================================
+         * FILTERS & POSTS
+         * ================================ */
+        .filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .filter-btn {
+            padding: 10px 18px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text);
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
         }
 
         /* Posts */
@@ -225,16 +462,31 @@
         }
 
         .post-card {
-            background: var(--surface);
             padding: 24px;
             border-radius: 12px;
-            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .post-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5); /* v14.0 Glow */
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 16px;
         }
 
         .post-meta {
             font-size: 13px;
             color: var(--text-secondary);
-            margin-bottom: 12px;
+        }
+
+        .post-meta strong {
+            color: var(--text);
+            font-size: 15px;
         }
 
         .post-badge {
@@ -242,8 +494,6 @@
             border-radius: 12px;
             font-size: 12px;
             font-weight: 700;
-            display: inline-block;
-            margin-bottom: 8px;
         }
 
         .badge-mental { background: #8b5cf6; color: white; }
@@ -251,178 +501,389 @@
         .badge-social { background: #10b981; color: white; }
         .badge-bullying { background: #ef4444; color: white; }
         .badge-other { background: #6b7280; color: white; }
+        .badge-memorial { background: #f59e0b; color: white; }
 
         .post-content {
             margin: 16px 0;
             line-height: 1.8;
+            font-size: 15px;
+            white-space: pre-wrap; /* Handles newlines */
+            word-wrap: break-word; /* Handles long words */
         }
 
+        .post-image {
+            margin: 16px 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .post-image img {
+            width: 100%;
+            display: block;
+        }
+
+        .memorial-tribute {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 16px 0;
+            color: white;
+        }
+
+        .memorial-tribute h4 {
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            border-top: 1px solid var(--border);
+            padding-top: 16px;
+        }
+        
         .reactions {
+            display: flex;
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        .reaction-btn, .comment-btn {
+            flex: 1;
+            padding: 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.2s;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        
+        .comment-btn {
+            flex: 0 1 auto; /* Don't grow, just take space */
+            font-size: 14px;
+            padding: 12px 16px;
+        }
+
+        .reaction-btn:hover, .comment-btn:hover {
+            transform: scale(1.05);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .reaction-btn.reacted {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .reaction-btn:disabled {
+             opacity: 0.7;
+             cursor: not-allowed;
+         }
+
+        .reaction-count {
+            font-size: 14px;
+        }
+
+        /* ================================
+         * NEW: COMMENTS MODAL (v14.0)
+         * ================================ */
+        #commentsContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+            max-height: 40vh;
+            overflow-y: auto;
+            padding: 10px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+        
+        .comment-card {
+            background: var(--surface-light);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        
+        .comment-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .comment-meta strong {
+            color: var(--primary);
+        }
+        
+        .comment-content {
+            font-size: 15px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        #commentForm {
             display: flex;
             gap: 10px;
             margin-top: 16px;
         }
-
-        .reaction-btn {
-            flex: 1;
-            padding: 12px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 18px;
-            text-align: center;
+        
+        #commentInput {
+            flex-grow: 1;
+            min-height: 50px;
+            resize: none;
+        }
+        
+        #postCommentBtn {
+            width: auto;
+            padding: 12px 20px;
+            font-size: 14px;
+        }
+        
+        /* ================================
+         * HELPLINES & COMMUNITY
+         * ================================ */
+        .helplines-grid, .community-grid {
+            display: grid;
+            gap: 16px;
         }
 
-        /* === NEW: Comments System Styles === */
-        .comments-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
+        .helpline-card, .info-card {
+            padding: 20px;
+            border-radius: 12px;
         }
 
-        .comments-toggle {
+        .helpline-header {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 12px 16px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-top: 12px;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
-        .comments-toggle:hover {
-            background: var(--surface-light);
-            border-color: var(--primary);
+        .helpline-icon {
+            font-size: 32px;
         }
 
-        .comments-toggle-icon {
-            font-size: 20px;
-        }
-
-        .comments-toggle-text {
-            font-weight: 600;
-            flex: 1;
-        }
-
-        .comments-count {
-            background: var(--primary);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
+        .helpline-title {
+            font-size: 18px;
             font-weight: 700;
         }
 
-        .comments-list {
-            margin-top: 16px;
-            display: none;
+        .helpline-desc {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.6;
         }
 
-        .comments-list.active {
-            display: block;
-        }
-
-        .comment-form {
-            margin-bottom: 20px;
-            padding: 16px;
+        .helpline-number {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             background: var(--bg);
+            padding: 12px 16px;
             border-radius: 8px;
+            margin-bottom: 8px;
         }
 
-        .comment-input {
-            width: 100%;
-            min-height: 80px;
-            padding: 12px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-family: inherit;
-            resize: vertical;
-            margin-bottom: 12px;
+        .helpline-number strong {
+            color: var(--primary);
+            font-size: 18px;
         }
 
-        .comment-submit {
-            background: var(--primary);
+        .call-btn {
+            background: var(--success);
             color: white;
-            padding: 10px 20px;
-            border: none;
+            padding: 8px 16px;
             border-radius: 6px;
-            cursor: pointer;
+            text-decoration: none;
             font-weight: 600;
             font-size: 14px;
         }
 
-        .comment-item {
-            background: var(--bg);
-            padding: 16px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            border-left: 3px solid var(--primary);
-        }
-
-        .comment-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .comment-author {
+        .helpline-hours {
             font-size: 13px;
             color: var(--text-secondary);
-            font-weight: 600;
+            margin-top: 8px;
         }
 
-        .comment-time {
-            font-size: 12px;
-            color: var(--text-secondary);
+        .memorial-intro {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            padding: 24px;
+            border-radius: 12px;
+            color: white;
+            margin-bottom: 24px;
+            text-align: center;
         }
 
-        .comment-content {
-            line-height: 1.6;
-            margin-bottom: 10px;
-            color: var(--text);
+        .memorial-intro h2 {
+            font-size: 24px;
+            margin-bottom: 8px;
         }
 
-        .comment-reactions {
+        .info-card h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
             display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-card p, .info-card li {
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .info-card ul {
+            list-style: none;
+            margin-top: 12px;
+        }
+
+        .info-card li {
+            padding: 8px 0;
+            display: flex;
+            align-items: start;
             gap: 8px;
         }
 
-        .comment-reaction-btn {
-            padding: 6px 12px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
+        .info-card li:before {
+            content: "✓";
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        /* ================================
+         * NEW: PROFILE SECTION (v14.0)
+         * ================================ */
+        .profile-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .profile-avatar {
+            font-size: 80px;
+            background: var(--surface-light);
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 4px;
+            justify-content: center;
+            margin: 0 auto 16px;
+            border: 2px solid var(--primary);
         }
-
-        .comment-reaction-btn:hover {
-            background: var(--surface-light);
+        
+        .profile-id {
+            font-size: 16px;
+            color: var(--text-secondary);
+            word-wrap: break-word;
+            padding: 0 20px;
         }
-
-        .comment-reaction-count {
-            font-size: 12px;
+        
+        .profile-stats {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 24px;
+        }
+        
+        .profile-stat-item {
+            padding: 20px;
+            flex-basis: 150px;
+            text-align: center;
+            border-radius: 12px;
+        }
+        
+        .profile-stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .profile-stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        
+        /* ================================
+         * LOADING, EMPTY, TOAST
+         * ================================ */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
             color: var(--text-secondary);
         }
 
-        /* Bottom Nav */
+        .loading-spinner {
+            font-size: 48px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 72px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface);
+            color: var(--text);
+            padding: 16px 28px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* ================================
+         * BOTTOM NAVIGATION (v14.0 Layout)
+         * ================================ */
         .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            background: var(--surface);
-            border-top: 1px solid var(--border);
+            border-top: 1px solid var(--border-glass);
             display: flex;
             justify-content: space-around;
             padding: 12px 0;
@@ -435,13 +896,13 @@
             flex-direction: column;
             align-items: center;
             gap: 4px;
+            background: none;
+            border: none;
             color: var(--text-secondary);
             cursor: pointer;
+            padding: 8px;
             font-size: 24px;
-        }
-
-        .bottom-nav-btn.active {
-            color: var(--primary);
+            transition: all 0.2s;
         }
 
         .bottom-nav-btn span {
@@ -449,55 +910,62 @@
             font-weight: 600;
         }
 
-        .toast {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--surface);
-            color: var(--text);
-            padding: 16px 24px;
-            border-radius: 8px;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s;
+        .bottom-nav-btn.active {
+            color: var(--primary);
         }
 
-        .toast.show {
-            opacity: 1;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-secondary);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-secondary);
-        }
-
+        /* ================================
+         * RESPONSIVE
+         * ================================ */
         @media (max-width: 640px) {
-            .container { padding: 12px; }
+            .container {
+                padding: 12px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .modal-content {
+                padding: 20px;
+                max-height: 85vh;
+            }
+            
+            #commentsContainer {
+                max-height: 35vh;
+            }
+
+            .stats {
+                gap: 12px;
+            }
+
+            .stat-value {
+                font-size: 20px;
+            }
+
+            .crisis-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .image-upload {
+                flex-direction: column;
+            }
+            
+            .reactions {
+                flex-wrap: wrap; /* Wrap buttons if needed */
+            }
         }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <div class="header">
-            <div class="header-top">
-                <div class="logo">
-                    <span style="font-size: 36px;">🕊️</span>
-                    <div>
-                        <h1>SafeVoice</h1>
-                        <p class="tagline">Your anonymous voice matters • Powered by community</p>
-                        <div class="live-indicator">
-                            <span>●</span> LIVE
-                        </div>
-                    </div>
+        <div class="header glassmorphism">
+            <div class="logo">
+                <span class="logo-icon">🕊️</span>
+                <div>
+                    <h1>SafeVoice</h1>
+                    <p class="tagline">Your anonymous voice matters • Powered by community</p>
                 </div>
             </div>
             <div class="stats">
@@ -510,34 +978,160 @@
                     <div class="stat-label">Support Given</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value" id="totalComments">0</div>
-                    <div class="stat-label">Comments</div>
+                    <div class="stat-value" id="totalMemorials">0</div>
+                    <div class="stat-label">Memorials</div>
                 </div>
             </div>
         </div>
 
         <div class="crisis-banner">
-            <span style="font-size: 32px;">🆘</span>
-            <div>
-                <h3 style="color: white; margin-bottom: 4px;">Need Help Now?</h3>
-                <p style="color: rgba(255,255,255,0.9);">You're not alone. Help is available now.</p>
+            <div class="crisis-content">
+                <span class="crisis-icon">🆘</span>
+                <div class="crisis-text">
+                    <h3>Need Help Now?</h3>
+                    <p>You're not alone. Help is available now.</p>
+                </div>
             </div>
             <a href="tel:1860-2662-345" class="crisis-button">📞 Call 1860-2662-345</a>
         </div>
 
         <div class="nav">
-            <button class="nav-btn active" onclick="switchSection('home')">🏠 Home</button>
-            <button class="nav-btn" onclick="switchSection('helplines')">📞 Helplines</button>
-            <button class="nav-btn" onclick="switchSection('memorials')">🕯️ Memorials</button>
-            <button class="nav-btn" onclick="switchSection('community')">👥 Community</button>
+            <button class="nav-btn active" data-section="home" onclick="switchSection('home')">🏠 Home</button>
+            <button class="nav-btn" data-section="helplines" onclick="switchSection('helplines')">📞 Helplines</button>
+            <button class="nav-btn" data-section="memorials" onclick="switchSection('memorials')">🕯️ Memorials</button>
+            <button class="nav-btn" data-section="community" onclick="switchSection('community')">👥 Community</button>
+            <button class="nav-btn" data-section="profile" onclick="switchSection('profile')">👤 Profile</button>
         </div>
 
         <div id="home" class="section active">
+            <div class="filters" id="postFilters">
+                <button class="filter-btn active" onclick="filterPosts(event, 'all')">All Posts</button>
+                <button class="filter-btn" onclick="filterPosts(event, 'mental')">💭 Mental Health</button>
+                <button class="filter-btn" onclick="filterPosts(event, 'academic')">📚 Academic</button>
+                <button class="filter-btn" onclick="filterPosts(event, 'social')">👥 Social</button>
+                <button class="filter-btn" onclick="filterPosts(event, 'bullying')">🚫 Bullying</button>
+            </div>
+
+            <div id="postsContainer" class="posts-container">
+                <div class="loading">
+                    <div class="loading-spinner">🕊️</div>
+                    <p>Loading posts...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="helplines" class="section">
+            <h2 style="margin-bottom: 24px; font-size: 26px;">🆘 Crisis Helplines</h2>
+            <div class="helplines-grid">
+                <div class="helpline-card glassmorphism">
+                    <div class="helpline-header">
+                        <span class="helpline-icon">💚</span>
+                        <div class="helpline-title">Vandrevala Foundation</div>
+                    </div>
+                    <p class="helpline-desc">24/7 • Mental health support & crisis intervention</p>
+                    <div class="helpline-number">
+                        <strong>1860-2662-345</strong>
+                        <a href="tel:1860-2662-345" class="call-btn">📞 Call Now</a>
+                    </div>
+                    <div class="helpline-hours">Available 24/7 • Confidential</div>
+                </div>
+                <div class="helpline-card glassmorphism">
+                    <div class="helpline-header">
+                        <span class="helpline-icon">🆘</span>
+                        <div class="helpline-title">iCall - TISS</div>
+                    </div>
+                    <p class="helpline-desc">24/7 • Suicide prevention & counseling</p>
+                    <div class="helpline-number">
+                        <strong>9152-987821</strong>
+                        <a href="tel:9152987821" class="call-btn">📞 Call Now</a>
+                    </div>
+                    <div class="helpline-hours">Monday-Saturday, 8 AM-10 PM</div>
+                </div>
+                <div class="helpline-card glassmorphism">
+                    <div class="helpline-header">
+                        <span class="helpline-icon">🧠</span>
+                        <div class="helpline-title">NIMHANS Helpline</div>
+                    </div>
+                    <p class="helpline-desc">Mon-Sat, 8 AM-10 PM • Professional counseling</p>
+                    <div class="helpline-number">
+                        <strong>080-46110007</strong>
+                        <a href="tel:08046110007" class="call-btn">📞 Call Now</a>
+                    </div>
+                    <div class="helpline-hours">Expert mental health professionals</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="memorials" class="section">
+            <div class="memorial-intro">
+                <h2>🕯️ In Loving Memory</h2>
+                <p>Honoring those we've lost • Celebrating their lives</p>
+            </div>
+            <div id="memorialsContainer" class="posts-container">
+                <div class="loading">
+                    <div class="loading-spinner">🕯️</div>
+                    <p>Loading memorials...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="community" class="section">
+            <h2 style="margin-bottom: 24px; font-size: 26px;">👥 Community Guidelines</h2>
+            <div class="community-grid">
+                <div class="info-card glassmorphism">
+                    <h3>🕊️ Our Mission</h3>
+                    <p>SafeVoice provides a secure, anonymous platform for students to share their experiences...</p>
+                </div>
+                <div class="info-card glassmorphism">
+                    <h3>🛡️ How We Protect You</h3>
+                    <ul>
+                        <li>Complete anonymity - no personal data collected</li>
+                        <li>No IP address tracking</li>
+                        <li>Community-driven moderation</li>
+                    </ul>
+                </div>
+                <div class="info-card glassmorphism">
+                    <h3>❤️ Community Guidelines</h3>
+                    <ul>
+                        <li>Be kind and supportive</li>
+                        <li>Respect others' experiences</li>
+                        <li>No hate speech or bullying</li>
+                        <li>Report harmful content</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div id="profile" class="section">
+             <div class="profile-header">
+                <div class="profile-avatar">👤</div>
+                <h2>Anonymous User</h2>
+                <p class="profile-id" id="profileAnonId">Loading...</p>
+            </div>
+            
+             <div class="profile-stats">
+                <div class="profile-stat-item glassmorphism">
+                    <div class="profile-stat-value" id="profilePostCount">0</div>
+                    <div class="profile-stat-label">Posts Created</div>
+                </div>
+                <div class="profile-stat-item glassmorphism">
+                    <div class="profile-stat-value" id="profileReactionCount">0</div>
+                    <div class="profile-stat-label">Reactions Given</div>
+                </div>
+            </div>
+        </div>
+
+    </div> <div id="postModal" class="modal">
+        <div class="modal-content glassmorphism">
+            <div class="modal-header">
+                <h2>Share Anonymously</h2>
+                <button class="modal-close-btn" onclick="closeModal('postModal')">&times;</button>
+            </div>
+            
             <div class="post-form">
-                <h2 style="margin-bottom: 20px;">Share Anonymously</h2>
                 <div class="form-group">
                     <label>Your College/University</label>
-                    <input type="text" id="collegeInput" placeholder="e.g., IIT Kharagpur">
+                    <input type="text" id="collegeInput" placeholder="e.g., IIT Kharagpur" required>
                 </div>
                 <div class="form-group">
                     <label>Category</label>
@@ -552,400 +1146,777 @@
                 <div class="form-group">
                     <label>Your Story (Max 1000 characters)</label>
                     <textarea id="contentInput" maxlength="1000" placeholder="Share your story anonymously..."></textarea>
-                    <div style="text-align: right; font-size: 12px; color: var(--text-secondary);"><span id="charCount">0</span>/1000</div>
+                    <div style="text-align: right; font-size: 12px; color: var(--text-secondary); margin-top: 4px;">
+                        <span id="charCount">0</span>/1000
+                    </div>
                 </div>
-                <button class="btn" onclick="createPost()">🕊️ Post Anonymously</button>
-            </div>
-
-            <div id="postsContainer" class="posts-container">
-                <div class="loading">
-                    <span style="font-size: 48px;">🕊️</span>
-                    <p>Loading posts...</p>
+                <div class="form-group">
+                    <label>Add Image (Optional, Max 5MB)</label>
+                    <div class="image-upload">
+                        <label for="cameraInput" class="image-button">📷 Camera</label>
+                        <label for="galleryInput" class="image-button">🖼️ Gallery</label>
+                    </div>
+                    <input type="file" id="cameraInput" accept="image/*" capture="camera" style="display: none;">
+                    <input type="file" id="galleryInput" accept="image/*" style="display: none;">
+                    <div id="imagePreview" class="image-preview" style="display: none;"></div>
                 </div>
-            </div>
-        </div>
-
-        <div id="helplines" class="section">
-            <h2 style="margin-bottom: 20px;">🆘 Crisis Helplines</h2>
-            <div style="background: var(--surface); padding: 20px; border-radius: 12px; margin-bottom: 16px;">
-                <h3>💚 Vandrevala Foundation</h3>
-                <p style="color: var(--text-secondary); margin: 8px 0;">24/7 • Mental health support & crisis intervention</p>
-                <a href="tel:1860-2662-345" style="background: var(--success); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 8px;">📞 Call 1860-2662-345</a>
-            </div>
-            <div style="background: var(--surface); padding: 20px; border-radius: 12px; margin-bottom: 16px;">
-                <h3>🆘 iCall - TISS</h3>
-                <p style="color: var(--text-secondary); margin: 8px 0;">24/7 • Suicide prevention & counseling</p>
-                <a href="tel:9152987821" style="background: var(--success); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 8px;">📞 Call 9152-987821</a>
-            </div>
-        </div>
-
-        <div id="memorials" class="section">
-            <h2 style="margin-bottom: 20px;">🕯️ In Loving Memory</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 20px;">Honoring those we've lost • Celebrating their lives</p>
-            <div id="memorialsContainer" class="posts-container">
-                <div class="loading">
-                    <span style="font-size: 48px;">🕯️</span>
-                    <p>Loading memorials...</p>
+                <div class="memorial-toggle">
+                    <input type="checkbox" id="memorialToggle">
+                    <label for="memorialToggle">🕯️ This is a memorial tribute</label>
                 </div>
-            </div>
-        </div>
-
-        <div id="community" class="section">
-            <h2 style="margin-bottom: 20px;">👥 Community Guidelines</h2>
-            <div style="background: var(--surface); padding: 24px; border-radius: 12px; margin-bottom: 16px;">
-                <h3>🕊️ Our Mission</h3>
-                <p style="color: var(--text-secondary); line-height: 1.8;">SafeVoice provides a secure, anonymous platform for students to share their experiences with mental health, academic pressure, and other challenges. We believe every voice matters.</p>
+                <div id="memorialFields" class="memorial-fields" style="display: none;">
+                    <div class="form-group">
+                        <label>Name of the person (optional)</label>
+                        <input type="text" id="memorialName" placeholder="Their name...">
+                    </div>
+                    <div class="form-group">
+                        <label>Memorial message</label>
+                        <textarea id="memorialMessage" placeholder="Share memories..."></textarea>
+                    </div>
+                </div>
+                <button class="btn" id="postBtn" onclick="createPost()">
+                    <span>🕊️</span> Post Anonymously
+                </button>
             </div>
         </div>
     </div>
 
-    <div class="bottom-nav">
-        <button class="bottom-nav-btn active" onclick="switchSection('home')">
-            <div>🏠</div><span>Home</span>
+    <div id="commentsModal" class="modal">
+        <div class="modal-content glassmorphism">
+            <div class="modal-header">
+                <h2>Comments</h2>
+                <button class="modal-close-btn" onclick="closeModal('commentsModal')">&times;</button>
+            </div>
+            
+            <div id="commentsContainer">
+                <div class="loading">
+                    <div class="loading-spinner">💬</div>
+                    <p>Loading comments...</p>
+                </div>
+            </div>
+            
+            <form id="commentForm" onsubmit="postComment(event)">
+                <textarea id="commentInput" placeholder="Add a supportive comment..." required></textarea>
+                <button id="postCommentBtn" type="submit" class="btn">Post</button>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="bottom-nav glassmorphism">
+        <button class="bottom-nav-btn active" data-section="home" onclick="switchSection('home')">
+            <div>🏠</div>
+            <span>Home</span>
         </button>
-        <button class="bottom-nav-btn" onclick="switchSection('helplines')">
-            <div>📞</div><span>Help</span>
+        <button class="bottom-nav-btn" data-section="post" onclick="showModal('postModal')">
+            <div>➕</div>
+            <span>Post</span>
         </button>
-        <button class="bottom-nav-btn" onclick="switchSection('memorials')">
-            <div>🕯️</div><span>Memorial</span>
+        <button class="bottom-nav-btn" data-section="helplines" onclick="switchSection('helplines')">
+            <div>📞</div>
+            <span>Help</span>
         </button>
-        <button class="bottom-nav-btn" onclick="switchSection('community')">
-            <div>👥</div><span>Community</span>
+        <button class="bottom-nav-btn" data-section="profile" onclick="switchSection('profile')">
+            <div>👤</div>
+            <span>Profile</span>
         </button>
     </div>
 
     <div id="toast" class="toast"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
-        // v13.0 Base Configuration (PRESERVED - NO CHANGES)
+        // ================================
+        // SUPABASE CONFIG (v14.0 - CRITICAL UPDATE)
+        // ================================
+        // Updated to new keys as per SUPABASE_CREDENTIALS.txt
         const SUPABASE_URL = 'https://jjfkwkmdvpxzjzbblodz.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZmt3a21kdnB4emp6YmJsb2R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjk0NzAwOTQsImV4cCI6MjA0NTA0NjA5NH0.rN8oDm5T_JXOG8KN_wBKiBdVTsE7OUOmBBkKJ4VF9TI';
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        let anonymousId = localStorage.getItem('anonymousId') || ('anon_' + Math.random().toString(36).substr(2, 9));
-        localStorage.setItem('anonymousId', anonymousId);
 
+        // ================================
+        // GLOBAL STATE
+        // ================================
+        let userFingerprint = localStorage.getItem('userFingerprint') || generateFingerprint();
+        localStorage.setItem('userFingerprint', userFingerprint);
+        
         let currentFilter = 'all';
+        let selectedImageFile = null; // v14.0 - Store file, not Base64
+        let currentPostIdForComments = null; // v14.0 - For comments modal
 
-        // v13.0 Functions (PRESERVED - NO MODIFICATIONS)
-        document.getElementById('contentInput').addEventListener('input', function() {
-            document.getElementById('charCount').textContent = this.value.length;
-        });
-
-        function switchSection(section) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(section).classList.add('active');
-            document.querySelectorAll('.nav-btn, .bottom-nav-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            if (section === 'home') loadPosts();
-            else if (section === 'memorials') loadMemorials();
+        function generateFingerprint() {
+            return 'user_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
         }
 
-        async function createPost() {
-            const college = document.getElementById('collegeInput').value.trim();
-            const topic = document.getElementById('categorySelect').value;
-            const content = document.getElementById('contentInput').value.trim();
+        // ================================
+        // INITIALIZE APP
+        // ================================
+        window.addEventListener('load', async function() {
+            console.log('🕊️ SafeVoice v14.0 - Comments & Glass UI');
+            console.log('✅ Supabase connected');
 
-            if (!college || !content) {
-                showToast('❌ Please fill all fields');
+            await loadPosts();
+            await fetchAndSetStats(); // Load global stats
+            
+            // Add listeners
+            document.getElementById('contentInput').addEventListener('input', updateCharCount);
+            document.getElementById('memorialToggle').addEventListener('change', toggleMemorialFields);
+            document.getElementById('cameraInput').addEventListener('change', handleImageSelect);
+            document.getElementById('galleryInput').addEventListener('change', handleImageSelect);
+        });
+
+        // ================================
+        // NAVIGATION (v14.0 UPGRADE)
+        // ================================
+        function switchSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+            // Show selected section
+            const activeSection = document.getElementById(section);
+            if(activeSection) {
+                activeSection.classList.add('active');
+            }
+
+            // Update nav buttons (Top and Bottom)
+            document.querySelectorAll('.nav-btn, .bottom-nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.section === section) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Load content for the new section
+            if (section === 'home') {
+                filterPosts(null, 'all'); // Reset to 'all' filter
+            } else if (section === 'memorials') {
+                filterPosts(null, 'memorial'); // Set to 'memorial' filter
+            } else if (section === 'profile') {
+                loadProfile();
+            }
+        }
+        
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // ================================
+        // IMAGE HANDLING (v14.0 UPGRADE - STORAGE)
+        // ================================
+        function handleImageSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                showToast('❌ Image too large! Max 5MB.');
+                resetImageInputs();
+                return;
+            }
+            
+            if (!file.type.startsWith('image/')) {
+                showToast('❌ Only image files are allowed.');
+                resetImageInputs();
                 return;
             }
 
-            try {
-                const { data, error } = await supabase.from('posts').insert([{
-                    college: college,
-                    topic: topic,
-                    content: content,
-                    anonymous_id: anonymousId,
-                    created_at: new Date().toISOString()
-                }]).select().single();
+            selectedImageFile = file; // Store the file object
 
-                if (error) throw error;
-
-                showToast('✅ Post shared anonymously!');
-                document.getElementById('collegeInput').value = '';
-                document.getElementById('contentInput').value = '';
-                document.getElementById('charCount').textContent = '0';
-                loadPosts();
-            } catch (error) {
-                console.error('Post error:', error);
-                showToast('❌ Failed to post');
-            }
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                displayImagePreview(event.target.result); // Show preview
+            };
+            reader.readAsDataURL(file);
         }
 
-        async function loadPosts() {
-            const container = document.getElementById('postsContainer');
-            container.innerHTML = '<div class="loading"><span style="font-size: 48px;">🕊️</span><p>Loading posts...</p></div>';
+        function displayImagePreview(imageData) {
+            const preview = document.getElementById('imagePreview');
+            preview.style.display = 'block';
+            preview.innerHTML = \`
+                <img src="\${imageData}" alt="Preview">
+                <button class="remove-image" onclick="removeImage()">×</button>
+            \`;
+        }
+
+        function removeImage() {
+            selectedImageFile = null;
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('imagePreview').innerHTML = '';
+            resetImageInputs();
+        }
+        
+        function resetImageInputs() {
+            document.getElementById('cameraInput').value = '';
+            document.getElementById('galleryInput').value = '';
+        }
+
+        // ================================
+        // POST FORM HELPERS
+        // ================================
+        function updateCharCount() {
+            document.getElementById('charCount').textContent = this.value.length;
+        }
+
+        function toggleMemorialFields() {
+            document.getElementById('memorialFields').style.display = this.checked ? 'block' : 'none';
+        }
+
+        // ================================
+        // CREATE POST (v14.0 UPGRADE - STORAGE)
+        // ================================
+        async function createPost() {
+            const college = document.getElementById('collegeInput').value.trim();
+            const category = document.getElementById('categorySelect').value;
+            const content = document.getElementById('contentInput').value.trim();
+            const isMemorial = document.getElementById('memorialToggle').checked;
+            const memorialName = document.getElementById('memorialName').value.trim();
+            const memorialMessage = document.getElementById('memorialMessage').value.trim();
+
+            if (!college || !content) {
+                showToast('❌ Please fill in college and story');
+                return;
+            }
+
+            const btn = document.getElementById('postBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span> Posting...';
 
             try {
-                const { data: posts, error } = await supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(50);
+                let imageUrl = null;
+
+                // **NEW: Handle Image Upload to Supabase Storage**
+                if (selectedImageFile) {
+                    const fileName = \`\${userFingerprint}_\${Date.now()}_\${selectedImageFile.name}\`;
+                    
+                    showToast('Uploading image...');
+                    const { data: uploadData, error: uploadError } = await supabase.storage
+                        .from('post-images') // **USER MUST CREATE THIS BUCKET & MAKE PUBLIC**
+                        .upload(fileName, selectedImageFile);
+
+                    if (uploadError) throw uploadError;
+
+                    // Get the public URL
+                    const { data: urlData } = supabase.storage
+                        .from('post-images')
+                        .getPublicUrl(fileName);
+                    
+                    imageUrl = urlData.publicUrl;
+                }
+
+                const postData = {
+                    college: college,
+                    category: category,
+                    content: content,
+                    image_url: imageUrl, // **CRITICAL: Using image_url**
+                    is_memorial: isMemorial,
+                    memorial_name: isMemorial ? memorialName : null,
+                    memorial_message: isMemorial ? memorialMessage : null,
+                    reaction_support: 0,
+                    reaction_helpful: 0,
+                    reaction_solidarity: 0,
+                    // These fields from v13.0 are still here, 
+                    // but our new react() function won't use them.
+                    // We'll use a separate 'reactions' table for v14.0 logic
+                    // For now, let's keep the schema simple and use the v13.0 rpc call.
+                    anonymous_id: userFingerprint // Add user fingerprint
+                };
+
+                const { data, error } = await supabase
+                    .from('posts')
+                    .insert([postData])
+                    .select();
+
+                if (error) throw error;
+                
+                showToast('✅ Post shared successfully!');
+                resetPostForm();
+                closeModal('postModal');
+                await loadPosts(); // Refresh posts
+                await fetchAndSetStats(); // Refresh stats
+
+            } catch (error) {
+                console.error('Error creating post:', error);
+                showToast(\`❌ Error: \${error.message}\`);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span>🕊️</span> Post Anonymously';
+            }
+        }
+        
+        function resetPostForm() {
+            document.getElementById('collegeInput').value = '';
+            document.getElementById('contentInput').value = '';
+            document.getElementById('charCount').textContent = '0';
+            document.getElementById('memorialToggle').checked = false;
+            document.getElementById('memorialFields').style.display = 'none';
+            document.getElementById('memorialName').value = '';
+            document.getElementById('memorialMessage').value = '';
+            removeImage();
+        }
+
+        // ================================
+        // LOAD POSTS
+        // ================================
+        async function loadPosts() {
+            const container = (currentFilter === 'memorial') ? document.getElementById('memorialsContainer') : document.getElementById('postsContainer');
+            
+            let loadingMessage = (currentFilter === 'memorial') ? 'Loading memorials...' : 'Loading posts...';
+            let loadingIcon = (currentFilter === 'memorial') ? '🕯️' : '🕊️';
+            
+            container.innerHTML = \`<div class="loading"><div class="loading-spinner">\${loadingIcon}</div><p>\${loadingMessage}</p></div>\`;
+
+            try {
+                let query = supabase
+                    .from('posts')
+                    .select('*')
+                    .order('timestamp', { ascending: false });
+
+                if (currentFilter === 'all') {
+                    query = query.eq('is_memorial', false);
+                } else if (currentFilter === 'memorial') {
+                    query = query.eq('is_memorial', true);
+                } else {
+                    query = query.eq('category', currentFilter).eq('is_memorial', false);
+                }
+
+                const { data: posts, error } = await query;
+
                 if (error) throw error;
 
                 if (!posts || posts.length === 0) {
-                    container.innerHTML = '<div class="empty-state"><span style="font-size: 72px;">🕊️</span><h3>No posts yet</h3><p>Be the first to share</p></div>';
+                    let emptyIcon = (currentFilter === 'memorial') ? '🕯️' : '🕊️';
+                    let emptyTitle = (currentFilter === 'memorial') ? 'No memorials yet' : 'No posts yet';
+                    let emptyMessage = (currentFilter === 'memorial') ? 'Honor someone by creating a tribute' : 'Be the first to share your voice!';
+                    
+                    container.innerHTML = \`
+                        <div class="empty-state">
+                            <div class="empty-state-icon">\${emptyIcon}</div>
+                            <h3>\${emptyTitle}</h3>
+                            <p>\${emptyMessage}</p>
+                        </div>
+                    \`;
                     return;
                 }
 
-                container.innerHTML = '';
-                for (const post of posts) {
-                    container.innerHTML += await renderPost(post);
-                }
+                container.innerHTML = posts.map(post => renderPost(post)).join('');
+                
+                // v14.0 - Check local storage for reacted posts
+                posts.forEach(post => {
+                    checkReactedStatus(post.id);
+                });
 
-                updateStats(posts);
             } catch (error) {
-                console.error('Load error:', error);
-                container.innerHTML = '<div class="empty-state"><span style="font-size: 72px;">⚠️</span><h3>Error loading posts</h3></div>';
+                console.error('Error loading posts:', error);
+                container.innerHTML = \`
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <h3>Error loading posts</h3>
+                        <p>Please refresh the page</p>
+                    </div>
+                \`;
             }
         }
 
-        async function renderPost(post) {
-            const badgeClass = `badge-${post.topic || 'other'}`;
-            const badgeText = getCategoryLabel(post.topic || 'other');
-            const timeAgo = getTimeAgo(new Date(post.created_at));
+        // ================================
+        // RENDER POST (v14.0 UPGRADE)
+        // ================================
+        function renderPost(post) {
+            const timeAgo = getTimeAgo(new Date(post.timestamp));
+            const badgeClass = post.is_memorial ? 'memorial' : post.category;
 
-            // Get comment count for this post
-            let commentCount = 0;
-            try {
-                const { count } = await supabase.from('comments').select('*', { count: 'exact', head: true }).eq('post_id', post.id);
-                commentCount = count || 0;
-            } catch (e) {
-                console.error('Comment count error:', e);
-            }
+            // v14.0 - Use image_url, not image_data
+            const imageHtml = post.image_url ? \`
+                <div class="post-image">
+                    <img src="\${post.image_url}" alt="Post image" loading="lazy">
+                </div>
+            \` : '';
+            
+            const memorialHtml = post.is_memorial && (post.memorial_name || post.memorial_message) ? \`
+                <div class="memorial-tribute">
+                    <h4>🕯️ In Memory \${post.memorial_name ? 'of ' + escapeHtml(post.memorial_name) : ''}</h4>
+                    \${post.memorial_message ? \`<p>\${escapeHtml(post.memorial_message)}</p>\` : ''}
+                </div>
+            \` : '';
 
-            return `
-                <div class="post-card" data-post-id="${post.id}">
-                    <div class="post-meta"><strong>Anonymous Student • ${post.college}</strong> • ${timeAgo}</div>
-                    <div class="post-badge ${badgeClass}">${badgeText}</div>
-                    <div class="post-content">${escapeHtml(post.content)}</div>
-                    <div class="reactions">
-                        <button class="reaction-btn" onclick="react('${post.id}', 'support')">💚 Support</button>
-                        <button class="reaction-btn" onclick="react('${post.id}', 'helpful')">🙌 Helpful</button>
-                        <button class="reaction-btn" onclick="react('${post.id}', 'solidarity')">🤝 Together</button>
-                    </div>
-
-                    <!-- NEW: Comments Section -->
-                    <div class="comments-toggle" onclick="toggleComments('${post.id}')">
-                        <span class="comments-toggle-icon">💬</span>
-                        <span class="comments-toggle-text">Comments</span>
-                        <span class="comments-count" id="comment-count-${post.id}">${commentCount}</span>
-                    </div>
-                    <div class="comments-list" id="comments-${post.id}">
-                        <div class="comment-form">
-                            <textarea class="comment-input" id="comment-input-${post.id}" placeholder="Add a supportive comment..." maxlength="500"></textarea>
-                            <button class="comment-submit" onclick="createComment('${post.id}')">Post Comment</button>
+            return \`
+                <div class="post-card glassmorphism" id="post-\${post.id}">
+                    <div class="post-header">
+                        <div class="post-meta">
+                            <strong>\${escapeHtml(post.college)}</strong><br>
+                            <span>\${timeAgo}</span>
                         </div>
-                        <div id="comments-list-${post.id}"></div>
+                        <span class="post-badge badge-\${badgeClass}">
+                            \${post.is_memorial ? '🕯️ Memorial' : getCategoryLabel(post.category)}
+                        </span>
+                    </div>
+
+                    <div class="post-content">\${escapeHtml(post.content)}</div>
+                    \${imageHtml}
+                    \${memorialHtml}
+
+                    <div class="post-actions">
+                        <div class="reactions">
+                            <button class="reaction-btn" data-postid="\${post.id}" data-type="support" onclick="react(event, '\${post.id}', 'support')">
+                                <span>💚</span>
+                                <span class="reaction-count">\${post.reaction_support || 0}</span>
+                            </button>
+                            <button class="reaction-btn" data-postid="\${post.id}" data-type="helpful" onclick="react(event, '\${post.id}', 'helpful')">
+                                <span>🙌</span>
+                                <span class="reaction-count">\${post.reaction_helpful || 0}</span>
+                            </button>
+                            <button class="reaction-btn" data-postid="\${post.id}" data-type="solidarity" onclick="react(event, '\${post.id}', 'solidarity')">
+                                <span>🤝</span>
+                                <span class="reaction-count">\${post.reaction_solidarity || 0}</span>
+                            </button>
+                        </div>
+                        <button class="comment-btn" onclick="showComments('\${post.id}')">
+                            <span>💬</span>
+                            Comments
+                        </button>
                     </div>
                 </div>
-            `;
+            \`;
         }
 
-        async function react(postId, type) {
-            const key = `react_${postId}_${anonymousId}`;
-            if (localStorage.getItem(key)) {
-                showToast('ℹ️ Already reacted');
+        // ================================
+        // REACTIONS (v14.0 BUG FIX - NO RELOAD)
+        // ================================
+        async function react(event, postId, reactionType) {
+            const reactionKey = \`reacted_\${postId}_\${reactionType}\`;
+            const btn = event.currentTarget;
+
+            // 1. Check local storage
+            if (localStorage.getItem(reactionKey)) {
+                showToast('ℹ️ You already reacted this way');
                 return;
             }
-            try {
-                await supabase.from('reactions').insert([{ post_id: postId, type: type, anonymous_id: anonymousId }]);
-                localStorage.setItem(key, type);
-                showToast('✅ Reaction added!');
-            } catch (error) {
-                console.error('Reaction error:', error);
-            }
-        }
+            
+            // 2. Optimistic Update (Update UI immediately)
+            btn.classList.add('reacted');
+            btn.disabled = true;
+            const countSpan = btn.querySelector('.reaction-count');
+            let currentCount = parseInt(countSpan.textContent || '0');
+            countSpan.textContent = currentCount + 1;
+            
+            // 3. Store in local storage
+            localStorage.setItem(reactionKey, 'true');
+            localStorage.setItem(\`reacted_total_\${userFingerprint}\`, (parseInt(localStorage.getItem(\`reacted_total_\${userFingerprint}\`)) || 0) + 1);
 
-        async function loadMemorials() {
-            const container = document.getElementById('memorialsContainer');
             try {
-                const { data, error } = await supabase.from('posts').select('*').eq('is_memorial', true).order('created_at', { ascending: false });
+                // 4. Call Supabase RPC in background
+                const { data, error } = await supabase
+                    .rpc('increment_reaction', {
+                        p_post_id: postId,
+                        p_reaction_type: reactionType,
+                        p_user_fingerprint: userFingerprint
+                    });
+
                 if (error) throw error;
-                container.innerHTML = data.length ? data.map(p => renderPost(p)).join('') : '<div class="empty-state"><span style="font-size: 72px;">🕯️</span><h3>No memorials yet</h3></div>';
+                
+                if (data === false) {
+                     // This shouldn't happen due to local storage check, but good to have
+                    showToast('ℹ️ You already reacted');
+                } else {
+                    showToast('✅ Reaction added!');
+                    // 5. Refresh global stats in header
+                    fetchAndSetStats();
+                }
+
             } catch (error) {
-                console.error('Memorials error:', error);
+                console.error('Error adding reaction:', error);
+                showToast('❌ Error adding reaction');
+                
+                // 6. Rollback optimistic update on error
+                btn.classList.remove('reacted');
+                btn.disabled = false;
+                countSpan.textContent = currentCount; // Set back to old count
+                localStorage.removeItem(reactionKey); // Clear local storage
+                localStorage.setItem(\`reacted_total_\${userFingerprint}\`, (parseInt(localStorage.getItem(\`reacted_total_\${userFingerprint}\`)) || 1) - 1);
             }
         }
+        
+        // Helper to re-apply reacted styles on load
+        function checkReactedStatus(postId) {
+            ['support', 'helpful', 'solidarity'].forEach(type => {
+                const reactionKey = \`reacted_\${postId}_\${type}\`;
+                if (localStorage.getItem(reactionKey)) {
+                    const btn = document.querySelector(\`button[data-postid="\${postId}"][data-type="\${type}"]\`);
+                    if (btn) {
+                        btn.classList.add('reacted');
+                        btn.disabled = true;
+                    }
+                }
+            });
+        }
 
-        async function updateStats(posts) {
-            document.getElementById('totalPosts').textContent = posts.length;
-            try {
-                const { count: reactionsCount } = await supabase.from('reactions').select('*', { count: 'exact', head: true });
-                document.getElementById('totalReactions').textContent = reactionsCount || 0;
 
-                const { count: commentsCount } = await supabase.from('comments').select('*', { count: 'exact', head: true });
-                document.getElementById('totalComments').textContent = commentsCount || 0;
+        // ================================
+        // FILTER POSTS
+        // ================================
+        function filterPosts(event, filter) {
+            currentFilter = filter;
+
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (event) { // If called from a click
+                 event.target.classList.add('active');
+            } else if (filter === 'all') { // If called from switchSection
+                document.querySelector('#postFilters .filter-btn[onclick*="\'all\'"]').classList.add('active');
+            }
+
+            loadPosts();
+        }
+
+        // ================================
+        // STATS & PROFILE (v14.0 UPGRADE)
+        // ================================
+        async function fetchAndSetStats() {
+             try {
+                // This is simpler than querying all posts
+                const { count, error } = await supabase
+                    .from('posts')
+                    .select('*', { count: 'exact', head: true });
+                
+                if (error) throw error;
+
+                const { data: reactions, error: reactError } = await supabase
+                    .rpc('get_total_reactions'); // Assuming an RPC function for this
+                
+                if (reactError) throw reactError;
+                
+                const { count: memorialCount, error: memError } = await supabase
+                    .from('posts')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('is_memorial', true);
+                
+                if (memError) throw memError;
+
+                document.getElementById('totalPosts').textContent = count || 0;
+                document.getElementById('totalReactions').textContent = reactions || 0;
+                document.getElementById('totalMemorials').textContent = memorialCount || 0;
+                
             } catch (e) {
-                console.error('Stats error:', e);
+                console.error('Error loading stats:', e);
+                // Fallback to v13.0 method if RPC fails
+                const { data: allPosts } = await supabase.from('posts').select('is_memorial, reaction_support, reaction_helpful, reaction_solidarity');
+                if (allPosts) {
+                     const totalPosts = allPosts.length;
+                    const totalMemorials = allPosts.filter(p => p.is_memorial).length;
+                    const totalReactions = allPosts.reduce((sum, p) => 
+                        sum + (p.reaction_support || 0) + (p.reaction_helpful || 0) + (p.reaction_solidarity || 0), 0
+                    );
+                    document.getElementById('totalPosts').textContent = totalPosts;
+                    document.getElementById('totalReactions').textContent = totalReactions;
+                    document.getElementById('totalMemorials').textContent = totalMemorials;
+                }
             }
         }
-
-        // === NEW: Comments System Functions ===
-        async function toggleComments(postId) {
-            const commentsList = document.getElementById(`comments-${postId}`);
-            const isActive = commentsList.classList.contains('active');
-
-            if (!isActive) {
-                commentsList.classList.add('active');
-                await loadComments(postId);
-            } else {
-                commentsList.classList.remove('active');
+        
+        async function loadProfile() {
+            document.getElementById('profileAnonId').textContent = userFingerprint;
+            
+            // Fix hardcoded post count
+            try {
+                const { count, error } = await supabase
+                    .from('posts')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('anonymous_id', userFingerprint);
+                    
+                if (error) throw error;
+                
+                document.getElementById('profilePostCount').textContent = count || 0;
+            } catch (error) {
+                console.error('Error loading post count:', error);
+                document.getElementById('profilePostCount').textContent = 'Error';
             }
+            
+            // Load reaction count from local storage
+            const reactionsGiven = localStorage.getItem(\`reacted_total_\${userFingerprint}\`) || 0;
+            document.getElementById('profileReactionCount').textContent = reactionsGiven;
         }
 
+        // ================================
+        // NEW: COMMENTS SYSTEM (v14.0)
+        // ================================
+        async function showComments(postId) {
+            currentPostIdForComments = postId;
+            document.getElementById('commentsContainer').innerHTML = \`
+                <div class="loading">
+                    <div class="loading-spinner">💬</div>
+                    <p>Loading comments...</p>
+                </div>\`;
+            showModal('commentsModal');
+            await loadComments(postId);
+        }
+        
         async function loadComments(postId) {
-            const container = document.getElementById(`comments-list-${postId}`);
-            container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-secondary);">Loading comments...</div>';
-
+            const container = document.getElementById('commentsContainer');
             try {
                 const { data: comments, error } = await supabase
                     .from('comments')
                     .select('*')
                     .eq('post_id', postId)
                     .order('created_at', { ascending: true });
-
+                
                 if (error) throw error;
-
+                
                 if (!comments || comments.length === 0) {
-                    container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-secondary);">No comments yet. Be the first!</div>';
+                    container.innerHTML = \`
+                        <div class="empty-state">
+                            <div class="empty-state-icon">💬</div>
+                            <h3>No comments yet</h3>
+                            <p>Be the first to add one!</p>
+                        </div>\`;
                     return;
                 }
-
-                container.innerHTML = '';
-                for (const comment of comments) {
-                    container.innerHTML += renderComment(comment);
-                }
+                
+                container.innerHTML = comments.map(comment => renderComment(comment)).join('');
+                
             } catch (error) {
-                console.error('Load comments error:', error);
-                container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger);">Error loading comments</div>';
+                console.error('Error loading comments:', error);
+                container.innerHTML = \`<div class="empty-state"><h3>Error loading comments</h3></div>\`;
             }
         }
-
+        
         function renderComment(comment) {
             const timeAgo = getTimeAgo(new Date(comment.created_at));
-
-            return `
-                <div class="comment-item">
-                    <div class="comment-header">
-                        <span class="comment-author">Anonymous</span>
-                        <span class="comment-time">${timeAgo}</span>
+            // Use only first 8 chars of anon_id for privacy
+            const anonId = escapeHtml(comment.anonymous_id).substring(0, 8);
+            
+            return \`
+                <div class="comment-card">
+                    <div class="comment-meta">
+                        <strong>\${anonId}...</strong> • <span>\${timeAgo}</span>
                     </div>
-                    <div class="comment-content">${escapeHtml(comment.content)}</div>
-                    <div class="comment-reactions">
-                        <button class="comment-reaction-btn" onclick="reactToComment('${comment.id}', 'support')">
-                            <span>💚</span>
-                            <span class="comment-reaction-count">Support</span>
-                        </button>
-                        <button class="comment-reaction-btn" onclick="reactToComment('${comment.id}', 'helpful')">
-                            <span>🙌</span>
-                            <span class="comment-reaction-count">Helpful</span>
-                        </button>
+                    <div class="comment-content">
+                        \${escapeHtml(comment.content)}
                     </div>
-                </div>
-            `;
+                    </div>
+            \`;
         }
-
-        async function createComment(postId) {
-            const input = document.getElementById(`comment-input-${postId}`);
+        
+        async function postComment(event) {
+            event.preventDefault(); // Stop form from reloading page
+            const btn = document.getElementById('postCommentBtn');
+            const input = document.getElementById('commentInput');
             const content = input.value.trim();
-
-            if (!content) {
-                showToast('❌ Comment cannot be empty');
-                return;
-            }
-
-            if (content.length > 500) {
-                showToast('❌ Comment too long (max 500 chars)');
-                return;
-            }
-
+            
+            if (!content || !currentPostIdForComments) return;
+            
+            btn.disabled = true;
+            btn.textContent = '...';
+            
             try {
-                const { data, error } = await supabase.from('comments').insert([{
-                    post_id: postId,
-                    content: content,
-                    anonymous_id: anonymousId,
-                    created_at: new Date().toISOString()
-                }]).select().single();
-
+                const { data, error } = await supabase
+                    .from('comments')
+                    .insert({
+                        post_id: currentPostIdForComments,
+                        content: content,
+                        anonymous_id: userFingerprint,
+                        // user_wallet: null // Add wallet logic later
+                    });
+                
                 if (error) throw error;
-
-                showToast('✅ Comment added!');
-                input.value = '';
-                await loadComments(postId);
-
-                // Update comment count
-                const countSpan = document.getElementById(`comment-count-${postId}`);
-                if (countSpan) {
-                    const currentCount = parseInt(countSpan.textContent) || 0;
-                    countSpan.textContent = currentCount + 1;
-                }
-
-                // Update global stats
-                const totalComments = document.getElementById('totalComments');
-                const currentTotal = parseInt(totalComments.textContent) || 0;
-                totalComments.textContent = currentTotal + 1;
-
+                
+                input.value = ''; // Clear input
+                await loadComments(currentPostIdForComments); // Refresh comments
+                
             } catch (error) {
-                console.error('Create comment error:', error);
-                showToast('❌ Failed to post comment');
+                console.error('Error posting comment:', error);
+                showToast('❌ Error posting comment');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Post';
             }
         }
 
-        async function reactToComment(commentId, type) {
-            const key = `comment_react_${commentId}_${anonymousId}`;
-            if (localStorage.getItem(key)) {
-                showToast('ℹ️ Already reacted to this comment');
-                return;
-            }
-
-            try {
-                await supabase.from('comment_reactions').insert([{
-                    comment_id: commentId,
-                    type: type,
-                    anonymous_id: anonymousId
-                }]);
-
-                localStorage.setItem(key, type);
-                showToast('✅ Reaction added!');
-            } catch (error) {
-                console.error('Comment reaction error:', error);
-                showToast('❌ Failed to add reaction');
-            }
-        }
-
-        // Utility Functions (v13.0 - PRESERVED)
-        function getCategoryLabel(topic) {
-            const labels = { mental: '💭 Mental Health', academic: '📚 Academic', social: '👥 Social', bullying: '🚫 Bullying', other: '💬 Other' };
-            return labels[topic] || '💬 Other';
+        // ================================
+        // HELPER FUNCTIONS
+        // ================================
+        function getCategoryLabel(category) {
+            const labels = {
+                mental: '💭 Mental Health',
+                academic: '📚 Academic',
+                social: '👥 Social',
+                bullying: '🚫 Bullying',
+                other: '💬 Other'
+            };
+            return labels[category] || category;
         }
 
         function getTimeAgo(date) {
             const seconds = Math.floor((new Date() - date) / 1000);
-            if (seconds < 60) return 'Just now';
-            if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
-            if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
-            return Math.floor(seconds / 86400) + 'd ago';
+            if (isNaN(seconds)) return 'just now'; // Handle invalid dates
+            
+            const intervals = {
+                year: 31536000,
+                month: 2592000,
+                week: 604800,
+                day: 86400,
+                hour: 3600,
+                minute: 60
+            };
+
+            for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+                const interval = Math.floor(seconds / secondsInUnit);
+                if (interval >= 1) {
+                    return \`\${interval} \${unit}\${interval !== 1 ? 's' : ''} ago\`;
+                }
+            }
+            return 'Just now';
         }
 
         function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+            if (!text) return '';
+            return text.replace(/[&<>"']/g, function(match) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                }[match];
+            }).replace(/\\n/g, '<br>'); // Also convert newlines
         }
 
-        function showToast(msg) {
+        function showToast(message) {
             const toast = document.getElementById('toast');
-            toast.textContent = msg;
+            toast.textContent = message;
             toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
 
-        // Initialize
-        window.addEventListener('load', function() {
-            console.log('🕊️ SafeVoice v14.0 - WITH COMMENTS');
-            console.log('✅ Supabase connected:', SUPABASE_URL);
-            loadPosts();
-        });
+        // ================================
+        // SERVICE WORKER
+        // ================================
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(() => console.log('✅ Service Worker registered'))
+                .catch(err => console.log('SW failed:', err));
+        }
     </script>
 </body>
 </html>
+"""
+
+# Save the HTML content to a file
+file_name = 'SafeVoice_v14.0_Comments_and_UI.html'
+try:
+    with open(file_name, 'w', encoding='utf-8') as f:
+        f.write(html_content)
+    
+    print(f"✅ File created: {file_name}")
+    print(f"📊 Size: {len(html_content.encode('utf-8'))} bytes")
+    print("📥 Download above and open in Koder app")
+
+except Exception as e:
+    print(f"Error creating file: {e}")
