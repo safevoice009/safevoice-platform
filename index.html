@@ -153,8 +153,8 @@
     <script>
         const GEMINI_API_KEY = ''; 
         const gun = Gun();
-        const posts = gun.get('safevoice-dapp-posts-v9');
-        const users = gun.get('safevoice-dapp-users-v9');
+        const posts = gun.get('safevoice-dapp-posts-v10');
+        const users = gun.get('safevoice-dapp-users-v10');
         let web3Provider, signer, userAddress, userAnonymousId;
         const ADJECTIVES = ['Brave', 'Strong', 'Hopeful', 'Kind', 'Wise', 'Calm', 'Proud', 'Valiant'];
         const NOUNS = ['Panda', 'Tiger', 'Eagle', 'Lion', 'Wolf', 'Bear', 'Fox', 'Hawk'];
@@ -165,21 +165,16 @@
 
         async function init() {
             const walletConnector = document.getElementById('walletConnector');
-            if (typeof window.ethereum !== 'undefined') {
-                try {
-                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                    if (accounts.length > 0) {
-                        await connectWallet(true);
-                    } else {
-                        walletConnector.innerHTML = `
-                            <h2 class="text-2xl font-bold mb-2">Connect Your Wallet</h2>
-                            <p class="mb-5 text-gray-400">To post and interact, connect your Web3 wallet.</p>
-                            <button class="btn inline-block w-auto px-8 py-3" onclick="connectWallet(false)">Connect Wallet</button>
-                        `;
-                    }
-                } catch (err) {
-                     walletConnector.innerHTML = `<h2 class="text-2xl font-bold text-red-400">Error</h2><p>Could not check wallet status. Please refresh.</p>`;
-                }
+            const isConnected = localStorage.getItem('safevoice_connected');
+
+            if (typeof window.ethereum !== 'undefined' && isConnected === 'true') {
+                 await connectWallet(true);
+            } else if (typeof window.ethereum !== 'undefined') {
+                 walletConnector.innerHTML = `
+                    <h2 class="text-2xl font-bold mb-2">Connect Your Wallet</h2>
+                    <p class="mb-5 text-gray-400">To post and interact, connect your Web3 wallet.</p>
+                    <button class="btn inline-block w-auto px-8 py-3" onclick="connectWallet(false)">Connect Wallet</button>
+                `;
             } else {
                 const dappUrl = window.location.href;
                 const metamaskLink = `https://metamask.app.link/dapp/${dappUrl.replace(/https?:\/\//, '')}`;
@@ -241,6 +236,8 @@
                 userAddress = await signer.getAddress();
                 userAnonymousId = generateAnonymousId(userAddress);
 
+                localStorage.setItem('safevoice_connected', 'true');
+
                 document.getElementById('walletConnector').style.display = 'none';
                 document.getElementById('dappContent').style.display = 'block';
                 document.getElementById('walletInfo').style.display = 'block';
@@ -251,11 +248,13 @@
                 switchSection('home', document.querySelector('.bottom-nav-btn.active'));
 
                  window.ethereum.on('accountsChanged', (accounts) => {
+                    localStorage.removeItem('safevoice_connected');
                     window.location.reload();
                 });
 
             } catch (error) {
-                alert("You must connect your wallet to use the DApp.");
+                 localStorage.removeItem('safevoice_connected');
+                 alert("Connection failed. Please try again.");
             }
         }
 
@@ -412,7 +411,7 @@
             container.innerHTML = `<div class="loading text-center p-4">Loading comments...</div>`;
             const commentsNode = posts.get(postId).get('comments');
             const renderedComments = new Set();
-            let hasComments = false;
+            let hasPosts = false;
             const setupCommentForm = () => `<div class="comments-list space-y-3"></div>
                 <form class="comment-form mt-4" onsubmit="createComment(event, '${postId}')">
                     <textarea required placeholder="Add a supportive comment..." class="w-full p-2 rounded-lg text-sm"></textarea>
@@ -423,9 +422,9 @@
                 </form>`;
             commentsNode.map().on((comment, commentId) => {
                 if (comment && comment.content && !renderedComments.has(commentId)) {
-                    if (!hasComments) {
+                    if (!hasPosts) {
                         container.innerHTML = setupCommentForm();
-                        hasComments = true;
+                        hasPosts = true;
                     }
                     renderedComments.add(commentId);
                     const list = container.querySelector('.comments-list');
@@ -436,7 +435,7 @@
                 }
             });
             setTimeout(() => {
-                if (!hasComments) container.innerHTML = setupCommentForm();
+                if (!hasPosts) container.innerHTML = setupCommentForm();
             }, 3000);
         }
 
