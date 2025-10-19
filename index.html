@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>SafeVoice v14.0.5 - Targeted Syntax Fix</title> 
+    <title>SafeVoice v14.0.6 - Second Syntax Fix</title> 
     <link rel="manifest" href="manifest.json">
 
     <style>
@@ -1275,10 +1275,10 @@
         }
 
         // ================================
-        // INITIALIZE APP (v14.0.5 - Targeted Fix)
+        // INITIALIZE APP (v14.0.6 - Syntax Fix)
         // ================================
         window.addEventListener('load', async function() {
-            console.log('🚀 [DEBUG] SafeVoice v14.0.5 - Targeted Syntax Fix Initializing...'); // DEBUG
+            console.log('🚀 [DEBUG] SafeVoice v14.0.6 - Syntax Fix Initializing...'); // DEBUG
             
             // Only proceed if Supabase client initialized
             if (!supabase) {
@@ -1535,6 +1535,7 @@
             console.log("🖼️ [DEBUG] Displaying image preview..."); // DEBUG
             try {
                 const preview = document.getElementById('imagePreview');
+                if (!preview) return console.error("🚨 [DEBUG] Image preview element not found!");
                 preview.style.display = 'block';
                 preview.innerHTML = \`
                     <img src="\${imageData}" alt="Preview">
@@ -1582,8 +1583,10 @@
                 const charCount = document.getElementById('charCount');
                 if (contentInput && charCount) {
                     charCount.textContent = contentInput.value.length;
+                } else {
+                     console.warn("⚠️ [DEBUG] Could not find elements for char count update.");
                 }
-             } catch(e) { console.error("[DEBUG] Error updating char count:", e); }
+             } catch(e) { console.error("🚨 [DEBUG] Error updating char count:", e); }
         }
 
         function toggleMemorialFields() {
@@ -1592,8 +1595,10 @@
                 const memorialFields = document.getElementById('memorialFields');
                 if (memorialToggle && memorialFields) {
                     memorialFields.style.display = memorialToggle.checked ? 'block' : 'none';
+                } else {
+                    console.warn("⚠️ [DEBUG] Could not find elements for memorial toggle.");
                 }
-             } catch(e) { console.error("[DEBUG] Error toggling memorial fields:", e); }
+             } catch(e) { console.error("🚨 [DEBUG] Error toggling memorial fields:", e); }
         }
 
         // ================================
@@ -1722,7 +1727,7 @@
         }
 
         // ================================
-        // LOAD POSTS (v14.0.5 - Targeted Fix)
+        // LOAD POSTS (v14.0.6 - Syntax Fix)
         // ================================
         async function loadPosts() {
             // Ensure Supabase client is available
@@ -1838,7 +1843,7 @@
 
 
         // ================================
-        // RENDER POST (v14.0.5 - Targeted Fix)
+        // RENDER POST (v14.0.6 - Syntax Fix)
         // ================================
         function renderPost(post) {
              // console.log(\`[DEBUG] Rendering post ID: \${post ? post.id : 'undefined'}\`); // DEBUG
@@ -1870,21 +1875,9 @@
                 const solidarityCount = Number(post.reaction_solidarity) || 0;
 
                 // v14.0.5 - Log variables right before returning the template string
-                console.log(\`[DEBUG] renderPost Variables for ID \${post.id}:\`, {
-                    postId: post.id,
-                    college: post.college,
-                    timeAgo: timeAgo,
-                    badgeClass: badgeClass,
-                    category: category,
-                    contentLength: post.content.length, // Log length instead of full content for brevity
-                    imageHtmlExists: !!imageHtml,
-                    memorialHtmlExists: !!memorialHtml,
-                    supportCount: supportCount,
-                    helpfulCount: helpfulCount,
-                    solidarityCount: solidarityCount
-                });
+                console.log(\`[DEBUG] renderPost Variables for ID \${post.id}:\`, { postId: post.id, college: post.college, timeAgo: timeAgo, badgeClass: badgeClass, category: category, contentLength: post.content.length, imageHtmlExists: !!imageHtml, memorialHtmlExists: !!memorialHtml, supportCount: supportCount, helpfulCount: helpfulCount, solidarityCount: solidarityCount });
 
-                // Construct the final HTML template literal
+                // Construct the final HTML template literal - carefully checked for syntax errors around buttons
                 return \` 
                     <div class="post-card glassmorphism" id="post-\${post.id}">
                         <div class="post-header">
@@ -1922,7 +1915,7 @@
                             </button>
                         </div>
                     </div>
-                \`; // This closing backtick seems correct. Error must be inside.
+                \`; // v14.0.6 - Double checked closing backtick and internal quotes/syntax
             } catch (renderError) { 
                  console.error(\`🚨 [DEBUG] [renderPost] Unexpected error rendering post ID \${post.id}:\`, renderError, post); 
                  return \`<div class="post-card glassmorphism render-error">Failed to render post ID: \${post.id}. Check console. (\${escapeHtml(renderError.message)})</div>\`; // Include error message
@@ -2062,7 +2055,7 @@
 
 
         // ================================
-        // STATS & PROFILE (v14.0.5 - Targeted Fix)
+        // STATS & PROFILE (v14.0.6 - Syntax Fix)
         // ================================
         async function fetchAndSetStats() {
             // Ensure Supabase client is available
@@ -2128,9 +2121,12 @@
                 showToast("❌ Error loading header stats. Check console."); // Inform user
                  // Indicate error state in the UI
                  try {
-                     document.getElementById('totalPosts').textContent = '⚠️';
-                     document.getElementById('totalReactions').textContent = '⚠️';
-                     document.getElementById('totalMemorials').textContent = '⚠️';
+                     const totalPostsEl = document.getElementById('totalPosts');
+                     const totalReactionsEl = document.getElementById('totalReactions');
+                     const totalMemorialsEl = document.getElementById('totalMemorials');
+                     if(totalPostsEl) totalPostsEl.textContent = '⚠️';
+                     if(totalReactionsEl) totalReactionsEl.textContent = '⚠️';
+                     if(totalMemorialsEl) totalMemorialsEl.textContent = '⚠️';
                  } catch (uiError) {
                      console.error("🚨 [DEBUG] Error updating stats UI to error state:", uiError); // Log UI update error
                  }
@@ -2145,6 +2141,7 @@
             try {
                  const profileIdElement = document.getElementById('profileAnonId');
                  if (profileIdElement) profileIdElement.textContent = userFingerprint;
+                 else console.warn("⚠️ [DEBUG] profileAnonId element not found.");
             } catch (e) { console.error("🚨 [DEBUG] Error setting profileAnonId:", e); }
             
             // Fix hardcoded post count
@@ -2160,6 +2157,7 @@
                  try { 
                      const countElement = document.getElementById('profilePostCount');
                      if(countElement) countElement.textContent = count || 0; 
+                     else console.warn("⚠️ [DEBUG] profilePostCount element not found.");
                  } catch(e){console.error("🚨 [DEBUG] Error setting profilePostCount:", e);}
             } catch (error) {
                 console.error("🚨 [DEBUG] Error loading post count for profile:", error); // DEBUG
@@ -2174,6 +2172,7 @@
              try { 
                  const reactionElement = document.getElementById('profileReactionCount');
                  if(reactionElement) reactionElement.textContent = reactionsGiven;
+                 else console.warn("⚠️ [DEBUG] profileReactionCount element not found.");
              } catch(e){console.error("🚨 [DEBUG] Error setting profileReactionCount:", e);}
              console.log(\`✅ [DEBUG] User reactions given (local): \${reactionsGiven}\`); // DEBUG
         }
@@ -2196,7 +2195,7 @@
                 await loadComments(postId);
             } catch (e) {
                  console.error(\`🚨 [DEBUG] Failed to load comments initially for post \${postId}:\`, e); // DEBUG
-                showToast("❌ Error loading comments. Check console.");
+                 showToast("❌ Error loading comments. Check console.");
             }
         }
         
@@ -2343,7 +2342,7 @@
         }
 
         // ================================
-        // HELPER FUNCTIONS (v14.0.5 - Targeted Fix)
+        // HELPER FUNCTIONS (v14.0.6 - Syntax Fix)
         // ================================
         function getCategoryLabel(category) {
             const labels = {
@@ -2409,6 +2408,7 @@
                  if (!toast) return console.error("🚨 [DEBUG] Toast element not found!"); // DEBUG
                 toast.textContent = message;
                 toast.classList.add('show');
+                // Automatically hide the toast after 3 seconds
                 setTimeout(() => {
                     // Check if toast still exists before trying to remove class
                     if (document.body.contains(toast)) {
