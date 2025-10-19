@@ -154,6 +154,26 @@
             margin-top: 4px;
         }
 
+        /* Profile Stats in Header (v14.0 NEW) */
+        .profile-stats {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 14px;
+        }
+
+        .profile-stats span {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .profile-stats .count {
+            color: var(--primary);
+        }
+
         /* Profile Modal */
         .modal-overlay {
             display: none;
@@ -250,6 +270,27 @@
 
         .info-value {
             font-weight: 600;
+        }
+
+        /* Web3 Connect Button (v14.0 NEW) */
+        .wallet-connect {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 12px;
+            transition: background 0.2s;
+        }
+
+        .wallet-connect:hover {
+            background: var(--primary-dark);
+        }
+
+        .wallet-connect.connected {
+            background: var(--success);
         }
 
         .modal-close {
@@ -549,6 +590,7 @@
             border: 1px solid var(--border);
             transition: transform 0.2s;
             position: relative;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2); /* v14.0 Glow */
         }
 
         .post-card:hover {
@@ -607,6 +649,135 @@
         .post-image img {
             width: 100%;
             display: block;
+        }
+
+        /* v14.0 Comments Section */
+        .comments-toggle {
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 12px 0;
+            padding: 8px 12px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .comments-toggle:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .comments-section {
+            display: none;
+            margin-top: 16px;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            animation: slideDown 0.3s ease;
+        }
+
+        .comments-section.active {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from { max-height: 0; opacity: 0; }
+            to { max-height: 500px; opacity: 1; }
+        }
+
+        .comment-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .comment-input {
+            resize: none;
+            min-height: 60px;
+            max-height: 120px;
+        }
+
+        .comment-submit {
+            align-self: flex-end;
+            padding: 8px 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            align-self: end;
+            width: auto;
+        }
+
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .comment-item {
+            padding: 12px;
+            background: var(--surface-light);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .comment-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 13px;
+        }
+
+        .comment-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .comment-text {
+            line-height: 1.5;
+            margin-bottom: 8px;
+        }
+
+        .comment-reactions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .comment-reaction {
+            padding: 4px 8px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.2s;
+        }
+
+        .comment-reaction:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
         }
 
         /* Image Viewer Modal */
@@ -1020,6 +1191,10 @@
                 width: 95%;
                 padding: 24px;
             }
+
+            .comments-section {
+                padding: 12px;
+            }
         }
     </style>
 </head>
@@ -1039,9 +1214,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="profile-icon" onclick="openProfile()">
-                    👤
-                </div>
+                <div class="profile-icon" onclick="openProfile()">👤</div>
             </div>
             <div class="stats">
                 <div class="stat-item">
@@ -1056,6 +1229,11 @@
                     <div class="stat-value" id="totalMemorials">0</div>
                     <div class="stat-label">Memorials</div>
                 </div>
+            </div>
+            <!-- v14.0 Profile Stats in Header -->
+            <div class="profile-stats">
+                <span>Your Posts:</span>
+                <span id="headerPostCount" class="count">Loading...</span>
             </div>
         </div>
 
@@ -1112,12 +1290,8 @@
                 <div class="form-group">
                     <label>Add Image (Optional)</label>
                     <div class="image-upload">
-                        <label for="cameraInput" class="image-button">
-                            📷 Camera
-                        </label>
-                        <label for="galleryInput" class="image-button">
-                            🖼️ Gallery
-                        </label>
+                        <label for="cameraInput" class="image-button">📷 Camera</label>
+                        <label for="galleryInput" class="image-button">🖼️ Gallery</label>
                     </div>
                     <input type="file" id="cameraInput" accept="image/*" capture="camera" style="display: none;">
                     <input type="file" id="galleryInput" accept="image/*" style="display: none;">
@@ -1289,23 +1463,24 @@
         <div class="profile-modal" onclick="event.stopPropagation()">
             <div class="profile-header">
                 <div class="profile-avatar">👤</div>
-                <div class="profile-name" id="profileName">Student7604</div>
+                <div class="profile-name" id="profileName">Anonymous Student</div>
                 <div class="profile-subtitle">Your identity is protected</div>
             </div>
             <div class="profile-info">
                 <div class="info-row">
+                    <span class="info-label">Your Posts</span>
+                    <span class="info-value" id="userPostCount">Loading...</span>
+                </div>
+                <div class="info-row">
                     <span class="info-label">Wallet Address</span>
-                    <span class="info-value">Not connected</span>
+                    <span class="info-value" id="walletAddress">Not connected</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">$VOICE Balance</span>
-                    <span class="info-value">0 VOICE</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Your Posts</span>
-                    <span class="info-value" id="userPostCount">0 posts</span>
+                    <span class="info-value">0 VOICE (v15.0)</span>
                 </div>
             </div>
+            <button id="connectWallet" class="wallet-connect" onclick="connectWallet()">Connect MetaMask</button>
             <button class="modal-close" onclick="closeProfile()">Close</button>
         </div>
     </div>
@@ -1365,58 +1540,94 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-        // ================================
-        // SUPABASE CONFIGURATION
-        // ================================
+        // ===============================
+        // CONFIG v14.0
+        // ===============================
+        const CONFIG = { version: '14.0' };
         const SUPABASE_URL = 'https://ytdlvsfhfyasisksrjyn.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0ZGx2c2ZoZnlhc2lza3NyanluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2NzQ0NzMsImV4cCI6MjA3NjI1MDQ3M30.MB2EojydD3256h3EkjQzR1WsuUw1z2DTsFTLldjigZE';
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // User fingerprint
+        // State
         let userFingerprint = localStorage.getItem('userFingerprint') || generateFingerprint();
         localStorage.setItem('userFingerprint', userFingerprint);
+        let currentFilter = 'all';
+        let selectedImage = null;
+        let selectedPostId = null;
+        let realtimeChannel = null; // v14.0 Single channel per critical errors
+        let userWallet = null;
 
         function generateFingerprint() {
             return 'user_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
         }
 
-        // Current selected post for menu
-        let selectedPostId = null;
-
-        // ================================
-        // REAL-TIME SUBSCRIPTIONS
-        // ================================
-        function setupRealtime() {
-            // Subscribe to post inserts
-            supabase
-                .channel('posts')
-                .on('postgres_changes', {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'posts'
-                }, payload => {
-                    console.log('New post!', payload);
-                    showToast('📢 New post shared!');
-                    loadPosts(); // Reload to show new post
-                })
-                .on('postgres_changes', {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'posts'
-                }, payload => {
-                    console.log('Post updated!', payload);
-                    loadPosts(); // Reload to show updated reactions
-                })
-                .subscribe();
+        // v14.0 Load Real Profile Count
+        async function loadProfileCount() {
+            try {
+                const { count, error } = await supabase
+                    .from('posts')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_fingerprint', userFingerprint);
+                if (error) throw error;
+                const countValue = count || 0;
+                document.getElementById('headerPostCount').textContent = countValue;
+                document.getElementById('userPostCount').textContent = `${countValue} posts`;
+            } catch (error) {
+                console.error('Profile count error:', error);
+                document.getElementById('headerPostCount').textContent = '0';
+                document.getElementById('userPostCount').textContent = '0 posts';
+            }
         }
 
-        // ================================
-        // PROFILE FUNCTIONS
-        // ================================
+        // ===============================
+        // REAL-TIME SUBSCRIPTIONS (v14.0 Enhanced - Single Channel)
+        // ===============================
+        function setupRealtime() {
+            if (realtimeChannel) return; // Prevent multiples - critical error avoidance
+            realtimeChannel = supabase
+                .channel('safevoice-channel')
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' }, payload => {
+                    console.log('New post!', payload);
+                    showToast('📢 New post shared!');
+                    loadPosts();
+                })
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'posts' }, payload => {
+                    console.log('Post updated!', payload);
+                    loadPosts();
+                })
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'comments' }, payload => {
+                    console.log('New comment!', payload);
+                    // Targeted reload for specific post comments
+                    loadCommentsForPost(payload.new.post_id);
+                })
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'commentreactions' }, payload => {
+                    console.log('Comment reaction!', payload);
+                    loadCommentsForPost(payload.new.comment_id ? currentFeed.find(p => p.comments?.some(c => c.id === payload.new.comment_id))?.id : null);
+                })
+                .subscribe((status) => {
+                    if (status === 'SUBSCRIBED') console.log('✅ Realtime connected v14.0');
+                });
+        }
+
+        // v14.0 Load Comments for Specific Post
+        async function loadCommentsForPost(postId) {
+            if (!postId) return;
+            const postElement = document.querySelector(`[data-post-id="${postId}"]`);
+            if (!postElement) return;
+            const commentsSection = postElement.querySelector('.comments-section');
+            if (commentsSection && commentsSection.classList.contains('active')) {
+                await loadComments(postId, postElement);
+            }
+        }
+
+        // ===============================
+        // PROFILE FUNCTIONS (v14.0 Web3 Enhanced)
+        // ===============================
         function openProfile() {
             document.getElementById('profileModal').classList.add('active');
-            updateProfileStats();
+            loadProfileCount();
+            updateWalletDisplay();
         }
 
         function closeProfile(event) {
@@ -1425,23 +1636,39 @@
             }
         }
 
-        async function updateProfileStats() {
-            try {
-                const { data: posts } = await supabase
-                    .from('posts')
-                    .select('id');
-
-                // For demo, show random number for user posts
-                const userPosts = Math.floor(Math.random() * 10) + 1;
-                document.getElementById('userPostCount').textContent = `${userPosts} posts`;
-            } catch (error) {
-                console.error('Error loading profile stats:', error);
+        // v14.0 Web3 MetaMask Connect Stub
+        async function connectWallet() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    userWallet = accounts[0];
+                    localStorage.setItem('userWallet', userWallet);
+                    document.getElementById('connectWallet').textContent = 'Wallet Connected';
+                    document.getElementById('connectWallet').classList.add('connected');
+                    document.getElementById('walletAddress').textContent = `${userWallet.slice(0,6)}...${userWallet.slice(-4)}`;
+                    showToast('✅ Wallet connected! Web3 features in v15.');
+                } catch (error) {
+                    console.error('Wallet connect error:', error);
+                    showToast('❌ Failed to connect wallet');
+                }
+            } else {
+                showToast('💡 Install MetaMask for Web3 support');
             }
         }
 
-        // ================================
+        function updateWalletDisplay() {
+            const savedWallet = localStorage.getItem('userWallet');
+            if (savedWallet) {
+                userWallet = savedWallet;
+                document.getElementById('walletAddress').textContent = `${userWallet.slice(0,6)}...${userWallet.slice(-4)}`;
+                document.getElementById('connectWallet').textContent = 'Wallet Connected';
+                document.getElementById('connectWallet').classList.add('connected');
+            }
+        }
+
+        // ===============================
         // IMAGE VIEWER
-        // ================================
+        // ===============================
         function openImageViewer(imageSrc) {
             document.getElementById('viewerImage').src = imageSrc;
             document.getElementById('imageViewer').classList.add('active');
@@ -1451,16 +1678,16 @@
             document.getElementById('imageViewer').classList.remove('active');
         }
 
-        // ================================
+        // ===============================
         // POST MENU (LONG PRESS)
-        // ================================
+        // ===============================
         let longPressTimer;
 
         function startLongPress(postId, event) {
             longPressTimer = setTimeout(() => {
                 selectedPostId = postId;
                 openPostMenu();
-            }, 500); // 500ms long press
+            }, 500);
         }
 
         function endLongPress() {
@@ -1506,9 +1733,9 @@
             closePostMenu();
         }
 
-        // ================================
+        // ===============================
         // NAVIGATION
-        // ================================
+        // ===============================
         function switchSection(section) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.getElementById(section).classList.add('active');
@@ -1523,11 +1750,9 @@
             }
         }
 
-        // ================================
+        // ===============================
         // IMAGE HANDLING
-        // ================================
-        let selectedImage = null;
-
+        // ===============================
         document.getElementById('cameraInput').addEventListener('change', handleImageSelect);
         document.getElementById('galleryInput').addEventListener('change', handleImageSelect);
 
@@ -1564,23 +1789,23 @@
             document.getElementById('galleryInput').value = '';
         }
 
-        // ================================
+        // ===============================
         // CHARACTER COUNT
-        // ================================
+        // ===============================
         document.getElementById('contentInput').addEventListener('input', function() {
             document.getElementById('charCount').textContent = this.value.length;
         });
 
-        // ================================
+        // ===============================
         // MEMORIAL TOGGLE
-        // ================================
+        // ===============================
         document.getElementById('memorialToggle').addEventListener('change', function() {
             document.getElementById('memorialFields').style.display = this.checked ? 'block' : 'none';
         });
 
-        // ================================
-        // CREATE POST
-        // ================================
+        // ===============================
+        // CREATE POST (v13.1 Preserved)
+        // ===============================
         async function createPost() {
             const college = document.getElementById('collegeInput').value.trim();
             const category = document.getElementById('categorySelect').value;
@@ -1617,70 +1842,52 @@
                     is_memorial: isMemorial,
                     memorial_name: isMemorial ? memorialName : null,
                     memorial_message: isMemorial ? memorialMessage : null,
+                    user_fingerprint: userFingerprint,
                     reaction_support: 0,
                     reaction_helpful: 0,
-                    reaction_solidarity: 0
+                    reaction_solidarity: 0,
+                    comment_count: 0
                 };
 
-                const { data, error } = await supabase
-                    .from('posts')
-                    .insert([postData])
-                    .select();
-
+                const { data, error } = await supabase.from('posts').insert([postData]).select().single();
                 if (error) throw error;
 
-                await supabase.from('analytics').insert([{
-                    event_type: 'post_created',
-                    event_data: { category: category, is_memorial: isMemorial }
-                }]);
-
-                showToast('✅ Post shared successfully!');
-
+                showToast('✅ Post shared anonymously!');
                 document.getElementById('collegeInput').value = '';
                 document.getElementById('contentInput').value = '';
-                document.getElementById('charCount').textContent = '0';
                 document.getElementById('memorialToggle').checked = false;
                 document.getElementById('memorialFields').style.display = 'none';
-                document.getElementById('memorialName').value = '';
-                document.getElementById('memorialMessage').value = '';
                 removeImage();
-
-                // No need to manually reload - realtime will handle it
+                btn.disabled = false;
+                btn.innerHTML = '<span>🕊️</span> Post Anonymously';
+                loadProfileCount(); // Update count after post
 
             } catch (error) {
-                console.error('Error creating post:', error);
-                showToast('❌ Error posting. Please try again.');
-            } finally {
+                console.error('Post error:', error);
+                showToast('❌ Failed to post. Try again.');
                 btn.disabled = false;
                 btn.innerHTML = '<span>🕊️</span> Post Anonymously';
             }
         }
 
-        // ================================
-        // LOAD POSTS
-        // ================================
-        let currentFilter = 'all';
-
+        // ===============================
+        // LOAD POSTS (v14.0 Comments Enhanced)
+        // ===============================
         async function loadPosts() {
             const container = document.getElementById('postsContainer');
             container.innerHTML = '<div class="loading"><div class="loading-spinner">🕊️</div><p>Loading posts...</p></div>';
 
             try {
-                let query = supabase
-                    .from('posts')
-                    .select('*')
-                    .order('timestamp', { ascending: false });
+                let query = supabase.from('posts').select(`
+                    *,
+                    comment_count: comments(count)
+                `).order('created_at', { ascending: false, foreignTable: 'comments' });
 
                 if (currentFilter !== 'all') {
-                    if (currentFilter === 'memorial') {
-                        query = query.eq('is_memorial', true);
-                    } else {
-                        query = query.eq('category', currentFilter).eq('is_memorial', false);
-                    }
+                    query = query.eq('category', currentFilter);
                 }
 
                 const { data: posts, error } = await query;
-
                 if (error) throw error;
 
                 if (!posts || posts.length === 0) {
@@ -1688,7 +1895,7 @@
                         <div class="empty-state">
                             <div class="empty-state-icon">🕊️</div>
                             <h3>No posts yet</h3>
-                            <p>Be the first to share your voice!</p>
+                            <p>Be the first to share your voice</p>
                         </div>
                     `;
                     return;
@@ -1696,6 +1903,7 @@
 
                 container.innerHTML = posts.map(post => renderPost(post)).join('');
                 updateStats(posts);
+                loadProfileCount();
 
             } catch (error) {
                 console.error('Error loading posts:', error);
@@ -1709,57 +1917,60 @@
             }
         }
 
-        // ================================
-        // RENDER POST
-        // ================================
+        // v14.0 Render Post with Comments
         function renderPost(post) {
-            const timeAgo = getTimeAgo(new Date(post.timestamp));
-            const badgeClass = post.is_memorial ? 'memorial' : post.category;
+            const isMemorial = post.is_memorial;
+            const badgeClass = `badge-${post.category}`;
+            const badgeText = getCategoryLabel(post.category);
+            const timeAgo = getTimeAgo(new Date(post.created_at));
+            const hasImage = post.image_data;
+            const commentCount = post.comment_count || 0;
 
             let html = `
-                <div class="post-card" 
-                     ontouchstart="startLongPress('${post.id}', event)" 
-                     ontouchend="endLongPress()" 
-                     onmousedown="startLongPress('${post.id}', event)" 
-                     onmouseup="endLongPress()">
+                <div class="post-card" data-post-id="${post.id}" ontouchstart="startLongPress('${post.id}', event)" ontouchend="endLongPress()" oncontextmenu="startLongPress('${post.id}', event); return false;">
                     <div class="post-header">
-                        <div class="post-meta">
-                            <strong>${escapeHtml(post.college)}</strong><br>
-                            <span>${timeAgo}</span>
+                        <div>
+                            <div class="post-meta">
+                                <strong>Anonymous Student • ${post.college}</strong>
+                                <span style="margin-left: 8px;">${timeAgo}</span>
+                            </div>
+                            ${isMemorial ? '<div class="post-badge badge-memorial">Memorial</div>' : `<div class="post-badge ${badgeClass}">${badgeText}</div>`}
                         </div>
-                        <span class="post-badge badge-${badgeClass}">
-                            ${post.is_memorial ? '🕯️ Memorial' : getCategoryLabel(post.category)}
-                        </span>
                     </div>
-
                     <div class="post-content">${escapeHtml(post.content)}</div>
-
-                    ${post.image_data ? `
-                        <div class="post-image" onclick="openImageViewer('${post.image_data}')">
-                            <img src="${post.image_data}" alt="Post image" loading="lazy">
-                        </div>
-                    ` : ''}
-
-                    ${post.is_memorial && (post.memorial_name || post.memorial_message) ? `
+                    ${isMemorial && post.memorial_name ? `
                         <div class="memorial-tribute">
-                            <h4>🕯️ In Memory ${post.memorial_name ? 'of ' + escapeHtml(post.memorial_name) : ''}</h4>
-                            ${post.memorial_message ? `<p>${escapeHtml(post.memorial_message)}</p>` : ''}
+                            <h4>In memory of ${post.memorial_name}</h4>
+                            <p>${escapeHtml(post.memorial_message)}</p>
                         </div>
                     ` : ''}
-
+                    ${hasImage ? `<div class="post-image" onclick="openImageViewer('${post.image_data}')"><img src="${post.image_data}" alt="Post image"></div>` : ''}
                     <div class="reactions">
-                        <button class="reaction-btn" onclick="react('${post.id}', 'support')">
+                        <button class="reaction-btn ${post.user_reaction === 'support' ? 'reacted' : ''}" onclick="react('${post.id}', 'support')">
                             <span>💚</span>
                             <span class="reaction-count">${post.reaction_support || 0}</span>
                         </button>
-                        <button class="reaction-btn" onclick="react('${post.id}', 'helpful')">
+                        <button class="reaction-btn ${post.user_reaction === 'helpful' ? 'reacted' : ''}" onclick="react('${post.id}', 'helpful')">
                             <span>🙌</span>
                             <span class="reaction-count">${post.reaction_helpful || 0}</span>
                         </button>
-                        <button class="reaction-btn" onclick="react('${post.id}', 'solidarity')">
+                        <button class="reaction-btn ${post.user_reaction === 'solidarity' ? 'reacted' : ''}" onclick="react('${post.id}', 'solidarity')">
                             <span>🤝</span>
                             <span class="reaction-count">${post.reaction_solidarity || 0}</span>
                         </button>
+                    </div>
+                    <div class="comments-toggle" onclick="toggleComments('${post.id}')">
+                        <span>💬</span>
+                        <span>Comments (${commentCount})</span>
+                    </div>
+                    <div class="comments-section" id="comments-${post.id}">
+                        <div class="comment-input-container">
+                            <textarea class="comment-input" id="commentInput-${post.id}" placeholder="Share your thoughts anonymously (10-500 chars)" maxlength="500" minlength="10"></textarea>
+                            <button class="comment-submit" onclick="submitComment('${post.id}')">Post Comment</button>
+                        </div>
+                        <div class="comments-list" id="commentsList-${post.id}">
+                            <div style="text-align: center; color: var(--text-secondary); padding: 20px 0;">Click to load comments</div>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1767,9 +1978,149 @@
             return html;
         }
 
-        // ================================
-        // REACTIONS
-        // ================================
+        // v14.0 Toggle Comments
+        function toggleComments(postId) {
+            const section = document.getElementById(`comments-${postId}`);
+            const isActive = section.classList.contains('active');
+            section.classList.toggle('active');
+            const toggle = document.querySelector(`[data-post-id="${postId}"] .comments-toggle`);
+            if (!isActive) {
+                toggle.innerHTML = '<span>💬</span><span>Hide Comments</span>';
+                loadComments(postId, document.querySelector(`[data-post-id="${postId}"]`));
+            } else {
+                toggle.innerHTML = '<span>💬</span><span>Comments (${section.querySelectorAll('.comment-item').length})</span>';
+            }
+        }
+
+        // v14.0 Load Comments
+        async function loadComments(postId, postElement) {
+            const list = document.getElementById(`commentsList-${postId}`);
+            list.innerHTML = '<div style="text-align: center; color: var(--text-secondary);">Loading comments...</div>';
+
+            try {
+                const { data: comments, error } = await supabase
+                    .from('comments')
+                    .select('*, commentreactions(*)')
+                    .eq('post_id', postId)
+                    .order('created_at', { ascending: false });
+                if (error) throw error;
+
+                if (!comments || comments.length === 0) {
+                    list.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 20px 0;">No comments yet. Be the first to reply!</div>';
+                    return;
+                }
+
+                list.innerHTML = comments.map(comment => renderComment(comment)).join('');
+                updateCommentCounts(postId);
+
+            } catch (error) {
+                console.error('Load comments error:', error);
+                list.innerHTML = '<div style="text-align: center; color: var(--danger);">Error loading comments. Try again.</div>';
+            }
+        }
+
+        // v14.0 Render Comment
+        function renderComment(comment) {
+            const timeAgo = getTimeAgo(new Date(comment.created_at));
+            const reactions = {
+                support: comment.commentreactions?.filter(r => r.type === 'support').length || 0,
+                helpful: comment.commentreactions?.filter(r => r.type === 'helpful').length || 0,
+                solidarity: comment.commentreactions?.filter(r => r.type === 'solidarity').length || 0
+            };
+
+            return `
+                <div class="comment-item">
+                    <div class="comment-meta">
+                        <span class="comment-author">Anonymous Student</span>
+                        <span class="comment-time">${timeAgo}</span>
+                    </div>
+                    <div class="comment-text">${escapeHtml(comment.text)}</div>
+                    <div class="comment-reactions">
+                        <button class="comment-reaction" onclick="reactToComment('${comment.id}', 'support')">
+                            💚 ${reactions.support}
+                        </button>
+                        <button class="comment-reaction" onclick="reactToComment('${comment.id}', 'helpful')">
+                            🙌 ${reactions.helpful}
+                        </button>
+                        <button class="comment-reaction" onclick="reactToComment('${comment.id}', 'solidarity')">
+                            🤝 ${reactions.solidarity}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // v14.0 Submit Comment
+        async function submitComment(postId) {
+            const input = document.getElementById(`commentInput-${postId}`);
+            const text = input.value.trim();
+
+            if (text.length < 10) {
+                showToast('❌ Comment too short (min 10 chars)');
+                return;
+            }
+
+            if (text.length > 500) {
+                showToast('❌ Comment too long (max 500 chars)');
+                return;
+            }
+
+            try {
+                const { error } = await supabase.from('comments').insert([{
+                    post_id: postId,
+                    text: text,
+                    user_fingerprint: userFingerprint
+                }]);
+
+                if (error) throw error;
+
+                input.value = '';
+                showToast('✅ Comment posted!');
+                loadComments(postId, document.querySelector(`[data-post-id="${postId}"]`)); // Reload
+
+            } catch (error) {
+                console.error('Submit comment error:', error);
+                showToast('❌ Failed to post comment');
+            }
+        }
+
+        // v14.0 React to Comment
+        async function reactToComment(commentId, type) {
+            try {
+                const { error } = await supabase.from('commentreactions').insert([{
+                    comment_id: commentId,
+                    type: type,
+                    user_fingerprint: userFingerprint
+                }]);
+
+                if (error) throw error;
+
+                showToast('✅ Reaction added to comment!');
+                // Realtime will handle update
+                loadCommentsForPost(document.querySelector(`[data-comment-id="${commentId}"]`)?.closest('[data-post-id]').dataset.postId);
+
+            } catch (error) {
+                console.error('Comment reaction error:', error);
+                if (error.message.includes('already exists')) {
+                    showToast('ℹ️ You already reacted to this comment');
+                } else {
+                    showToast('❌ Failed to add reaction');
+                }
+            }
+        }
+
+        // v14.0 Update Comment Counts
+        function updateCommentCounts(postId) {
+            const comments = document.querySelectorAll(`#commentsList-${postId} .comment-item`);
+            const toggle = document.querySelector(`[data-post-id="${postId}"] .comments-toggle`);
+            if (toggle) {
+                toggle.innerHTML = `<span>💬</span><span>Comments (${comments.length})</span>`;
+            }
+        }
+
+        // ===============================
+        // REACTIONS (v13.1 Preserved)
+        // ===============================
         async function react(postId, reactionType) {
             try {
                 const { data, error } = await supabase
@@ -1786,8 +2137,8 @@
                     return;
                 }
 
-                // Realtime will update automatically
                 showToast('✅ Reaction added!');
+                // Realtime will update
 
             } catch (error) {
                 console.error('Error adding reaction:', error);
@@ -1795,9 +2146,9 @@
             }
         }
 
-        // ================================
+        // ===============================
         // FILTER POSTS
-        // ================================
+        // ===============================
         function filterPosts(filter) {
             currentFilter = filter;
 
@@ -1820,9 +2171,12 @@
             try {
                 const { data: posts, error } = await supabase
                     .from('posts')
-                    .select('*')
+                    .select(`
+                        *,
+                        comment_count: comments(count)
+                    `)
                     .eq('is_memorial', true)
-                    .order('timestamp', { ascending: false });
+                    .order('created_at', { ascending: false, foreignTable: 'comments' });
 
                 if (error) throw error;
 
@@ -1851,9 +2205,9 @@
             }
         }
 
-        // ================================
+        // ===============================
         // UPDATE STATS
-        // ================================
+        // ===============================
         async function updateStats(posts) {
             const totalPosts = posts.length;
             const totalMemorials = posts.filter(p => p.is_memorial).length;
@@ -1866,9 +2220,9 @@
             document.getElementById('totalMemorials').textContent = totalMemorials;
         }
 
-        // ================================
+        // ===============================
         // HELPER FUNCTIONS
-        // ================================
+        // ===============================
         function getCategoryLabel(category) {
             const labels = {
                 mental: '💭 Mental Health',
@@ -1881,7 +2235,7 @@
         }
 
         function getTimeAgo(date) {
-            const seconds = Math.floor((new Date() - date) / 1000);
+            const seconds = Math.floor((new Date() - new Date(date)) / 1000);
             const intervals = {
                 year: 31536000,
                 month: 2592000,
@@ -1916,33 +2270,35 @@
             }, 3000);
         }
 
-        // ================================
-        // INITIALIZE APP
-        // ================================
+        // ===============================
+        // INITIALIZE APP v14.0
+        // ===============================
         window.addEventListener('load', async function() {
-            console.log('🕊️ SafeVoice v13.1 - Enhanced Edition');
+            console.log(`🕊️ SafeVoice v${CONFIG.version} - Comments & Web3 Ready`);
             console.log('✅ Supabase connected');
-            console.log('✅ Real-time enabled');
+            console.log('✅ Real-time enabled (single channel)');
+            console.log('✅ Profile counts live');
+            console.log('✅ Comments system active');
 
             await loadPosts();
             setupRealtime();
+            loadProfileCount();
+            updateWalletDisplay();
 
             try {
-                const { data: allPosts } = await supabase
-                    .from('posts')
-                    .select('*');
+                const { data: allPosts } = await supabase.from('posts').select('*');
                 if (allPosts) updateStats(allPosts);
             } catch (e) {
                 console.error('Error loading stats:', e);
             }
-        });
 
-        // Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
-                .then(() => console.log('✅ Service Worker registered'))
-                .catch(err => console.log('SW failed:', err));
-        }
+            // Service Worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(() => console.log('✅ Service Worker registered'))
+                    .catch(err => console.log('SW failed:', err));
+            }
+        });
     </script>
 </body>
 </html>
