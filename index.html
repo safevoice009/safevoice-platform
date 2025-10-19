@@ -25,7 +25,7 @@
         .wallet-info { background: var(--bg); padding: 12px; border-radius: 8px; margin-top: 16px; border: 1px solid var(--border); }
         .wallet-info p { font-size: 12px; color: var(--text-secondary); word-break: break-all; margin: 4px 0; }
         .wallet-info strong { font-size: 18px; color: var(--primary); }
-        .btn { background: linear-gradient(135deg, var(--primary), #8b5cf6); color: white; padding: 16px 32px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 700; width: 100%; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn { background: linear-gradient(135deg, var(--primary), #8b5cf6); color: white; padding: 16px 32px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 700; width: 100%; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
         .btn.secondary { background: var(--surface-light); }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .post-form { background: var(--surface); padding: 24px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--border); }
@@ -85,9 +85,7 @@
         </div>
 
         <div id="walletConnector" class="wallet-connector">
-            <h2>Connect Your Wallet</h2>
-            <p>To post and interact, connect your Web3 wallet.</p>
-            <button class="btn" onclick="connectWallet()" style="margin-top: 20px; width: auto;">Connect MetaMask</button>
+            <!-- This content will be changed dynamically by JavaScript -->
         </div>
 
         <div id="dappContent" style="display: none;">
@@ -156,11 +154,40 @@
         // ================================
         const GEMINI_API_KEY = ''; // IMPORTANT: PASTE YOUR GEMINI API KEY HERE
         const gun = Gun();
-        const posts = gun.get('safevoice-dapp-posts-v6');
-        const users = gun.get('safevoice-dapp-users-v6');
+        const posts = gun.get('safevoice-dapp-posts-v7');
+        const users = gun.get('safevoice-dapp-users-v7');
         let web3Provider, signer, userAddress, userAnonymousId;
         const ADJECTIVES = ['Brave', 'Strong', 'Hopeful', 'Kind', 'Wise', 'Calm', 'Proud', 'Valiant'];
         const NOUNS = ['Panda', 'Tiger', 'Eagle', 'Lion', 'Wolf', 'Bear', 'Fox', 'Hawk'];
+
+        // ================================
+        // INITIALIZATION
+        // ================================
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+        });
+
+        function init() {
+            if (typeof window.ethereum !== 'undefined') {
+                // MetaMask is likely installed (or another wallet)
+                const walletConnector = document.getElementById('walletConnector');
+                walletConnector.innerHTML = `
+                    <h2>Connect Your Wallet</h2>
+                    <p>To post and interact, connect your Web3 wallet.</p>
+                    <button class="btn" onclick="connectWallet()" style="margin-top: 20px; width: auto;">Connect Wallet</button>
+                `;
+            } else {
+                // MetaMask is not installed, provide a deep link for mobile
+                const walletConnector = document.getElementById('walletConnector');
+                const dappUrl = window.location.href;
+                const metamaskLink = `https://metamask.app.link/dapp/${dappUrl.replace(/https?:\/\//, '')}`;
+                walletConnector.innerHTML = `
+                    <h2>MetaMask Not Detected</h2>
+                    <p>Please open this page in your MetaMask app's browser, or tap the button below to launch MetaMask.</p>
+                    <a href="${metamaskLink}" class="btn" style="margin-top: 20px; width: auto;">📱 Open in MetaMask App</a>
+                `;
+            }
+        }
 
         // ================================
         // GEMINI API INTEGRATION
@@ -210,7 +237,6 @@
         // CORE APP LOGIC
         // ================================
         async function connectWallet() {
-            if (typeof window.ethereum === 'undefined') return alert("MetaMask is not installed.");
             try {
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
                 web3Provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -423,7 +449,7 @@
         async function addReaction(postId, reactionType) {
             if (!userAddress) return alert("Please connect wallet.");
             posts.get(postId).once(post => {
-                if (post.author === userAddress) return; // Cannot react to own post
+                if (post.author === userAddress) return;
                 const reactionNode = posts.get(postId).get('reactions').get(reactionType);
                 reactionNode.get(userAddress).once(data => {
                     const isReacting = !data;
@@ -468,10 +494,6 @@
             el.innerText = text;
             return el.innerHTML;
         }
-
-        document.addEventListener('DOMContentLoaded', () => {
-             // Attach event listeners or initializations if needed
-        });
     </script>
 </body>
 </html>
