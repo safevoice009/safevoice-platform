@@ -45,30 +45,25 @@
             padding: 20px;
         }
 
-        /* Header Styles */
+        /* Header */
         .header {
             background: var(--surface);
             padding: 24px;
             border-radius: 16px;
             margin-bottom: 24px;
             border: 1px solid var(--border);
-            position: relative;
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
         }
 
         .logo {
             display: flex;
             align-items: center;
             gap: 12px;
+            margin-bottom: 12px;
         }
 
-        .logo-icon { font-size: 36px; }
+        .logo-icon {
+            font-size: 36px;
+        }
 
         .logo h1 {
             font-size: 28px;
@@ -78,51 +73,10 @@
             -webkit-text-fill-color: transparent;
         }
 
-        .profile-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .profile-icon:hover { transform: scale(1.1); }
-
         .tagline {
             color: var(--text-secondary);
             font-size: 14px;
             margin-top: 4px;
-        }
-
-        .live-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--success);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            color: white;
-            margin-top: 8px;
-        }
-
-        .live-dot {
-            width: 6px;
-            height: 6px;
-            background: white;
-            border-radius: 50%;
-            animation: pulse-dot 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
         }
 
         .stats {
@@ -150,114 +104,6 @@
             margin-top: 4px;
         }
 
-        /* Modals */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            animation: fadeIn 0.3s;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .profile-modal {
-            background: var(--surface);
-            border-radius: 16px;
-            padding: 32px;
-            max-width: 400px;
-            width: 90%;
-            border: 1px solid var(--border);
-            animation: slideUp 0.3s;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .profile-header {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        .profile-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), #8b5cf6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-            margin: 0 auto 16px;
-        }
-
-        .profile-name {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .profile-subtitle {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        .profile-info {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .info-row {
-            background: var(--bg);
-            padding: 12px 16px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .info-label {
-            color: var(--text-secondary);
-            font-size: 13px;
-        }
-
-        .info-value { font-weight: 600; }
-
-        .modal-close {
-            background: var(--surface-light);
-            color: var(--text);
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            width: 100%;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
         /* Crisis Banner */
         .crisis-banner {
             background: linear-gradient(135deg, var(--danger), #dc2626);
@@ -278,7 +124,9 @@
             gap: 16px;
         }
 
-        .crisis-icon { font-size: 32px; }
+        .crisis-icon {
+            font-size: 32px;
+        }
 
         .crisis-text h3 {
             color: white;
@@ -333,6 +181,7 @@
             color: white;
         }
 
+        /* Sections */
         .section {
             display: none;
         }
@@ -383,6 +232,7 @@
             border-color: var(--primary);
         }
 
+        /* Image Upload */
         .image-upload {
             display: flex;
             gap: 12px;
@@ -438,6 +288,7 @@
             font-weight: bold;
         }
 
+        /* Memorial Toggle */
         .memorial-toggle {
             display: flex;
             align-items: center;
@@ -465,6 +316,7 @@
             margin-top: 16px;
         }
 
+        /* Button */
         .btn {
             background: linear-gradient(135deg, var(--primary), #8b5cf6);
             color: white;
@@ -482,9 +334,18 @@
             gap: 8px;
         }
 
-        .btn:hover { transform: translateY(-2px); }
-        .btn:active { transform: translateY(0); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
         /* Filters */
         .filters {
@@ -527,10 +388,11 @@
             border-radius: 12px;
             border: 1px solid var(--border);
             transition: transform 0.2s;
-            position: relative;
         }
 
-        .post-card:hover { transform: translateY(-2px); }
+        .post-card:hover {
+            transform: translateY(-2px);
+        }
 
         .post-header {
             display: flex;
@@ -573,104 +435,11 @@
             margin: 16px 0;
             border-radius: 8px;
             overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.2s;
         }
 
-        .post-image:hover { transform: scale(1.02); }
         .post-image img {
             width: 100%;
             display: block;
-        }
-
-        .image-viewer {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s;
-        }
-
-        .image-viewer.active { display: flex; }
-
-        .image-viewer img {
-            max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
-        }
-
-        .image-viewer-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            font-size: 24px;
-            cursor: pointer;
-            backdrop-filter: blur(10px);
-        }
-
-        .post-menu {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--surface);
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
-            padding: 24px;
-            z-index: 1500;
-            animation: slideUp 0.3s;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .post-menu.active { display: block; }
-
-        .post-menu-header {
-            text-align: center;
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-
-        .menu-option {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 16px;
-            background: var(--bg);
-            border-radius: 8px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .menu-option:hover { background: var(--surface-light); }
-
-        .menu-option-icon { font-size: 24px; }
-        .menu-option-text { font-weight: 600; }
-
-        .menu-cancel {
-            background: var(--surface-light);
-            color: var(--text);
-            padding: 14px;
-            border-radius: 8px;
-            text-align: center;
-            margin-top: 12px;
-            cursor: pointer;
-            font-weight: 600;
         }
 
         .memorial-tribute {
@@ -720,7 +489,9 @@
             color: white;
         }
 
-        .reaction-count { font-size: 14px; }
+        .reaction-count {
+            font-size: 14px;
+        }
 
         /* Helplines */
         .helplines-grid {
@@ -742,7 +513,9 @@
             margin-bottom: 12px;
         }
 
-        .helpline-icon { font-size: 32px; }
+        .helpline-icon {
+            font-size: 32px;
+        }
 
         .helpline-title {
             font-size: 18px;
@@ -786,6 +559,7 @@
             margin-top: 8px;
         }
 
+        /* Memorial Section */
         .memorial-intro {
             background: linear-gradient(135deg, #f59e0b, #d97706);
             padding: 24px;
@@ -800,6 +574,7 @@
             margin-bottom: 8px;
         }
 
+        /* Community Info */
         .community-grid {
             display: grid;
             gap: 16px;
@@ -844,6 +619,7 @@
             font-weight: bold;
         }
 
+        /* Loading */
         .loading {
             text-align: center;
             padding: 60px 20px;
@@ -860,6 +636,7 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 80px 20px;
@@ -878,6 +655,7 @@
             color: var(--text);
         }
 
+        /* Toast */
         .toast {
             position: fixed;
             bottom: 100px;
@@ -895,8 +673,11 @@
             font-weight: 600;
         }
 
-        .toast.show { opacity: 1; }
+        .toast.show {
+            opacity: 1;
+        }
 
+        /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -930,44 +711,53 @@
             font-weight: 600;
         }
 
-        .bottom-nav-btn.active { color: var(--primary); }
+        .bottom-nav-btn.active {
+            color: var(--primary);
+        }
 
+        /* Responsive */
         @media (max-width: 640px) {
-            .container { padding: 12px; }
-            .header { padding: 20px; }
-            .post-form { padding: 20px; }
-            .stats { gap: 12px; }
-            .stat-value { font-size: 20px; }
+            .container {
+                padding: 12px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .post-form {
+                padding: 20px;
+            }
+
+            .stats {
+                gap: 12px;
+            }
+
+            .stat-value {
+                font-size: 20px;
+            }
+
             .crisis-content {
                 flex-direction: column;
                 text-align: center;
             }
-            .image-upload { flex-direction: column; }
-            .profile-modal {
-                width: 95%;
-                padding: 24px;
+
+            .image-upload {
+                flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
-
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <div class="header-top">
-                <div class="logo">
-                    <span class="logo-icon">🕊️</span>
-                    <div>
-                        <h1>SafeVoice</h1>
-                        <p class="tagline">Your anonymous voice matters</p>
-                        <div class="live-indicator">
-                            <div class="live-dot"></div>
-                            <span>LIVE</span>
-                        </div>
-                    </div>
+            <div class="logo">
+                <span class="logo-icon">🕊️</span>
+                <div>
+                    <h1>SafeVoice</h1>
+                    <p class="tagline">Your anonymous voice matters • Powered by community</p>
                 </div>
-                <div class="profile-icon" onclick="openProfile()">👤</div>
             </div>
             <div class="stats">
                 <div class="stat-item">
@@ -1072,7 +862,7 @@
             </div>
 
             <!-- Filters -->
-            <div class="filters">
+            <div class="filters" id="postFilters">
                 <button class="filter-btn active" onclick="filterPosts('all')">All Posts</button>
                 <button class="filter-btn" onclick="filterPosts('mental')">💭 Mental Health</button>
                 <button class="filter-btn" onclick="filterPosts('academic')">📚 Academic</button>
@@ -1159,8 +949,8 @@
                 <p>Honoring those we've lost • Celebrating their lives</p>
             </div>
 
-            <div class="filters">
-                <button class="filter-btn active" onclick="loadMemorials()">All Memorials</button>
+            <div class="filters" id="memorialFilters">
+                <button class="filter-btn active" onclick="filterPosts('memorial')">All Memorials</button>
             </div>
 
             <div id="memorialsContainer" class="posts-container">
@@ -1210,60 +1000,6 @@
         </div>
     </div>
 
-    <!-- Profile Modal -->
-    <div id="profileModal" class="modal-overlay" onclick="closeProfile(event)">
-        <div class="profile-modal" onclick="event.stopPropagation()">
-            <div class="profile-header">
-                <div class="profile-avatar">👤</div>
-                <div class="profile-name" id="profileName">Anonymous Student</div>
-                <div class="profile-subtitle">Your identity is protected</div>
-            </div>
-            <div class="profile-info">
-                <div class="info-row">
-                    <span class="info-label">Wallet Address</span>
-                    <span class="info-value">Not connected</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">$VOICE Balance</span>
-                    <span class="info-value">0 VOICE</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Your Posts</span>
-                    <span class="info-value" id="userPostCount">7 posts</span>
-                </div>
-            </div>
-            <button class="modal-close" onclick="closeProfile()">Close</button>
-        </div>
-    </div>
-
-    <!-- Image Viewer Modal -->
-    <div id="imageViewer" class="image-viewer" onclick="closeImageViewer()">
-        <button class="image-viewer-close">×</button>
-        <img id="viewerImage" src="" alt="Full size image">
-    </div>
-
-    <!-- Post Menu -->
-    <div id="postMenu" class="post-menu">
-        <div class="post-menu-header">Post Options</div>
-        <div class="menu-option" onclick="sharePost()">
-            <span class="menu-option-icon">📤</span>
-            <span class="menu-option-text">Share Post</span>
-        </div>
-        <div class="menu-option" onclick="copyLink()">
-            <span class="menu-option-icon">🔗</span>
-            <span class="menu-option-text">Copy Link</span>
-        </div>
-        <div class="menu-option" onclick="bookmarkPost()">
-            <span class="menu-option-icon">🔖</span>
-            <span class="menu-option-text">Bookmark</span>
-        </div>
-        <div class="menu-option" onclick="reportPost()">
-            <span class="menu-option-icon">🚩</span>
-            <span class="menu-option-text">Report</span>
-        </div>
-        <div class="menu-cancel" onclick="closePostMenu()">Cancel</div>
-    </div>
-
     <!-- Bottom Navigation -->
     <div class="bottom-nav">
         <button class="bottom-nav-btn active" onclick="switchSection('home')">
@@ -1291,155 +1027,49 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
-
         // ================================
-        // SUPABASE CONFIGURATION - FIXED CREDENTIALS
+        // SUPABASE CONFIGURATION
         // ================================
-        const SUPABASE_URL = 'https://jjfkwkmdvpxzjzbblodz.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZmt3a21kdnB4emp6YmJsb2R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjk0NzAwOTQsImV4cCI6MjA0NTA0NjA5NH0.rN8oDm5T_JXOG8KN_wBKiBdVTsE7OUOmBBkKJ4VF9TI';
+        const SUPABASE_URL = 'https://ytdlvsfhfyasisksrjyn.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0ZGx2c2ZoZnlhc2lza3NyanluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2NzQ0NzMsImV4cCI6MjA3NjI1MDQ3M30.MB2EojydD3256h3EkjQzR1WsuUw1z2DTsFTLldjigZE';
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // User fingerprint for anonymity
-        let anonymousId = localStorage.getItem('anonymousId') || generateFingerprint();
-        localStorage.setItem('anonymousId', anonymousId);
+        // User fingerprint for anonymous reactions
+        let userFingerprint = localStorage.getItem('userFingerprint') || generateFingerprint();
+        localStorage.setItem('userFingerprint', userFingerprint);
 
         function generateFingerprint() {
-            return 'anon_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
-        }
-
-        // Current filter and selected image
-        let currentFilter = 'all';
-        let selectedImage = null;
-        let selectedPostId = null;
-
-        // ================================
-        // REAL-TIME SUBSCRIPTIONS (SINGLE CHANNEL - CRITICAL!)
-        // ================================
-        function setupRealtime() {
-            // Subscribe to post inserts - NO RE-SUBSCRIPTION INSIDE LOADPOSTS!
-            supabase
-                .channel('posts')
-                .on('postgres_changes', {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'posts'
-                }, payload => {
-                    console.log('New post!', payload);
-                    showToast('📢 New post shared!');
-                    loadPosts(); // Safe - loadPosts doesn't re-subscribe
-                })
-                .on('postgres_changes', {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'posts'
-                }, payload => {
-                    console.log('Post updated!', payload);
-                    loadPosts(); // Safe - reactions update
-                })
-                .subscribe();
-        }
-
-        // ================================
-        // PROFILE FUNCTIONS
-        // ================================
-        function openProfile() {
-            document.getElementById('profileModal').classList.add('active');
-        }
-
-        function closeProfile(event) {
-            if (!event || event.target.id === 'profileModal') {
-                document.getElementById('profileModal').classList.remove('active');
-            }
-        }
-
-        // ================================
-        // IMAGE VIEWER
-        // ================================
-        function openImageViewer(imageSrc) {
-            document.getElementById('viewerImage').src = imageSrc;
-            document.getElementById('imageViewer').classList.add('active');
-        }
-
-        function closeImageViewer() {
-            document.getElementById('imageViewer').classList.remove('active');
-        }
-
-        // ================================
-        // POST MENU (LONG PRESS)
-        // ================================
-        let longPressTimer;
-
-        function startLongPress(postId, event) {
-            longPressTimer = setTimeout(() => {
-                selectedPostId = postId;
-                openPostMenu();
-            }, 500);
-        }
-
-        function endLongPress() {
-            clearTimeout(longPressTimer);
-        }
-
-        function openPostMenu() {
-            document.getElementById('postMenu').classList.add('active');
-        }
-
-        function closePostMenu() {
-            document.getElementById('postMenu').classList.remove('active');
-        }
-
-        function sharePost() {
-            if (navigator.share) {
-                navigator.share({
-                    title: 'SafeVoice Post',
-                    text: 'Check out this anonymous post on SafeVoice',
-                    url: window.location.href
-                });
-            } else {
-                showToast('📤 Share feature not supported');
-            }
-            closePostMenu();
-        }
-
-        function copyLink() {
-            const link = window.location.href;
-            navigator.clipboard.writeText(link).then(() => {
-                showToast('🔗 Link copied!');
-            });
-            closePostMenu();
-        }
-
-        function bookmarkPost() {
-            showToast('🔖 Post bookmarked!');
-            closePostMenu();
-        }
-
-        function reportPost() {
-            showToast('🚩 Post reported. Thank you for keeping our community safe.');
-            closePostMenu();
+            return 'user_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
         }
 
         // ================================
         // NAVIGATION
         // ================================
         function switchSection(section) {
+            // Hide all sections
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+            // Show selected section
             document.getElementById(section).classList.add('active');
 
+            // Update nav buttons
             document.querySelectorAll('.nav-btn, .bottom-nav-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
 
+            // Load content based on section
             if (section === 'home') {
                 loadPosts();
             } else if (section === 'memorials') {
-                loadMemorials();
+                filterPosts('memorial');
             }
         }
 
         // ================================
         // IMAGE HANDLING
         // ================================
+        let selectedImage = null;
+
         document.getElementById('cameraInput').addEventListener('change', handleImageSelect);
         document.getElementById('galleryInput').addEventListener('change', handleImageSelect);
 
@@ -1491,7 +1121,7 @@
         });
 
         // ================================
-        // CREATE POST (FIXED FIELD NAMES: topic, image_url, anonymous_id)
+        // CREATE POST
         // ================================
         async function createPost() {
             const college = document.getElementById('collegeInput').value.trim();
@@ -1523,23 +1153,31 @@
             try {
                 const postData = {
                     college: college,
-                    topic: category,  // FIXED: topic instead of category
+                    category: category,
                     content: content,
-                    image_url: selectedImage,  // FIXED: image_url instead of image_data
+                    image_data: selectedImage,
                     is_memorial: isMemorial,
                     memorial_name: isMemorial ? memorialName : null,
                     memorial_message: isMemorial ? memorialMessage : null,
-                    anonymous_id: anonymousId,  // FIXED: anonymous_id instead of user_fingerprint
-                    created_at: new Date().toISOString()
+                    reaction_support: 0,
+                    reaction_helpful: 0,
+                    reaction_solidarity: 0
                 };
 
-                const { data, error } = await supabase.from('posts').insert([postData]).select().single();
+                const { data, error } = await supabase
+                    .from('posts')
+                    .insert([postData])
+                    .select();
 
                 if (error) throw error;
 
-                showToast('✅ Post shared anonymously!');
+                await supabase.from('analytics').insert([{
+                    event_type: 'post_created',
+                    event_data: { category: category, is_memorial: isMemorial }
+                }]);
 
-                // Clear form
+                showToast('✅ Post shared successfully!');
+
                 document.getElementById('collegeInput').value = '';
                 document.getElementById('contentInput').value = '';
                 document.getElementById('charCount').textContent = '0';
@@ -1549,36 +1187,38 @@
                 document.getElementById('memorialMessage').value = '';
                 removeImage();
 
-                // Reset button
-                btn.disabled = false;
-                btn.innerHTML = '<span>🕊️</span> Post Anonymously';
-
-                // Realtime will update posts automatically
+                loadPosts();
 
             } catch (error) {
-                console.error('Post error:', error);
-                showToast('❌ Failed to post. Try again.');
+                console.error('Error creating post:', error);
+                showToast('❌ Error posting. Please try again.');
+            } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<span>🕊️</span> Post Anonymously';
             }
         }
 
         // ================================
-        // LOAD POSTS (FIXED FIELD NAMES)
+        // LOAD POSTS
         // ================================
+        let currentFilter = 'all';
+
         async function loadPosts() {
             const container = document.getElementById('postsContainer');
             container.innerHTML = '<div class="loading"><div class="loading-spinner">🕊️</div><p>Loading posts...</p></div>';
 
             try {
-                let query = supabase.from('posts').select('*').order('created_at', { ascending: false });
+                let query = supabase
+                    .from('posts')
+                    .select('*')
+                    .order('timestamp', { ascending: false });
 
-                if (currentFilter !== 'all' && currentFilter !== 'memorial') {
-                    query = query.eq('topic', currentFilter);  // FIXED: topic instead of category
-                }
-
-                if (currentFilter === 'memorial') {
-                    query = query.eq('is_memorial', true);
+                if (currentFilter !== 'all') {
+                    if (currentFilter === 'memorial') {
+                        query = query.eq('is_memorial', true);
+                    } else {
+                        query = query.eq('category', currentFilter).eq('is_memorial', false);
+                    }
                 }
 
                 const { data: posts, error } = await query;
@@ -1590,7 +1230,7 @@
                         <div class="empty-state">
                             <div class="empty-state-icon">🕊️</div>
                             <h3>No posts yet</h3>
-                            <p>Be the first to share your voice</p>
+                            <p>Be the first to share your voice!</p>
                         </div>
                     `;
                     return;
@@ -1612,46 +1252,51 @@
         }
 
         // ================================
-        // RENDER POST (FIXED FIELD NAMES)
+        // RENDER POST
         // ================================
         function renderPost(post) {
-            const isMemorial = post.is_memorial;
-            const badgeClass = `badge-${post.topic || 'other'}`;  // FIXED: topic instead of category
-            const badgeText = getCategoryLabel(post.topic || 'other');  // FIXED
-            const timeAgo = getTimeAgo(new Date(post.created_at));
-            const hasImage = post.image_url;  // FIXED: image_url instead of image_data
+            const timeAgo = getTimeAgo(new Date(post.timestamp));
+            const badgeClass = post.is_memorial ? 'memorial' : post.category;
 
             let html = `
-                <div class="post-card" data-post-id="${post.id}" ontouchstart="startLongPress('${post.id}', event)" ontouchend="endLongPress()" oncontextmenu="startLongPress('${post.id}', event); return false;">
+                <div class="post-card">
                     <div class="post-header">
-                        <div>
-                            <div class="post-meta">
-                                <strong>Anonymous Student • ${post.college}</strong>
-                                <span style="margin-left: 8px;">${timeAgo}</span>
-                            </div>
-                            ${isMemorial ? '<div class="post-badge badge-memorial">🕯️ Memorial</div>' : `<div class="post-badge ${badgeClass}">${badgeText}</div>`}
+                        <div class="post-meta">
+                            <strong>${escapeHtml(post.college)}</strong><br>
+                            <span>${timeAgo}</span>
                         </div>
+                        <span class="post-badge badge-${badgeClass}">
+                            ${post.is_memorial ? '🕯️ Memorial' : getCategoryLabel(post.category)}
+                        </span>
                     </div>
+
                     <div class="post-content">${escapeHtml(post.content)}</div>
-                    ${isMemorial && post.memorial_name ? `
-                        <div class="memorial-tribute">
-                            <h4>In memory of ${post.memorial_name}</h4>
-                            <p>${escapeHtml(post.memorial_message || '')}</p>
+
+                    ${post.image_data ? `
+                        <div class="post-image">
+                            <img src="${post.image_data}" alt="Post image" loading="lazy">
                         </div>
                     ` : ''}
-                    ${hasImage ? `<div class="post-image" onclick="openImageViewer('${post.image_url}')"><img src="${post.image_url}" alt="Post image"></div>` : ''}
+
+                    ${post.is_memorial && (post.memorial_name || post.memorial_message) ? `
+                        <div class="memorial-tribute">
+                            <h4>🕯️ In Memory ${post.memorial_name ? 'of ' + escapeHtml(post.memorial_name) : ''}</h4>
+                            ${post.memorial_message ? `<p>${escapeHtml(post.memorial_message)}</p>` : ''}
+                        </div>
+                    ` : ''}
+
                     <div class="reactions">
                         <button class="reaction-btn" onclick="react('${post.id}', 'support')">
                             <span>💚</span>
-                            <span class="reaction-count">Support</span>
+                            <span class="reaction-count">${post.reaction_support || 0}</span>
                         </button>
                         <button class="reaction-btn" onclick="react('${post.id}', 'helpful')">
                             <span>🙌</span>
-                            <span class="reaction-count">Helpful</span>
+                            <span class="reaction-count">${post.reaction_helpful || 0}</span>
                         </button>
                         <button class="reaction-btn" onclick="react('${post.id}', 'solidarity')">
                             <span>🤝</span>
-                            <span class="reaction-count">Together</span>
+                            <span class="reaction-count">${post.reaction_solidarity || 0}</span>
                         </button>
                     </div>
                 </div>
@@ -1661,30 +1306,26 @@
         }
 
         // ================================
-        // REACTIONS (FIXED FIELD NAMES)
+        // REACTIONS
         // ================================
         async function react(postId, reactionType) {
             try {
-                // Check if user already reacted
-                const reactionKey = `reaction_${postId}_${anonymousId}`;
-                if (localStorage.getItem(reactionKey)) {
+                const { data, error } = await supabase
+                    .rpc('increment_reaction', {
+                        p_post_id: postId,
+                        p_reaction_type: reactionType,
+                        p_user_fingerprint: userFingerprint
+                    });
+
+                if (error) throw error;
+
+                if (data === false) {
                     showToast('ℹ️ You already reacted to this post');
                     return;
                 }
 
-                const { error } = await supabase.from('reactions').insert([{
-                    post_id: postId,
-                    type: reactionType,
-                    anonymous_id: anonymousId  // FIXED: anonymous_id instead of user_fingerprint
-                }]);
-
-                if (error) throw error;
-
-                // Mark as reacted
-                localStorage.setItem(reactionKey, reactionType);
-
+                await loadPosts();
                 showToast('✅ Reaction added!');
-                // Realtime will update UI
 
             } catch (error) {
                 console.error('Error adding reaction:', error);
@@ -1703,19 +1344,23 @@
             });
             event.target.classList.add('active');
 
-            loadPosts();
+            if (filter === 'memorial') {
+                document.getElementById('memorialsContainer').innerHTML = '<div class="loading"><div class="loading-spinner">🕯️</div><p>Loading memorials...</p></div>';
+                loadMemorials();
+            } else {
+                loadPosts();
+            }
         }
 
         async function loadMemorials() {
             const container = document.getElementById('memorialsContainer');
-            container.innerHTML = '<div class="loading"><div class="loading-spinner">🕯️</div><p>Loading memorials...</p></div>';
 
             try {
                 const { data: posts, error } = await supabase
                     .from('posts')
                     .select('*')
                     .eq('is_memorial', true)
-                    .order('created_at', { ascending: false });
+                    .order('timestamp', { ascending: false });
 
                 if (error) throw error;
 
@@ -1750,28 +1395,19 @@
         async function updateStats(posts) {
             const totalPosts = posts.length;
             const totalMemorials = posts.filter(p => p.is_memorial).length;
+            const totalReactions = posts.reduce((sum, p) => 
+                sum + (p.reaction_support || 0) + (p.reaction_helpful || 0) + (p.reaction_solidarity || 0), 0
+            );
 
             document.getElementById('totalPosts').textContent = totalPosts;
+            document.getElementById('totalReactions').textContent = totalReactions;
             document.getElementById('totalMemorials').textContent = totalMemorials;
-
-            // Get total reactions
-            try {
-                const { count, error } = await supabase
-                    .from('reactions')
-                    .select('*', { count: 'exact', head: true });
-
-                if (!error) {
-                    document.getElementById('totalReactions').textContent = count || 0;
-                }
-            } catch (e) {
-                console.error('Stats error:', e);
-            }
         }
 
         // ================================
         // HELPER FUNCTIONS
         // ================================
-        function getCategoryLabel(topic) {
+        function getCategoryLabel(category) {
             const labels = {
                 mental: '💭 Mental Health',
                 academic: '📚 Academic',
@@ -1779,7 +1415,7 @@
                 bullying: '🚫 Bullying',
                 other: '💬 Other'
             };
-            return labels[topic] || '💬 Other';
+            return labels[category] || category;
         }
 
         function getTimeAgo(date) {
@@ -1822,16 +1458,16 @@
         // INITIALIZE APP
         // ================================
         window.addEventListener('load', async function() {
-            console.log('🕊️ SafeVoice v13.2 - PRODUCTION READY');
-            console.log('✅ Supabase connected:', SUPABASE_URL);
-            console.log('✅ Real-time enabled (single subscription)');
-            console.log('✅ Field mapping: topic, image_url, anonymous_id');
+            console.log('🕊️ SafeVoice v13.0 - Full Production');
+            console.log('✅ Supabase connected');
 
             await loadPosts();
-            setupRealtime();
 
+            // Load all stats
             try {
-                const { data: allPosts } = await supabase.from('posts').select('*');
+                const { data: allPosts } = await supabase
+                    .from('posts')
+                    .select('*');
                 if (allPosts) updateStats(allPosts);
             } catch (e) {
                 console.error('Error loading stats:', e);
@@ -1842,7 +1478,7 @@
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js')
                 .then(() => console.log('✅ Service Worker registered'))
-                .catch(err => console.log('SW registration failed:', err));
+                .catch(err => console.log('SW failed:', err));
         }
     </script>
 </body>
