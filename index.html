@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>SafeVoice v14.0.2 - Intense Debugging</title>
+    <title>SafeVoice v14.0.3 - Ultimate Debugging</title>
     <link rel="manifest" href="manifest.json">
 
     <style>
@@ -1244,9 +1244,9 @@
         let supabase; // Initialize later after checks
         try {
              supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-             console.log("Supabase client initialized successfully."); // DEBUG
+             console.log("✅ [DEBUG] Supabase client initialized successfully."); // DEBUG
         } catch (e) {
-            console.error("🚨 CRITICAL ERROR: Supabase client initialization failed:", e);
+            console.error("🚨 CRITICAL ERROR: Supabase client initialization failed:", e); // DEBUG
             // Display error message directly on the page if Supabase fails early
             document.body.innerHTML = '<div style="color:white; padding: 20px; text-align: center;"><h1>Connection Error</h1><p>Could not connect to the backend service. Please check your internet connection and try refreshing the page.</p></div>';
         }
@@ -1256,7 +1256,7 @@
         // ================================
         let userFingerprint = localStorage.getItem('userFingerprint') || generateFingerprint();
         localStorage.setItem('userFingerprint', userFingerprint);
-        console.log("User Fingerprint:", userFingerprint); // DEBUG
+        console.log("ℹ️ [DEBUG] User Fingerprint:", userFingerprint); // DEBUG
         
         let currentFilter = 'all';
         let selectedImageFile = null; // v14.0 - Store file, not Base64
@@ -1264,74 +1264,69 @@
         let realtimeChannel = null; // v14.0 - Prevent multiple subscriptions
 
         function generateFingerprint() {
-            console.log("Generating new user fingerprint."); // DEBUG
+            console.log("⚙️ [DEBUG] Generating new user fingerprint."); // DEBUG
             return 'user_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
         }
 
         // ================================
-        // INITIALIZE APP (v14.0.2 - More robust)
+        // INITIALIZE APP (v14.0.3 - Ultimate Debugging)
         // ================================
         window.addEventListener('load', async function() {
-            console.log('🕊️ SafeVoice v14.0.2 - Intense Debugging');
+            console.log('🚀 [DEBUG] SafeVoice v14.0.3 - Ultimate Debugging Initializing...'); // DEBUG
             
             // Only proceed if Supabase client initialized
             if (!supabase) {
                 showToast("🔴 Critical Error: Backend connection failed.");
-                 console.error("Supabase client not available. Aborting initialization."); // DEBUG
+                 console.error("🚨 [DEBUG] Supabase client not available. Aborting initialization."); // DEBUG
                 return; 
             }
             
-            console.log('✅ Supabase connection confirmed in load event.'); // DEBUG
+            console.log('✅ [DEBUG] Supabase connection confirmed in load event.'); // DEBUG
 
+            // Wrap entire init sequence in try/catch
             try {
-                 console.log("⏳ Starting initial loadPosts..."); // DEBUG
+                // STEP 1: Load essential data (Posts first, then stats)
+                console.log("⏳ [DEBUG] STEP 1.1: Starting initial loadPosts..."); // DEBUG
                 await loadPosts();
-                console.log("✅ Initial loadPosts completed."); // DEBUG
-            } catch (error) {
-                 console.error("🚨 CRITICAL ERROR during initial loadPosts:", error); // DEBUG
-                 showToast("❌ Error loading initial posts.");
-                 // Display error state in posts container
-                 const container = document.getElementById('postsContainer') || document.getElementById('memorialsContainer');
-                 if(container) container.innerHTML = \`<div class="empty-state"><h3>⚠️ Error Loading Posts</h3><p>Could not fetch data. Please try refreshing.</p><p style="font-size:10px; color:var(--danger);">(\${error.message})</p></div>\`;
-                 return; // Stop further execution if posts fail to load
-            }
-            
-            try {
-                 console.log("⏳ Starting initial fetchAndSetStats..."); // DEBUG
+                console.log("✅ [DEBUG] STEP 1.1: Initial loadPosts completed."); // DEBUG
+                
+                console.log("⏳ [DEBUG] STEP 1.2: Starting initial fetchAndSetStats..."); // DEBUG
                 await fetchAndSetStats(); // Load global stats
-                console.log("✅ Initial fetchAndSetStats completed."); // DEBUG
-            } catch (error) {
-                 console.error("🚨 CRITICAL ERROR during initial fetchAndSetStats:", error); // DEBUG
-                 showToast("❌ Error loading stats.");
-                 // Optionally clear stats or show error indicators
-                 document.getElementById('totalPosts').textContent = '-';
-                 document.getElementById('totalReactions').textContent = '-';
-                 document.getElementById('totalMemorials').textContent = '-';
+                console.log("✅ [DEBUG] STEP 1.2: Initial fetchAndSetStats completed."); // DEBUG
+
+                // STEP 2: Set up non-critical listeners and real-time AFTER data load
+                console.log("⏳ [DEBUG] STEP 2.1: Adding event listeners..."); // DEBUG
+                setupEventListeners(); // Moved listener setup here
+                console.log("✅ [DEBUG] STEP 2.1: Event listeners added."); // DEBUG
+                
+                console.log("⏳ [DEBUG] STEP 2.2: Setting up real-time subscription..."); // DEBUG
+                subscribeToChanges(); // Call ONCE
+                console.log("✅ [DEBUG] STEP 2.2: Real-time setup initiated."); // DEBUG
+
+                console.log("✅✅✅ [DEBUG] App initialization sequence fully completed."); // DEBUG
+
+            } catch (initError) {
+                 console.error("🚨🚨🚨 [DEBUG] CRITICAL ERROR during app initialization:", initError); // DEBUG
+                 showToast("❌ App failed to initialize. Please refresh.");
+                 // Display a more prominent error if posts didn't load
+                 const container = document.getElementById('postsContainer') || document.getElementById('memorialsContainer');
+                  if(container && container.innerHTML.includes('loading-spinner')) {
+                      container.innerHTML = \`<div class="empty-state"><h3>⚠️ Initialization Failed</h3><p>Could not load initial data. Please check console (F12) and refresh.</p><p style="font-size:10px; color:var(--danger);">(\${initError.message})</p></div>\`;
+                  }
             }
-            
-            try {
-                 console.log("⏳ Setting up real-time subscription..."); // DEBUG
-                subscribeToChanges(); // v14.0 - Call ONCE
-                 console.log("✅ Real-time setup initiated."); // DEBUG
-            } catch (error) {
-                 console.error("🚨 CRITICAL ERROR setting up real-time:", error); // DEBUG
-                 showToast("❌ Error connecting to real-time updates.");
-            }
-            
-            // Add listeners safely
-            try {
-                console.log("⏳ Adding event listeners..."); // DEBUG
+        });
+        
+        // v14.0.3 - Moved listener setup to a separate function
+        function setupEventListeners() {
+             try {
                 document.getElementById('contentInput').addEventListener('input', updateCharCount);
                 document.getElementById('memorialToggle').addEventListener('change', toggleMemorialFields);
                 document.getElementById('cameraInput').addEventListener('change', handleImageSelect);
                 document.getElementById('galleryInput').addEventListener('change', handleImageSelect);
-                console.log("✅ Event listeners added."); // DEBUG
             } catch(e) {
-                console.error("🚨 Error setting up listeners:", e); // DEBUG
+                console.error("🚨 [DEBUG] Error setting up listeners:", e); // DEBUG
             }
-            
-            console.log("✅ App initialization complete."); // DEBUG
-        });
+        }
         
         // ================================
         // REAL-TIME (FIXED: CRITICAL ERROR #1)
@@ -1339,56 +1334,56 @@
         function subscribeToChanges() {
             // Prevent multiple subscriptions or running if Supabase failed
             if (realtimeChannel || !supabase) {
-                 console.log(`Skipping real-time setup: channelExists=${!!realtimeChannel}, supabaseExists=${!!supabase}`); // DEBUG
+                 console.log(`ℹ️ [DEBUG] Skipping real-time setup: channelExists=${!!realtimeChannel}, supabaseExists=${!!supabase}`); // DEBUG
                  return; 
             }
 
             try {
-                console.log("Attempting to create real-time channel 'public-posts'..."); // DEBUG
+                console.log("⏳ [DEBUG] Attempting to create real-time channel 'public-posts'..."); // DEBUG
                 realtimeChannel = supabase
                     .channel('public-posts')
                     .on('postgres_changes', 
                         { event: 'INSERT', schema: 'public', table: 'posts' },
                         async (payload) => { // Make handler async
-                            console.log('➡️ Real-time: New post received!', payload); // DEBUG
+                            console.log('➡️ Real-time: New post received!', payload.new); // DEBUG Log the new data
                             try {
                                 // Smartly add new post instead of full reload? Maybe later.
                                 await loadPosts();
                                 await fetchAndSetStats();
                             } catch (e) {
-                                console.error("🚨 Real-time Error handling new post:", e); // DEBUG
+                                console.error("🚨 [DEBUG] Real-time Error handling new post:", e); // DEBUG
                             }
                         }
                     )
                     .on('postgres_changes',
                         { event: 'INSERT', schema: 'public', table: 'comments' },
                         async (payload) => { // Make handler async
-                             console.log('➡️ Real-time: New comment received!', payload); // DEBUG
+                             console.log('➡️ Real-time: New comment received!', payload.new); // DEBUG Log the new data
                             // If comment modal is open and for this post, refresh it
                             if (document.getElementById('commentsModal').classList.contains('active') &&
                                 payload.new.post_id === currentPostIdForComments) {
-                                console.log("Refreshing comments modal due to real-time event."); // DEBUG
+                                console.log("🔄 [DEBUG] Refreshing comments modal due to real-time event."); // DEBUG
                                 try {
                                     await loadComments(currentPostIdForComments);
                                 } catch (e) {
-                                    console.error("🚨 Real-time Error handling new comment:", e); // DEBUG
+                                    console.error("🚨 [DEBUG] Real-time Error handling new comment:", e); // DEBUG
                                 }
                             }
                         }
                     )
                     .subscribe((status, err) => {
-                         console.log(\`Real-time status change: \${status}\`); // DEBUG
+                         console.log(\`ℹ️ [DEBUG] Real-time status change: \${status}\`); // DEBUG
                         if (status === 'SUBSCRIBED') {
-                            console.log('✅ Real-time channel subscribed successfully!'); // DEBUG
+                            console.log('✅ [DEBUG] Real-time channel subscribed successfully!'); // DEBUG
                         }
                         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-                            console.error('🚨 Real-time subscription error/closed:', status, err); // DEBUG
+                            console.error('🚨 [DEBUG] Real-time subscription error/closed:', status, err); // DEBUG
                             showToast("⚠️ Real-time connection issue.");
                             // Optionally try to resubscribe after a delay
                             realtimeChannel = null; // Allow resubscribe attempt later maybe
                         }
                         if (err) {
-                            console.error('🚨 Real-time subscription error object:', err); // DEBUG
+                            console.error('🚨 [DEBUG] Real-time subscription error object:', err); // DEBUG
                         }
                     });
             } catch (e) {
@@ -1402,7 +1397,7 @@
         // NAVIGATION (v14.0 UPGRADE)
         // ================================
         function switchSection(section) {
-             console.log(\`Switching to section: \${section}\`); // DEBUG
+             console.log(\`🔄 [DEBUG] Switching to section: \${section}\`); // DEBUG
             try {
                 // Hide all sections
                 document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -1411,9 +1406,9 @@
                 const activeSection = document.getElementById(section);
                 if(activeSection) {
                     activeSection.classList.add('active');
-                     console.log(\`Section '\${section}' activated.\`); // DEBUG
+                     console.log(\`✅ [DEBUG] Section '\${section}' activated.\`); // DEBUG
                 } else {
-                     console.error(\`Section with ID "\${section}" not found. Defaulting to home.\`); // DEBUG
+                     console.error(\`🚨 [DEBUG] Section with ID "\${section}" not found. Defaulting to home.\`); // DEBUG
                      document.getElementById('home').classList.add('active');
                      section = 'home'; // Update section variable to reflect reality
                 }
@@ -1435,37 +1430,37 @@
                     loadProfile();
                 }
             } catch (error) {
-                console.error("🚨 Error in switchSection:", error); // DEBUG
+                console.error("🚨 [DEBUG] Error in switchSection:", error); // DEBUG
                 showToast("❌ Navigation Error");
             }
         }
         
         function showModal(modalId) {
-             console.log(\`Showing modal: \${modalId}\`); // DEBUG
+             console.log(\`🔼 [DEBUG] Showing modal: \${modalId}\`); // DEBUG
              try {
                 const modal = document.getElementById(modalId);
                 if (modal) {
                     modal.classList.add('active');
                 } else {
-                    console.error(\`Modal with ID "\${modalId}" not found.\`); // DEBUG
+                    console.error(\`🚨 [DEBUG] Modal with ID "\${modalId}" not found.\`); // DEBUG
                 }
              } catch (error) {
-                console.error("🚨 Error showing modal:", error); // DEBUG
+                console.error("🚨 [DEBUG] Error showing modal:", error); // DEBUG
                 showToast("❌ UI Error");
              }
         }
         
         function closeModal(modalId) {
-             console.log(\`Closing modal: \${modalId}\`); // DEBUG
+             console.log(\`🔽 [DEBUG] Closing modal: \${modalId}\`); // DEBUG
             try {
                 const modal = document.getElementById(modalId);
                 if (modal) {
                      modal.classList.remove('active');
                 } else {
-                    console.error(\`Modal with ID "\${modalId}" not found.\`); // DEBUG
+                    console.error(\`🚨 [DEBUG] Modal with ID "\${modalId}" not found.\`); // DEBUG
                 }
             } catch (error) {
-                 console.error("🚨 Error closing modal:", error); // DEBUG
+                 console.error("🚨 [DEBUG] Error closing modal:", error); // DEBUG
                  showToast("❌ UI Error");
             }
         }
@@ -1474,14 +1469,14 @@
         // IMAGE HANDLING (v14.0 UPGRADE - STORAGE)
         // ================================
         function handleImageSelect(e) {
-            console.log("Handling image selection..."); // DEBUG
+            console.log("⚙️ [DEBUG] Handling image selection..."); // DEBUG
             try {
                 const file = e.target.files[0];
                 if (!file) {
-                     console.log("No file selected."); // DEBUG
+                     console.log("ℹ️ [DEBUG] No file selected."); // DEBUG
                      return;
                 }
-                 console.log(\`File selected: \${file.name}, Size: \${file.size}, Type: \${file.type}\`); // DEBUG
+                 console.log(\`ℹ️ [DEBUG] File selected: \${file.name}, Size: \${file.size}, Type: \${file.type}\`); // DEBUG
 
                 if (file.size > 5 * 1024 * 1024) { // 5MB limit
                     showToast('❌ Image too large! Max 5MB.');
@@ -1499,24 +1494,24 @@
 
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                     console.log("FileReader loaded successfully."); // DEBUG
+                     console.log("✅ [DEBUG] FileReader loaded successfully."); // DEBUG
                     displayImagePreview(event.target.result); // Show preview
                 };
                  reader.onerror = function(error) {
-                    console.error("🚨 FileReader error:", error); // DEBUG
+                    console.error("🚨 [DEBUG] FileReader error:", error); // DEBUG
                     showToast("❌ Error reading image file.");
                     removeImage(); // Clear selection on error
                 };
                 reader.readAsDataURL(file);
             } catch (error) {
-                 console.error("🚨 Error handling image selection:", error); // DEBUG
+                 console.error("🚨 [DEBUG] Error handling image selection:", error); // DEBUG
                  showToast("❌ Error selecting image.");
                  removeImage(); // Ensure cleanup
             }
         }
 
         function displayImagePreview(imageData) {
-            console.log("Displaying image preview..."); // DEBUG
+            console.log("🖼️ [DEBUG] Displaying image preview..."); // DEBUG
             try {
                 const preview = document.getElementById('imagePreview');
                 preview.style.display = 'block';
@@ -1525,20 +1520,20 @@
                     <button class="remove-image" onclick="removeImage()">×</button>
                 \`;
             } catch(e) {
-                console.error("🚨 Error displaying image preview:", e); // DEBUG
+                console.error("🚨 [DEBUG] Error displaying image preview:", e); // DEBUG
                 showToast("❌ Could not display image preview.");
             }
         }
 
         function removeImage() {
-             console.log("Removing selected image."); // DEBUG
+             console.log("🗑️ [DEBUG] Removing selected image."); // DEBUG
             try {
                 selectedImageFile = null;
                 document.getElementById('imagePreview').style.display = 'none';
                 document.getElementById('imagePreview').innerHTML = '';
                 resetImageInputs();
             } catch (e) {
-                 console.error("🚨 Error removing image:", e); // DEBUG
+                 console.error("🚨 [DEBUG] Error removing image:", e); // DEBUG
             }
         }
         
@@ -1546,9 +1541,9 @@
             try {
                 document.getElementById('cameraInput').value = '';
                 document.getElementById('galleryInput').value = '';
-                 console.log("Image input fields reset."); // DEBUG
+                 console.log("ℹ️ [DEBUG] Image input fields reset."); // DEBUG
             } catch (e) {
-                console.error("🚨 Error resetting image inputs:", e); // DEBUG
+                console.error("🚨 [DEBUG] Error resetting image inputs:", e); // DEBUG
             }
         }
 
@@ -1559,21 +1554,21 @@
              try {
                 const contentInput = document.getElementById('contentInput');
                 document.getElementById('charCount').textContent = contentInput.value.length;
-             } catch(e) { console.error("Error updating char count:", e); }
+             } catch(e) { console.error("[DEBUG] Error updating char count:", e); }
         }
 
         function toggleMemorialFields() {
              try {
                 const memorialToggle = document.getElementById('memorialToggle');
                 document.getElementById('memorialFields').style.display = memorialToggle.checked ? 'block' : 'none';
-             } catch(e) { console.error("Error toggling memorial fields:", e); }
+             } catch(e) { console.error("[DEBUG] Error toggling memorial fields:", e); }
         }
 
         // ================================
         // CREATE POST (v14.0 UPGRADE - STORAGE)
         // ================================
         async function createPost() {
-            console.log("Attempting to create post..."); // DEBUG
+            console.log("⏳ [DEBUG] Attempting to create post..."); // DEBUG
             if (!supabase) return showToast("🔴 Backend connection error.");
 
             const college = document.getElementById('collegeInput').value.trim();
@@ -1585,7 +1580,7 @@
 
             if (!college || !content) {
                 showToast('❌ Please fill in college and story');
-                 console.log("Post creation failed: Missing college or content."); // DEBUG
+                 console.log("🛑 [DEBUG] Post creation failed: Missing college or content."); // DEBUG
                 return;
             }
 
@@ -1601,28 +1596,29 @@
                     const fileName = \`\${userFingerprint}_\${Date.now()}_\${selectedImageFile.name.replace(/[^a-zA-Z0-9._-]/g, '')}\`; // Sanitize filename
                     
                     showToast('Uploading image...');
-                    console.log(\`Uploading \${fileName} to post-images bucket...\`); // DEBUG
+                    console.log(\`⏳ [DEBUG] Uploading \${fileName} to post-images bucket...\`); // DEBUG
                     const { data: uploadData, error: uploadError } = await supabase.storage
                         .from('post-images') // **USER MUST CREATE THIS BUCKET & MAKE PUBLIC**
                         .upload(fileName, selectedImageFile);
 
                     if (uploadError) {
-                         console.error("🚨 Supabase storage upload error:", uploadError); // DEBUG
+                         console.error("🚨 [DEBUG] Supabase storage upload error:", uploadError); // DEBUG
                          throw new Error(\`Image upload failed: \${uploadError.message}\`); // Throw specific error
                     }
-                     console.log("✅ Image upload successful:", uploadData); // DEBUG
+                     console.log("✅ [DEBUG] Image upload successful:", uploadData); // DEBUG
 
                     // Get the public URL
+                     console.log("⏳ [DEBUG] Getting public URL for image..."); // DEBUG
                     const { data: urlData } = supabase.storage
                         .from('post-images')
                         .getPublicUrl(fileName);
                     
                     if (!urlData || !urlData.publicUrl) {
-                        console.error("🚨 Could not get public URL for uploaded image."); // DEBUG
+                        console.error("🚨 [DEBUG] Could not get public URL for uploaded image."); // DEBUG
                         throw new Error("Failed to get image URL after upload.");
                     }
                     imageUrl = urlData.publicUrl;
-                     console.log("✅ Image URL obtained:", imageUrl); // DEBUG
+                     console.log("✅ [DEBUG] Image URL obtained:", imageUrl); // DEBUG
                 }
 
                 const postData = {
@@ -1639,17 +1635,17 @@
                     anonymous_id: userFingerprint // Add user fingerprint
                 };
                 
-                 console.log("⏳ Inserting post data into Supabase:", postData); // DEBUG
+                 console.log("⏳ [DEBUG] Inserting post data into Supabase:", postData); // DEBUG
                 const { data, error } = await supabase
                     .from('posts')
                     .insert([postData])
                     .select();
 
                 if (error) {
-                     console.error("🚨 Supabase insert post error:", error); // DEBUG
+                     console.error("🚨 [DEBUG] Supabase insert post error:", error); // DEBUG
                      throw error; // Re-throw to be caught by outer catch
                 }
-                console.log("✅ Post inserted successfully:", data); // DEBUG
+                console.log("✅ [DEBUG] Post inserted successfully:", data); // DEBUG
                 
                 showToast('✅ Post shared successfully!');
                 resetPostForm();
@@ -1657,7 +1653,7 @@
                 // Real-time subscription *should* handle loading the post and stats
 
             } catch (error) {
-                console.error("🚨 CRITICAL ERROR creating post:", error); // DEBUG
+                console.error("🚨🚨🚨 [DEBUG] CRITICAL ERROR creating post:", error); // DEBUG
                 showToast(\`❌ Error creating post: \${error.message}\`); // Show more specific error
             } finally {
                 btn.disabled = false;
@@ -1667,7 +1663,7 @@
         
         function resetPostForm() {
             try {
-                 console.log("Resetting post form fields."); // DEBUG
+                 console.log("⚙️ [DEBUG] Resetting post form fields."); // DEBUG
                 document.getElementById('collegeInput').value = '';
                 document.getElementById('contentInput').value = '';
                 document.getElementById('charCount').textContent = '0';
@@ -1677,37 +1673,43 @@
                 document.getElementById('memorialMessage').value = '';
                 removeImage();
             } catch (e) {
-                console.error("🚨 Error resetting post form:", e); // DEBUG
+                console.error("🚨 [DEBUG] Error resetting post form:", e); // DEBUG
             }
         }
 
         // ================================
-        // LOAD POSTS (v14.0.2 - More logging)
+        // LOAD POSTS (v14.0.3 - Ultimate Debugging)
         // ================================
         async function loadPosts() {
+            // Ensure Supabase client is available
             if (!supabase) {
-                 console.error("loadPosts aborted: Supabase client not available."); // DEBUG
-                 return Promise.reject("Supabase client not available."); // Return a rejected promise
+                 console.error("🚨 [DEBUG] loadPosts aborted: Supabase client not available."); // DEBUG
+                 // Display error state immediately if Supabase is missing
+                 const container = document.getElementById('postsContainer') || document.getElementById('memorialsContainer');
+                 if(container) container.innerHTML = '<div class="empty-state"><h3>⚠️ Connection Error</h3><p>Cannot load posts. Backend connection failed.</p></div>';
+                 return Promise.reject(new Error("Supabase client not available.")); // Return a rejected promise
             }
             
-            console.log(\`⏳ [loadPosts] Loading posts with filter: \${currentFilter}\`); // DEBUG
+            console.log(\`⏳ [DEBUG] [loadPosts] Starting load with filter: \${currentFilter}\`); // DEBUG
             const container = (currentFilter === 'memorial') ? document.getElementById('memorialsContainer') : document.getElementById('postsContainer');
             if (!container) {
-                 console.error("🚨 [loadPosts] Posts container not found!"); // DEBUG
-                 return Promise.reject("Posts container not found.");
+                 console.error("🚨 [DEBUG] [loadPosts] Posts container element not found!"); // DEBUG
+                 return Promise.reject(new Error("Posts container element not found."));
             }
             
+            // Set loading state immediately
             let loadingMessage = (currentFilter === 'memorial') ? 'Loading memorials...' : 'Loading posts...';
             let loadingIcon = (currentFilter === 'memorial') ? '🕯️' : '🕊️';
-            
             container.innerHTML = \`<div class="loading"><div class="loading-spinner">\${loadingIcon}</div><p>\${loadingMessage}</p></div>\`;
 
+            // Start the actual data fetching
             try {
                 let query = supabase
                     .from('posts')
                     .select('*')
                     .order('timestamp', { ascending: false });
 
+                // Apply filters based on currentFilter
                 if (currentFilter === 'all') {
                     query = query.eq('is_memorial', false);
                 } else if (currentFilter === 'memorial') {
@@ -1716,17 +1718,19 @@
                     query = query.eq('category', currentFilter).eq('is_memorial', false);
                 }
 
-                console.log("⏳ [loadPosts] Executing Supabase query..."); // DEBUG
+                console.log("⏳ [DEBUG] [loadPosts] Executing Supabase query..."); // DEBUG
                 const { data: posts, error, count } = await query;
 
+                // Handle potential errors from Supabase query
                 if (error) {
-                     console.error("🚨 [loadPosts] Supabase error loading posts:", error); // DEBUG
-                     throw error; // Let outer catch handle UI update
+                     console.error("🚨 [DEBUG] [loadPosts] Supabase query error:", error); // DEBUG
+                     throw error; // Propagate the error to the catch block
                 }
-                 console.log(\`✅ [loadPosts] Fetched \${posts ? posts.length : 0} posts.\`); // DEBUG
+                 console.log(\`✅ [DEBUG] [loadPosts] Fetched \${posts ? posts.length : 0} posts.\`); // DEBUG
 
+                // Handle case where no posts are found
                 if (!posts || posts.length === 0) {
-                     console.log("[loadPosts] No posts found for this filter."); // DEBUG
+                     console.log("ℹ️ [DEBUG] [loadPosts] No posts found for this filter."); // DEBUG
                     let emptyIcon = (currentFilter === 'memorial') ? '🕯️' : '🕊️';
                     let emptyTitle = (currentFilter === 'memorial') ? 'No memorials yet' : 'No posts yet';
                     let emptyMessage = (currentFilter === 'memorial') ? 'Honor someone by creating a tribute' : 'Be the first to share your voice!';
@@ -1738,41 +1742,41 @@
                             <p>\${emptyMessage}</p>
                         </div>
                     \`;
-                    return Promise.resolve(); // Successfully loaded empty state
+                    return Promise.resolve(); // Indicate successful loading of empty state
                 }
                 
-                // Check if container still exists before updating
-                 console.log("⏳ [loadPosts] Rendering posts..."); // DEBUG
-                if (document.body.contains(container)) {
-                    // v14.0.2 - Wrap rendering in try/catch
+                // Render the fetched posts
+                 console.log("⏳ [DEBUG] [loadPosts] Rendering fetched posts..."); // DEBUG
+                if (document.body.contains(container)) { // Double-check container exists
+                    // Map posts to HTML, catching individual rendering errors
                     const renderedPostsHtml = posts.map((post, index) => {
                          try {
-                              // console.log(\`Rendering post index \${index}, ID: \${post.id}\`); // DEBUG - Too verbose?
-                             return renderPost(post);
+                             return renderPost(post); // Call the render function for each post
                          } catch (renderError) {
-                              console.error(\`🚨 [loadPosts] Error rendering post index \${index}, ID: \${post.id}:\`, renderError, post); // DEBUG
-                             return \`<div class="post-card glassmorphism render-error">Failed to render this post (ID: \${post.id}). See console for details.</div>\`;
+                              console.error(\`🚨 [DEBUG] [loadPosts] Error rendering post index \${index}, ID: \${post ? post.id : 'unknown'}:\`, renderError, post); // Log error with post data
+                             return \`<div class="post-card glassmorphism render-error">Failed to render this post (ID: \${post ? post.id : 'unknown'}). See console.</div>\`; // Provide fallback UI
                          }
                     }).join('');
                     
-                    container.innerHTML = renderedPostsHtml;
+                    container.innerHTML = renderedPostsHtml; // Update the container with rendered HTML
                 
-                    // v14.0 - Check local storage for reacted posts
-                    console.log("⏳ [loadPosts] Checking reacted status for posts..."); // DEBUG
+                    // Apply 'reacted' status from local storage
+                    console.log("⏳ [DEBUG] [loadPosts] Checking and applying reacted status..."); // DEBUG
                     posts.forEach(post => {
-                        if (post && post.id) { // Ensure post and id exist before checking
+                        if (post && post.id) { // Ensure post and id exist
                             checkReactedStatus(post.id);
                         }
                     });
-                     console.log("✅ [loadPosts] Post rendering and reaction checks complete."); // DEBUG
+                     console.log("✅ [DEBUG] [loadPosts] Post rendering and reaction checks complete."); // DEBUG
                      return Promise.resolve(); // Indicate success
                 } else {
-                    console.warn("🚨 [loadPosts] Container was removed before rendering posts could complete."); // DEBUG
-                     return Promise.reject("Container removed during rendering.");
+                    console.warn("🚨 [DEBUG] [loadPosts] Container was removed before rendering posts could complete."); // DEBUG
+                     return Promise.reject(new Error("Container removed during rendering."));
                 }
 
-            } catch (error) {
-                console.error("🚨 CRITICAL ERROR in loadPosts catch block:", error); // DEBUG
+            } catch (error) { // Catch errors from query or rendering setup
+                console.error("🚨🚨🚨 [DEBUG] CRITICAL ERROR in loadPosts catch block:", error); // Log the caught error
+                 // Update UI to show error state if container still exists
                  if (document.body.contains(container)) {
                     container.innerHTML = \`
                         <div class="empty-state">
@@ -1783,33 +1787,37 @@
                         </div>
                     \`;
                  }
-                 // Re-throw the error so the initial load handler knows it failed
-                 return Promise.reject(error); // Return rejected promise
+                 // Return a rejected promise to signal failure
+                 return Promise.reject(error); 
             }
         }
 
+
         // ================================
-        // RENDER POST (v14.0.2 - More defensive)
+        // RENDER POST (v14.0.3 - Ultimate Debugging)
         // ================================
         function renderPost(post) {
-             // console.log(\`Rendering post ID: \${post ? post.id : 'undefined'}\`); // DEBUG
-             // Add checks for essential post data
-             if (!post || !post.id || !post.college || typeof post.content === 'undefined') {
-                console.error("🚨 [renderPost] Invalid post data received:", post); // DEBUG
-                return '<div class="post-card glassmorphism render-error">Error: Invalid post data received.</div>'; // Render an error placeholder
+             // console.log(\`[DEBUG] Rendering post ID: \${post ? post.id : 'undefined'}\`); // DEBUG - Can be verbose
+             // Validate essential post data before proceeding
+             if (!post || typeof post.id === 'undefined' || typeof post.college === 'undefined' || typeof post.content === 'undefined') {
+                console.error("🚨 [DEBUG] [renderPost] Invalid or incomplete post data received:", post); // Log the problematic data
+                return '<div class="post-card glassmorphism render-error">Error: Invalid post data. Cannot render.</div>'; // Return an error placeholder
             }
             
-            try { // Wrap the whole rendering in a try/catch
-                const timeAgo = getTimeAgo(new Date(post.timestamp || Date.now())); // Fallback for timestamp
-                const badgeClass = post.is_memorial ? 'memorial' : (post.category || 'other');
+            // Proceed with rendering inside a try...catch block
+            try { 
+                const timeAgo = getTimeAgo(new Date(post.timestamp || Date.now())); // Provide fallback for timestamp
+                const category = post.category || 'other'; // Default category if missing
+                const badgeClass = post.is_memorial ? 'memorial' : category;
 
-                // v14.0 - Use image_url, not image_data
+                // Generate image HTML safely
                 const imageHtml = post.image_url ? \`
                     <div class="post-image">
-                        <img src="\${post.image_url}" alt="Post image" loading="lazy" onerror="this.style.display='none'; console.warn('Image failed to load:', this.src);"> 
+                        <img src="\${escapeHtml(post.image_url)}" alt="Post image" loading="lazy" onerror="this.style.display='none'; console.warn('Image failed to load:', this.src);"> 
                     </div>
                 \` : '';
                 
+                // Generate memorial HTML safely
                 const memorialHtml = post.is_memorial && (post.memorial_name || post.memorial_message) ? \`
                     <div class="memorial-tribute">
                         <h4>🕯️ In Memory \${post.memorial_name ? 'of ' + escapeHtml(post.memorial_name) : ''}</h4>
@@ -1817,11 +1825,12 @@
                     </div>
                 \` : '';
 
-                // Ensure reaction counts are numbers, default to 0
+                // Safely parse reaction counts, defaulting to 0
                 const supportCount = Number(post.reaction_support) || 0;
                 const helpfulCount = Number(post.reaction_helpful) || 0;
                 const solidarityCount = Number(post.reaction_solidarity) || 0;
 
+                // Construct the final HTML, ensuring all variables are escaped
                 return \`
                     <div class="post-card glassmorphism" id="post-\${post.id}">
                         <div class="post-header">
@@ -1830,7 +1839,7 @@
                                 <span>\${timeAgo}</span>
                             </div>
                             <span class="post-badge badge-\${badgeClass}">
-                                \${post.is_memorial ? '🕯️ Memorial' : getCategoryLabel(post.category)}
+                                \${post.is_memorial ? '🕯️ Memorial' : getCategoryLabel(category)} 
                             </span>
                         </div>
 
@@ -1860,17 +1869,18 @@
                         </div>
                     </div>
                 \`;
-            } catch (renderError) {
-                 console.error(\`🚨 [renderPost] Error rendering post ID \${post.id}:\`, renderError, post); // DEBUG
-                 return \`<div class="post-card glassmorphism render-error">Failed to render post ID: \${post.id}. Check console.</div>\`;
+            } catch (renderError) { // Catch any unexpected errors during rendering
+                 console.error(\`🚨 [DEBUG] [renderPost] Unexpected error rendering post ID \${post.id}:\`, renderError, post); // Log error and post data
+                 return \`<div class="post-card glassmorphism render-error">Failed to render post ID: \${post.id}. Check console.</div>\`; // Return fallback UI
             }
         }
+
 
         // ================================
         // REACTIONS (v14.0 BUG FIX - NO RELOAD)
         // ================================
         async function react(event, postId, reactionType) {
-             console.log(\`Reacting to post \${postId} with type \${reactionType}\`); // DEBUG
+             console.log(\`👍 [DEBUG] Reacting to post \${postId} with type \${reactionType}\`); // DEBUG
             if (!supabase) return showToast("🔴 Backend connection error.");
 
             const reactionKey = \`reacted_\${postId}_\${reactionType}\`;
@@ -1879,7 +1889,7 @@
             // 1. Check local storage
             if (localStorage.getItem(reactionKey)) {
                 showToast('ℹ️ You already reacted this way');
-                 console.log("Reaction blocked: Already reacted (local check)."); // DEBUG
+                 console.log("ℹ️ [DEBUG] Reaction blocked: Already reacted (local check)."); // DEBUG
                 return;
             }
             
@@ -1891,7 +1901,7 @@
              // Ensure count is a number before incrementing
             if (isNaN(currentCount)) currentCount = 0;
             countSpan.textContent = currentCount + 1;
-             console.log(\`Optimistic update: Count changed from \${currentCount} to \${currentCount + 1}\`); // DEBUG
+             console.log(\`✅ [DEBUG] Optimistic update: Count changed from \${currentCount} to \${currentCount + 1}\`); // DEBUG
             
             // 3. Store in local storage
             localStorage.setItem(reactionKey, 'true');
@@ -1899,7 +1909,7 @@
 
             try {
                 // 4. Call Supabase RPC in background
-                 console.log("⏳ Calling Supabase RPC 'increment_reaction'..."); // DEBUG
+                 console.log("⏳ [DEBUG] Calling Supabase RPC 'increment_reaction'..."); // DEBUG
                 const { data, error } = await supabase
                     .rpc('increment_reaction', {
                         p_post_id: postId,
@@ -1908,15 +1918,15 @@
                     });
 
                 if (error) {
-                     console.error("🚨 Supabase RPC error (increment_reaction):", error); // DEBUG
+                     console.error("🚨 [DEBUG] Supabase RPC error (increment_reaction):", error); // DEBUG
                      throw error; // Let outer catch handle rollback
                 }
                 
-                console.log("✅ RPC increment_reaction result:", data); // DEBUG
+                console.log("✅ [DEBUG] RPC increment_reaction result:", data); // DEBUG
                 if (data === false) {
                      // This shouldn't happen due to local storage check, but good to have
                     showToast('ℹ️ Already reacted (server check)');
-                     console.log("Server indicated already reacted."); // DEBUG
+                     console.log("ℹ️ [DEBUG] Server indicated already reacted."); // DEBUG
                 } else {
                     showToast('✅ Reaction added!');
                     // 5. Refresh global stats in header
@@ -1928,7 +1938,7 @@
                 showToast('❌ Error adding reaction');
                 
                 // 6. Rollback optimistic update on error
-                 console.log("Rolling back optimistic reaction update..."); // DEBUG
+                 console.log("⏪ [DEBUG] Rolling back optimistic reaction update..."); // DEBUG
                 btn.classList.remove('reacted');
                 btn.disabled = false;
                 countSpan.textContent = currentCount; // Set back to old count
@@ -1939,21 +1949,21 @@
         
         // Helper to re-apply reacted styles on load
         function checkReactedStatus(postId) {
-            // console.log(\`Checking reaction status for post \${postId}\`); // DEBUG - Too verbose
+            // console.log(\`[DEBUG] Checking reaction status for post \${postId}\`); // DEBUG - Too verbose
             try {
                 ['support', 'helpful', 'solidarity'].forEach(type => {
                     const reactionKey = \`reacted_\${postId}_\${type}\`;
                     if (localStorage.getItem(reactionKey)) {
                         const btn = document.querySelector(\`button[data-postid="\${postId}"][data-type="\${type}"]\`);
                         if (btn) {
-                             // console.log(\`Applying reacted style to \${type} for post \${postId}\`); // DEBUG
+                             // console.log(\`[DEBUG] Applying reacted style to \${type} for post \${postId}\`); // DEBUG
                             btn.classList.add('reacted');
                             btn.disabled = true;
                         }
                     }
                 });
             } catch (e) {
-                console.error("🚨 Error checking reaction status:", e); // DEBUG
+                console.error("🚨 [DEBUG] Error checking reaction status:", e); // DEBUG
             }
         }
 
@@ -1962,7 +1972,7 @@
         // FILTER POSTS
         // ================================
         function filterPosts(event, filter) {
-             console.log(\`Filtering posts by: \${filter}\`); // DEBUG
+             console.log(\`🔄 [DEBUG] Filtering posts by: \${filter}\`); // DEBUG
             currentFilter = filter;
 
             try {
@@ -1977,7 +1987,7 @@
                      if (filterBtn) {
                          filterBtn.classList.add('active');
                      } else {
-                          console.warn(\`Filter button for '\${filter}' not found.\`); // DEBUG
+                          console.warn(\`⚠️ [DEBUG] Filter button for '\${filter}' not found.\`); // DEBUG
                           // Attempt to activate 'all' as fallback if specific filter button missing
                           const allFilterBtn = document.querySelector('#postFilters .filter-btn[onclick*="\'all\'"]');
                           if(allFilterBtn) allFilterBtn.classList.add('active');
@@ -1986,109 +1996,122 @@
 
                 loadPosts(); // Reload posts with the new filter
             } catch (e) {
-                console.error("🚨 Error applying filter:", e); // DEBUG
+                console.error("🚨 [DEBUG] Error applying filter:", e); // DEBUG
                 showToast("❌ Error applying filter");
             }
         }
 
         // ================================
-        // STATS & PROFILE (v14.0.2 BUGFIX - Simpler Stats)
+        // STATS & PROFILE (v14.0.3 - Ultimate Debugging)
         // ================================
         async function fetchAndSetStats() {
+            // Ensure Supabase client is available
             if (!supabase) {
-                 console.error("fetchAndSetStats aborted: Supabase client not available."); // DEBUG
-                 return Promise.reject("Supabase client not available.");
+                 console.error("🚨 [DEBUG] fetchAndSetStats aborted: Supabase client not available."); // DEBUG
+                 return Promise.reject(new Error("Supabase client not available."));
             } 
-             console.log("⏳ [fetchAndSetStats] Fetching global stats..."); // DEBUG
-             try {
-                 console.log("⏳ [fetchAndSetStats] Fetching total posts count..."); // DEBUG
+            
+            console.log("⏳ [DEBUG] [fetchAndSetStats] Starting fetch..."); // DEBUG
+            
+            // Wrap in try...catch
+            try {
+                 console.log("⏳ [DEBUG] [fetchAndSetStats] Fetching total posts count..."); // DEBUG
                 // Get total posts count
                 const { count: totalPostCount, error: countError } = await supabase
                     .from('posts')
-                    .select('*', { count: 'exact', head: true });
+                    .select('*', { count: 'exact', head: true }); // head: true is more efficient
                 if (countError) {
-                     console.error("🚨 [fetchAndSetStats] Error fetching total posts count:", countError); // DEBUG
-                     throw countError;
+                     console.error("🚨 [DEBUG] [fetchAndSetStats] Error fetching total posts count:", countError); // DEBUG
+                     throw countError; // Propagate error
                 }
                 document.getElementById('totalPosts').textContent = totalPostCount || 0;
-                 console.log(\`✅ [fetchAndSetStats] Total Posts: \${totalPostCount}\`); // DEBUG
+                 console.log(\`✅ [DEBUG] [fetchAndSetStats] Total Posts: \${totalPostCount}\`); // DEBUG
 
-                 console.log("⏳ [fetchAndSetStats] Fetching total memorials count..."); // DEBUG
+                 console.log("⏳ [DEBUG] [fetchAndSetStats] Fetching total memorials count..."); // DEBUG
                 // Get total memorials count
                 const { count: memorialCount, error: memError } = await supabase
                     .from('posts')
                     .select('*', { count: 'exact', head: true })
                     .eq('is_memorial', true);
                 if (memError) {
-                     console.error("🚨 [fetchAndSetStats] Error fetching memorials count:", memError); // DEBUG
-                     throw memError;
+                     console.error("🚨 [DEBUG] [fetchAndSetStats] Error fetching memorials count:", memError); // DEBUG
+                     throw memError; // Propagate error
                 }
                 document.getElementById('totalMemorials').textContent = memorialCount || 0;
-                 console.log(\`✅ [fetchAndSetStats] Total Memorials: \${memorialCount}\`); // DEBUG
+                 console.log(\`✅ [DEBUG] [fetchAndSetStats] Total Memorials: \${memorialCount}\`); // DEBUG
 
-                 console.log("⏳ [fetchAndSetStats] Fetching posts for reaction counts..."); // DEBUG
-                // Calculate total reactions (Fallback method from v14.0 is now primary)
+                 console.log("⏳ [DEBUG] [fetchAndSetStats] Fetching posts for reaction counts..."); // DEBUG
+                // Calculate total reactions - Simplified for debugging (v14.0.3)
+                // This might be less performant on huge datasets, but safer for now.
                 const { data: allPostsData, error: postDataError } = await supabase
                     .from('posts')
                     .select('reaction_support, reaction_helpful, reaction_solidarity');
                 if (postDataError) {
-                     console.error("🚨 [fetchAndSetStats] Error fetching post reaction data:", postDataError); // DEBUG
-                     throw postDataError;
+                     console.error("🚨 [DEBUG] [fetchAndSetStats] Error fetching post reaction data:", postDataError); // DEBUG
+                     throw postDataError; // Propagate error
                 }
 
+                 console.log(\`✅ [DEBUG] [fetchAndSetStats] Fetched reaction data from \${allPostsData.length} posts.\`); // DEBUG
                 const totalReactions = allPostsData.reduce((sum, p) => 
                         sum + (Number(p.reaction_support) || 0) + (Number(p.reaction_helpful) || 0) + (Number(p.reaction_solidarity) || 0), 0
                     );
                 document.getElementById('totalReactions').textContent = totalReactions || 0;
-                 console.log(\`✅ [fetchAndSetStats] Total Reactions calculated: \${totalReactions}\`); // DEBUG
+                 console.log(\`✅ [DEBUG] [fetchAndSetStats] Total Reactions calculated: \${totalReactions}\`); // DEBUG
+                 
+                 console.log("✅ [DEBUG] [fetchAndSetStats] Fetch completed successfully."); // DEBUG
                  return Promise.resolve(); // Indicate success
                 
-            } catch (e) {
-                console.error("🚨 CRITICAL ERROR loading stats:", e); // DEBUG
-                showToast("❌ Error loading header stats.");
-                 // Indicate error in UI
-                 document.getElementById('totalPosts').textContent = '⚠️';
-                 document.getElementById('totalReactions').textContent = '⚠️';
-                 document.getElementById('totalMemorials').textContent = '⚠️';
-                 // Re-throw so initial load handler knows it failed
-                 return Promise.reject(e); // Return rejected promise
+            } catch (e) { // Catch any error during the stat fetching process
+                console.error("🚨🚨🚨 [DEBUG] CRITICAL ERROR loading stats:", e); // Log the specific error
+                showToast("❌ Error loading header stats. Check console."); // Inform user
+                 // Indicate error state in the UI
+                 try {
+                     document.getElementById('totalPosts').textContent = '⚠️';
+                     document.getElementById('totalReactions').textContent = '⚠️';
+                     document.getElementById('totalMemorials').textContent = '⚠️';
+                 } catch (uiError) {
+                     console.error("🚨 [DEBUG] Error updating stats UI to error state:", uiError); // Log UI update error
+                 }
+                 // Return a rejected promise to signal failure
+                 return Promise.reject(e); 
             }
         }
+
         
         async function loadProfile() {
             if (!supabase) return; 
-             console.log("⏳ Loading profile data..."); // DEBUG
+             console.log("⏳ [DEBUG] Loading profile data..."); // DEBUG
             try {
                 document.getElementById('profileAnonId').textContent = userFingerprint;
-            } catch (e) { console.error("Error setting profileAnonId:", e); }
+            } catch (e) { console.error("🚨 [DEBUG] Error setting profileAnonId:", e); }
             
             // Fix hardcoded post count
             try {
-                 console.log("⏳ Fetching post count for user:", userFingerprint); // DEBUG
+                 console.log("⏳ [DEBUG] Fetching post count for user:", userFingerprint); // DEBUG
                 const { count, error } = await supabase
                     .from('posts')
                     .select('*', { count: 'exact', head: true })
                     .eq('anonymous_id', userFingerprint);
                     
                 if (error) throw error;
-                 console.log(\`✅ User post count: \${count}\`); // DEBUG
-                 try { document.getElementById('profilePostCount').textContent = count || 0; } catch(e){console.error("Error setting profilePostCount:", e);}
+                 console.log(\`✅ [DEBUG] User post count: \${count}\`); // DEBUG
+                 try { document.getElementById('profilePostCount').textContent = count || 0; } catch(e){console.error("🚨 [DEBUG] Error setting profilePostCount:", e);}
             } catch (error) {
-                console.error("🚨 Error loading post count for profile:", error); // DEBUG
-                 try { document.getElementById('profilePostCount').textContent = 'Error'; } catch(e){console.error("Error setting profilePostCount to Error:", e);}
+                console.error("🚨 [DEBUG] Error loading post count for profile:", error); // DEBUG
+                 try { document.getElementById('profilePostCount').textContent = 'Error'; } catch(e){console.error("🚨 [DEBUG] Error setting profilePostCount to Error:", e);}
             }
             
             // Load reaction count from local storage
             const reactionsGiven = localStorage.getItem(\`reacted_total_\${userFingerprint}\`) || 0;
-             try { document.getElementById('profileReactionCount').textContent = reactionsGiven; } catch(e){console.error("Error setting profileReactionCount:", e);}
-             console.log(\`✅ User reactions given (local): \${reactionsGiven}\`); // DEBUG
+             try { document.getElementById('profileReactionCount').textContent = reactionsGiven; } catch(e){console.error("🚨 [DEBUG] Error setting profileReactionCount:", e);}
+             console.log(\`✅ [DEBUG] User reactions given (local): \${reactionsGiven}\`); // DEBUG
         }
 
         // ================================
         // NEW: COMMENTS SYSTEM (v14.0)
         // ================================
         async function showComments(postId) {
-             console.log(\`Showing comments for post: \${postId}\`); // DEBUG
+             console.log(\`💬 [DEBUG] Showing comments for post: \${postId}\`); // DEBUG
             currentPostIdForComments = postId;
             document.getElementById('commentsContainer').innerHTML = \`
                 <div class="loading">
@@ -2099,22 +2122,22 @@
             try {
                 await loadComments(postId);
             } catch (e) {
-                 console.error(\`Failed to load comments initially for post \${postId}:\`, e); // DEBUG
+                 console.error(\`🚨 [DEBUG] Failed to load comments initially for post \${postId}:\`, e); // DEBUG
                 // Error handled within loadComments, UI should show error state
             }
         }
         
         async function loadComments(postId) {
              if (!supabase) return Promise.reject("Supabase client not available."); 
-             console.log(\`⏳ Loading comments for post: \${postId}\`); // DEBUG
+             console.log(\`⏳ [DEBUG] Loading comments for post: \${postId}\`); // DEBUG
             const container = document.getElementById('commentsContainer');
              if (!container) {
-                 console.error("🚨 Comments container not found!"); // DEBUG
+                 console.error("🚨 [DEBUG] Comments container not found!"); // DEBUG
                  return Promise.reject("Comments container not found.");
              }
 
             try {
-                 console.log("⏳ [loadComments] Executing Supabase query..."); // DEBUG
+                 console.log("⏳ [DEBUG] [loadComments] Executing Supabase query..."); // DEBUG
                 const { data: comments, error } = await supabase
                     .from('comments')
                     .select('*')
@@ -2122,13 +2145,13 @@
                     .order('created_at', { ascending: true });
                 
                 if (error) {
-                     console.error("🚨 [loadComments] Supabase error loading comments:", error); // DEBUG
+                     console.error("🚨 [DEBUG] [loadComments] Supabase error loading comments:", error); // DEBUG
                      throw error;
                 }
-                 console.log(\`✅ [loadComments] Fetched \${comments ? comments.length : 0} comments.\`); // DEBUG
+                 console.log(\`✅ [DEBUG] [loadComments] Fetched \${comments ? comments.length : 0} comments.\`); // DEBUG
                 
                 if (!comments || comments.length === 0) {
-                     console.log("[loadComments] No comments found."); // DEBUG
+                     console.log("ℹ️ [DEBUG] [loadComments] No comments found."); // DEBUG
                     container.innerHTML = \`
                         <div class="empty-state">
                             <div class="empty-state-icon">💬</div>
@@ -2138,23 +2161,23 @@
                     return Promise.resolve();
                 }
                 
-                 console.log("⏳ [loadComments] Rendering comments..."); // DEBUG
+                 console.log("⏳ [DEBUG] [loadComments] Rendering comments..."); // DEBUG
                  if (document.body.contains(container)) {
                      // v14.0.2 - Wrap rendering in try/catch
                     const renderedCommentsHtml = comments.map((comment, index) => {
                          try {
                              return renderComment(comment);
                          } catch (renderError) {
-                              console.error(\`🚨 [loadComments] Error rendering comment index \${index}, ID: \${comment.id}:\`, renderError, comment); // DEBUG
-                             return \`<div class="comment-card render-error">Failed to render this comment (ID: \${comment.id}). See console.</div>\`;
+                              console.error(\`🚨 [DEBUG] [loadComments] Error rendering comment index \${index}, ID: \${comment ? comment.id : 'unknown'}:\`, renderError, comment); // DEBUG
+                             return \`<div class="comment-card render-error">Failed to render this comment (ID: \${comment ? comment.id : 'unknown'}). See console.</div>\`;
                          }
                     }).join('');
                     
                     container.innerHTML = renderedCommentsHtml;
-                     console.log("✅ [loadComments] Comments rendered successfully."); // DEBUG
+                     console.log("✅ [DEBUG] [loadComments] Comments rendered successfully."); // DEBUG
                      return Promise.resolve();
                  } else {
-                     console.warn("🚨 [loadComments] Comments container removed before rendering."); // DEBUG
+                     console.warn("🚨 [DEBUG] [loadComments] Comments container removed before rendering."); // DEBUG
                      return Promise.reject("Comments container removed during rendering.");
                  }
                 
@@ -2169,9 +2192,9 @@
         }
         
         function renderComment(comment) {
-            // console.log(\`Rendering comment ID: \${comment ? comment.id : 'undefined'}\`); // DEBUG
-             if (!comment || !comment.id || !comment.anonymous_id || typeof comment.content === 'undefined') {
-                console.error("🚨 [renderComment] Invalid comment data:", comment); // DEBUG
+            // console.log(\`[DEBUG] Rendering comment ID: \${comment ? comment.id : 'undefined'}\`); // DEBUG
+             if (!comment || typeof comment.id === 'undefined' || typeof comment.anonymous_id === 'undefined' || typeof comment.content === 'undefined') {
+                console.error("🚨 [DEBUG] [renderComment] Invalid comment data:", comment); // DEBUG
                 return '<div class="comment-card render-error">Error: Invalid comment data.</div>';
             }
             try { // Wrap rendering
@@ -2190,14 +2213,14 @@
                         </div>
                 \`;
             } catch (renderError) {
-                 console.error(\`🚨 [renderComment] Error rendering comment ID \${comment.id}:\`, renderError, comment); // DEBUG
+                 console.error(\`🚨 [DEBUG] [renderComment] Unexpected error rendering comment ID \${comment.id}:\`, renderError, comment); // DEBUG
                  return \`<div class="comment-card render-error">Failed to render comment ID: \${comment.id}. Check console.</div>\`;
             }
         }
         
         async function postComment(event) {
             event.preventDefault(); // Stop form from reloading page
-             console.log("Attempting to post comment..."); // DEBUG
+             console.log("⏳ [DEBUG] Attempting to post comment..."); // DEBUG
             if (!supabase) return showToast("🔴 Backend connection error.");
 
             const btn = document.getElementById('postCommentBtn');
@@ -2205,7 +2228,7 @@
             const content = input.value.trim();
             
             if (!content || !currentPostIdForComments) {
-                 console.log("Comment post blocked: No content or post ID."); // DEBUG
+                 console.log("🛑 [DEBUG] Comment post blocked: No content or post ID."); // DEBUG
                  return;
             }
             
@@ -2213,7 +2236,7 @@
             btn.textContent = '...';
             
             try {
-                 console.log(\`⏳ Posting comment to post \${currentPostIdForComments}\`); // DEBUG
+                 console.log(\`⏳ [DEBUG] Posting comment to post \${currentPostIdForComments}\`); // DEBUG
                 const { data, error } = await supabase
                     .from('comments')
                     .insert({
@@ -2224,11 +2247,11 @@
                     });
                 
                 if (error) {
-                     console.error("🚨 Supabase error posting comment:", error); // DEBUG
+                     console.error("🚨 [DEBUG] Supabase error posting comment:", error); // DEBUG
                      throw error;
                 }
                 
-                 console.log("✅ Comment posted successfully:", data); // DEBUG
+                 console.log("✅ [DEBUG] Comment posted successfully:", data); // DEBUG
                 input.value = ''; // Clear input
                 // Real-time *should* handle reloading comments if modal is open
                 showToast("✅ Comment added!");
@@ -2253,86 +2276,89 @@
                 bullying: '🚫 Bullying',
                 other: '💬 Other'
             };
-            return labels[category] || '💬 Other'; // Default to 'Other' if category is missing/invalid
+            // Return label or default to 'Other' if category is unknown or invalid
+            return labels[category] || '💬 Other'; 
         }
 
         function getTimeAgo(date) {
             try {
+                 // Check if 'date' is a valid Date object
                  if (!(date instanceof Date) || isNaN(date.getTime())) {
-                     console.warn("Invalid date passed to getTimeAgo:", date); // DEBUG
-                     return 'a while ago';
+                     console.warn("⚠️ [DEBUG] Invalid date passed to getTimeAgo:", date); // DEBUG
+                     return 'a while ago'; // Return a default string for invalid dates
                  }
                 const seconds = Math.floor((new Date() - date) / 1000);
-                if (isNaN(seconds) || seconds < 0) return 'just now'; // Handle invalid dates or future dates
+                // Check if seconds calculation resulted in NaN or negative (future date)
+                if (isNaN(seconds) || seconds < 0) return 'just now'; 
                 
                 const intervals = {
-                    year: 31536000,
-                    month: 2592000,
-                    week: 604800,
-                    day: 86400,
-                    hour: 3600,
-                    minute: 60
+                    year: 31536000, month: 2592000, week: 604800,
+                    day: 86400, hour: 3600, minute: 60
                 };
 
                 for (const [unit, secondsInUnit] of Object.entries(intervals)) {
-                    if (secondsInUnit <= 0) continue; // Avoid division by zero or negative numbers
+                    // Ensure secondsInUnit is positive to prevent infinite loops or errors
+                    if (secondsInUnit <= 0) continue; 
                     const interval = Math.floor(seconds / secondsInUnit);
                     if (interval >= 1) {
                         return \`\${interval} \${unit}\${interval !== 1 ? 's' : ''} ago\`;
                     }
                 }
-                return 'Just now';
+                return 'Just now'; // If less than a minute
             } catch (e) {
-                 console.error("🚨 Error calculating time ago:", e); // DEBUG
-                 return 'a while ago';
+                 console.error("🚨 [DEBUG] Error calculating time ago:", e); // DEBUG
+                 return 'a while ago'; // Fallback string on error
             }
         }
 
         function escapeHtml(text) {
              try {
+                 // Ensure input is treated as a string
                 if (typeof text !== 'string') {
-                     if (text === null || typeof text === 'undefined') return '';
-                     console.warn("escapeHtml received non-string input, attempting conversion:", text); // DEBUG
-                     text = String(text);
+                     if (text === null || typeof text === 'undefined') return ''; // Return empty for null/undefined
+                     console.warn("⚠️ [DEBUG] escapeHtml received non-string input, attempting conversion:", text); // DEBUG
+                     text = String(text); // Convert to string
                 }
-                // Simpler, safer escape
+                // Define the map for HTML entity replacements
                 const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+                // Replace special characters using the map
                 let escapedText = text.replace(/[&<>"']/g, m => map[m]);
-                // Convert newlines AFTER escaping
-                return escapedText.replace(/\\r\\n|\\r|\\n|\n/g, '<br>'); // Handle different newline types
+                // Convert newline characters (\r\n, \r, \n) to <br> tags AFTER escaping
+                return escapedText.replace(/\\r\\n|\\r|\\n|\n/g, '<br>'); 
              } catch(e) {
-                 console.error("🚨 Error escaping HTML:", e); // DEBUG
-                 return 'Content display error';
+                 console.error("🚨 [DEBUG] Error escaping HTML:", e); // DEBUG
+                 return 'Content display error'; // Return fallback text on error
              }
         }
 
         function showToast(message) {
              try {
-                 console.log(\`Toast: \${message}\`); // DEBUG
+                 console.log(\`🍞 [DEBUG] Toast: \${message}\`); // DEBUG
                 const toast = document.getElementById('toast');
-                 if (!toast) return console.error("Toast element not found!"); // DEBUG
+                 if (!toast) return console.error("🚨 [DEBUG] Toast element not found!"); // DEBUG
                 toast.textContent = message;
                 toast.classList.add('show');
+                // Automatically hide the toast after 3 seconds
                 setTimeout(() => {
                     toast.classList.remove('show');
                 }, 3000);
-             } catch(e) { console.error("🚨 Error showing toast:", e); } // DEBUG
+             } catch(e) { console.error("🚨 [DEBUG] Error showing toast:", e); } // DEBUG
         }
 
         // ================================
         // SERVICE WORKER
         // ================================
         if ('serviceWorker' in navigator) {
-             console.log("Attempting to register Service Worker..."); // DEBUG
+             console.log("⚙️ [DEBUG] Attempting to register Service Worker..."); // DEBUG
             navigator.serviceWorker.register('/sw.js')
                 .then((registration) => {
-                     console.log('✅ Service Worker registered successfully with scope:', registration.scope); // DEBUG
+                     console.log('✅ [DEBUG] Service Worker registered successfully with scope:', registration.scope); // DEBUG
                 })
                 .catch(err => {
-                     console.error('🚨 Service Worker registration failed:', err); // DEBUG
+                     console.error('🚨 [DEBUG] Service Worker registration failed:', err); // DEBUG
                 });
         } else {
-             console.log("Service Worker not supported by this browser."); // DEBUG
+             console.log("ℹ️ [DEBUG] Service Worker not supported by this browser."); // DEBUG
         }
     </script>
 </body>
