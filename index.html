@@ -1,527 +1,333 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- Chosen Palette: Deep Indigo & Violet -->
-<!-- Application Structure Plan: The application is architected around a two-state user flow: disconnected and connected. Initially, it presents a single-purpose connection view that intelligently detects the user's environment (desktop vs. mobile) and pre-existing connections to provide a seamless entry point, which was a key bug fix. Once connected, the structure shifts to a task-oriented SPA with two primary sections accessible via persistent bottom navigation: "Home" for general interaction (posting, commenting, reacting) and "Memorials" as a dedicated, respectful space for tributes. This separation was chosen to honor the sensitive nature of memorial content while keeping the main feed dynamic and conversational. A persistent header acts as a dashboard, displaying the user's anonymous identity and their real-time Support Points (SP) balance, reinforcing the gamified reward system that is central to the project's vision. This structure prioritizes immediate user engagement and clear separation of core functionalities over mirroring a linear report. -->
-<!-- Visualization & Content Choices: Report Info -> Goal: Display real-time, user-generated content (posts, memorials, comments). -> Presentation Method: Dynamic HTML cards generated via JavaScript. -> Interaction: Users can create, view, and react to content. -> Justification: A card-based feed is the most intuitive UI for a social-style platform, allowing for easy consumption of individual stories. No data charts are necessary as the report's content is qualitative and social. Report Info -> Goal: Track and display user contributions. -> Presentation Method: A real-time updating numeric display for "Support Points" (SP). -> Interaction: The balance changes dynamically based on user actions (posting, commenting, reacting). -> Justification: This provides immediate positive feedback and visualizes the user's growing stake in the community, which is a core requirement for the future tokenomics. Report Info -> Goal: Facilitate supportive user conversations. -> Presentation Method: Toggleable comment sections within each post card, populated with dynamic HTML. -> Interaction: Users can write comments and use the "AI Suggest Reply" button. -> Justification: This keeps the main feed clean while allowing for deep, focused conversations on individual posts. The Gemini AI integration lowers the barrier to entry for providing support. All interactions are handled with vanilla JS and the Gun.js library for decentralized data storage. -->
-<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SafeVoice - Decentralized</title>
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D-Chat: The Dynasty Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #6366f1; --primary-dark: #4f46e5; --bg: #0f172a; --surface: #1e293b;
-            --surface-light: #334155; --text: #f1f5f9; --text-secondary: #94a3b8; --success: #10b981;
-            --warning: #f59e0b; --danger: #ef4444; --border: #334155; --memorial-gold: #f59e0b;
+            --background: #1a1c23; --surface: #242731; --primary: #8a78ff;
+            --primary-hover: #7a68ea; --text-primary: #ffffff; --text-secondary: #a9b1d6;
+            --border-color: rgba(255, 255, 255, 0.1); --green: #9ece6a; --orange: #e0af68; --red: #f7768e;
         }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; padding-bottom: 90px; }
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-        .header { background: var(--surface); padding: 24px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--border); }
-        .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-        .logo-icon { font-size: 36px; }
-        .logo h1 { font-size: 28px; font-weight: 700; background: linear-gradient(135deg, var(--primary), #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .tagline { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
-        .wallet-info { background: var(--bg); padding: 12px; border-radius: 8px; margin-top: 16px; border: 1px solid var(--border); }
-        .wallet-info p { font-size: 12px; color: var(--text-secondary); word-break: break-all; margin: 4px 0; }
-        .wallet-info strong { font-size: 18px; color: var(--primary); }
-        .btn { background: linear-gradient(135deg, var(--primary), #8b5cf6); color: white; padding: 16px 32px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 700; width: 100%; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
-        .btn.secondary { background: var(--surface-light); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .post-form { background: var(--surface); padding: 24px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--border); }
-        .form-group { margin-bottom: 16px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: var(--text-secondary); }
-        input, select, textarea { width: 100%; padding: 12px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 15px; font-family: inherit; }
-        textarea { resize: vertical; min-height: 120px; }
-        .posts-container { display: flex; flex-direction: column; gap: 16px; }
-        .post-card { background: var(--surface); padding: 24px; border-radius: 16px; border: 1px solid var(--border); }
-        .post-card.memorial { border-color: var(--memorial-gold); }
-        .post-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px; }
-        .post-meta { font-size: 13px; color: var(--text-secondary); }
-        .post-meta strong { color: var(--text); font-size: 15px; }
-        .post-badge { padding: 6px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; }
-        .badge-memorial { background-color: var(--memorial-gold); }
-        .post-content { margin: 16px 0; line-height: 1.8; font-size: 15px; white-space: pre-wrap; }
-        .memorial-tribute { background: rgba(245, 158, 11, 0.1); padding: 16px; border-radius: 8px; border-left: 4px solid var(--memorial-gold); margin-top: 16px; }
-        .memorial-tribute p { margin: 0; color: var(--text); }
-        .post-footer { border-top: 1px solid var(--border); margin-top: 20px; padding-top: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .reactions { display: flex; gap: 10px; }
-        .reaction-btn { padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 18px; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: border-color 0.2s; }
-        .loading, .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
-        .wallet-connector { text-align: center; padding: 40px 20px; background: var(--surface); border-radius: 16px; margin-bottom: 24px; }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; }
-        .bottom-nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 8px; font-size: 24px; transition: all 0.2s; }
-        .bottom-nav-btn span { font-size: 11px; font-weight: 600; }
-        .bottom-nav-btn.active { color: var(--primary); }
-        .section { display: none; }
-        .section.active { display: block; }
-        .comments-section { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; display: none; }
-        .comments-list { display: flex; flex-direction: column; gap: 12px; max-height: 300px; overflow-y: auto; padding-right: 8px; margin-bottom: 16px; }
-        .comment { background: var(--bg); padding: 14px; border-radius: 8px; }
-        .comment-meta { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
-        .comment-meta strong { color: var(--text); }
-        .comment-content { font-size: 14px; }
-        .comment-form { margin-top: 16px; }
-        .comment-form-actions { display: flex; gap: 10px; margin-top: 8px; }
-        .comment-form-actions button { flex: 1; }
-        .comment-form textarea { min-height: 40px; height: 40px; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--surface); }
+        ::-webkit-scrollbar-thumb { background-color: var(--primary); border-radius: 10px; border: 2px solid var(--surface); }
+        body { font-family: 'Inter', sans-serif; background-color: var(--background); color: var(--text-primary); overflow: hidden; }
+        .glass-pane { background: rgba(36, 39, 49, 0.7); backdrop-filter: blur(12px); border: 1px solid var(--border-color); }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; transition: background-color 0.3s ease; }
+        .status-disconnected { background-color: var(--red); box-shadow: 0 0 8px var(--red); }
+        .status-connecting { background-color: var(--orange); box-shadow: 0 0 8px var(--orange); }
+        .status-connected { background-color: var(--green); box-shadow: 0 0 8px var(--green); }
+        .btn-primary { background-color: var(--primary); transition: background-color 0.2s ease; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-secondary { background-color: var(--surface); transition: background-color 0.2s ease; }
+        .btn-secondary:hover { background-color: #363b49; }
+        .code-block { background-color: #16161e; color: var(--text-secondary); font-family: monospace; }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .tooltip { position: relative; display: inline-block; }
+        .tooltip .tooltiptext { visibility: hidden; width: 120px; background-color: #16161e; color: #fff; text-align: center; border-radius: 6px; padding: 5px 0; position: absolute; z-index: 50; bottom: 125%; left: 50%; margin-left: -60px; opacity: 0; transition: opacity 0.3s; }
+        .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+        .message-actions { visibility: hidden; opacity: 0; transition: opacity 0.2s ease; }
+        .message-wrapper:hover .message-actions { visibility: visible; opacity: 1; }
     </style>
 </head>
-<body class="antialiased font-sans">
-    <div class="container mx-auto px-4">
-        <div class="header my-6 p-6 rounded-2xl border">
-            <div class="logo flex items-center gap-3 mb-3">
-                <span class="text-4xl">🔗</span>
-                <div>
-                    <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-indigo-500">SafeVoice DApp</h1>
-                    <p class="text-sm tagline">Decentralized & Unstoppable</p>
+<body class="antialiased">
+    <div class="flex h-screen w-screen text-sm">
+        <!-- Servers Column -->
+        <nav class="w-20 bg-black/20 flex flex-col items-center py-4 space-y-4 flex-shrink-0">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center font-bold text-xl shadow-lg">D</div>
+            <div title="Current Room" class="w-12 h-12 rounded-2xl bg-surface flex items-center justify-center cursor-pointer border-2 border-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+        </nav>
+
+        <!-- Channels & Profile Panel -->
+        <aside class="w-72 bg-surface flex-shrink-0 flex flex-col p-3">
+            <h2 class="font-bold text-lg mb-4 px-2">Dynasty Room</h2>
+            <div class="flex-grow space-y-2 pr-1 overflow-y-auto">
+                <h3 class="text-xs font-bold uppercase text-gray-400 px-2">Text Channels</h3>
+                <div class="px-2 py-2 rounded-lg bg-primary/20 text-white font-semibold cursor-pointer"># general</div>
+            </div>
+            <!-- Profile Hub -->
+            <div id="profile-hub" class="flex-shrink-0 pt-3 border-t border-white/10 p-2 bg-black/20 rounded-lg mt-2 cursor-pointer hover:bg-black/30">
+                <div class="flex items-center gap-3">
+                    <div id="my-avatar" class="w-10 h-10 rounded-full flex-shrink-0"></div>
+                    <div>
+                        <p id="my-name" class="font-bold text-white">Generating...</p>
+                        <p class="text-xs text-gray-400 truncate" id="my-id-short">ID loading...</p>
+                    </div>
                 </div>
             </div>
-            <div id="walletInfo" class="wallet-info mt-4 p-3 rounded-lg border" style="display: none;">
-                 <p class="text-xs">Connected: <span id="userWalletAddress" class="font-mono"></span></p>
-                 <p class="text-xs">Anonymous ID: <strong id="userAnonymousId" class="text-base"></strong></p>
-                 <p class="text-xs">Balance: <strong id="userSupportPoints" class="text-lg">0</strong> SP</p>
-            </div>
-        </div>
+        </aside>
 
-        <div id="walletConnector" class="wallet-connector my-6 p-10 rounded-2xl border">
-        </div>
+        <!-- Main Chat Area -->
+        <main class="flex-1 flex flex-col bg-black/10">
+            <header class="h-14 flex-shrink-0 flex items-center justify-between px-6 border-b border-white/10">
+                <h3 class="font-bold text-lg"># general</h3>
+                <div class="flex items-center gap-2">
+                    <span id="status-dot" class="status-dot status-disconnected"></span>
+                    <span id="status-text" class="font-medium">Offline</span>
+                </div>
+            </header>
+            
+            <div id="messages" class="flex-1 p-6 overflow-y-auto space-y-1"></div>
 
-        <div id="dappContent" style="display: none;">
-            <div id="home" class="section active">
-                <div class="post-form mb-6 p-6 rounded-2xl border">
-                    <h2 class="text-2xl font-bold mb-5">Share Anonymously</h2>
-                    <div class="form-group mb-4">
-                        <label class="block mb-2 text-sm font-semibold">Your College/University</label>
-                        <input type="text" id="collegeInput" placeholder="e.g., IIT Kharagpur" required class="w-full p-3 rounded-lg text-base">
-                    </div>
-                    <div class="form-group mb-4">
-                        <label class="block mb-2 text-sm font-semibold">Category</label>
-                        <select id="categorySelect" class="w-full p-3 rounded-lg text-base">
-                            <option value="mental">💭 Mental Health</option>
-                            <option value="academic">📚 Academic Pressure</option>
-                            <option value="social">👥 Social Issues</option>
-                            <option value="bullying">🚫 Bullying/Harassment</option>
-                            <option value="other">💬 Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group mb-4">
-                        <label class="block mb-2 text-sm font-semibold">Your Story</label>
-                        <textarea id="contentInput" placeholder="Share your story..." class="w-full p-3 rounded-lg text-base min-h-[120px]"></textarea>
-                    </div>
-                    <div class="form-group mb-4 flex items-center">
-                        <input type="checkbox" id="memorialToggle" onchange="toggleMemorialFields()" class="h-5 w-5 rounded mr-2" style="width:auto;">
-                        <label for="memorialToggle" class="font-semibold">🕯️ This is a memorial tribute</label>
-                    </div>
-                    <div id="memorialFields" style="display:none;">
-                         <div class="form-group mb-4">
-                            <label class="block mb-2 text-sm font-semibold">Name of Person (Optional)</label>
-                            <input type="text" id="memorialNameInput" placeholder="e.g., Priya Sharma" class="w-full p-3 rounded-lg text-base">
-                        </div>
-                        <div class="form-group mb-4">
-                            <label class="block mb-2 text-sm font-semibold">Tribute Message</label>
-                            <textarea id="memorialMessageInput" placeholder="A message to remember them..." class="w-full p-3 rounded-lg text-base"></textarea>
-                        </div>
-                    </div>
-                    <button class="btn w-full p-4 rounded-lg font-bold text-lg flex items-center justify-center gap-2" id="postBtn" onclick="createPost()">
-                        <span>🕊️</span> Post to the Network (+10 SP)
+            <div class="p-6 flex-shrink-0">
+                 <div id="replying-to-banner" class="hidden text-xs bg-surface p-2 rounded-t-lg items-center justify-between">
+                    <p>Replying to <strong id="replying-to-user">User</strong></p>
+                    <button id="cancel-reply-btn" class="font-bold">X</button>
+                </div>
+                <div class="bg-surface rounded-lg px-4 py-2 flex items-center gap-4 rounded-t-none">
+                    <input type="text" id="messageInput" class="flex-grow bg-transparent focus:outline-none" placeholder="Message in #general...">
+                    <button id="sendMessageBtn" class="btn-primary rounded-md p-2">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                     </button>
                 </div>
-                <div id="postsContainer" class="posts-container space-y-4"></div>
             </div>
+        </main>
+        
+        <!-- Members Panel -->
+        <section class="w-72 bg-surface flex-shrink-0 flex flex-col p-3 border-l border-white/10">
+            <h2 class="font-bold text-lg mb-4 px-2">Members - <span id="member-count">0</span></h2>
+            <div id="members-list" class="space-y-3 overflow-y-auto">
+                <p class="text-gray-400 text-center">No one is here yet. Host a room to begin.</p>
+            </div>
+        </section>
+    </div>
 
-            <div id="memorials" class="section" style="display:none;">
-                 <h2 class="text-2xl font-bold mb-2">🕯️ Permanent Memorials</h2>
-                 <p class="mb-6 text-gray-400">A permanent, decentralized space to honor and remember students we have lost. These tributes live forever on the network.</p>
-                 <div id="memorialsContainer" class="posts-container space-y-4"></div>
+    <!-- Modals -->
+    <div id="connection-modal" class="hidden fixed inset-0 bg-black/70 items-center justify-center z-50">
+        <div class="glass-pane rounded-xl p-6 w-11/12 md:w-1/2 max-w-lg">
+            <h3 class="text-lg font-bold mb-4">Connection Hub</h3>
+            <div class="space-y-4">
+                 <div>
+                    <label for="peerToken" class="font-semibold block mb-1 text-xs">Join / Host a Room</label>
+                    <textarea id="peerToken" class="w-full bg-[#16161e] rounded-md p-2 text-xs h-24 resize-none focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Leave empty to host. Paste an invite token to join."></textarea>
+                </div>
+                <div class="flex gap-2">
+                    <button id="hostBtn" class="w-full btn-primary font-bold py-2 rounded-md">Host New Room</button>
+                    <button id="joinBtn" class="w-full btn-secondary font-bold py-2 rounded-md">Join with Token</button>
+                </div>
+                 <button id="resetBtn" class="w-full bg-red-600/20 text-red-400 hover:bg-red-600/40 hover:text-red-300 font-bold py-2 rounded-md transition-all">Disconnect</button>
+            </div>
+             <button class="absolute top-4 right-4 text-gray-400 hover:text-white" id="close-connection-modal-btn">X</button>
+        </div>
+    </div>
+    
+     <div id="profile-modal" class="hidden fixed inset-0 bg-black/70 items-center justify-center z-50">
+        <div class="glass-pane rounded-xl p-6 w-11/12 md:w-1/2 max-w-lg">
+            <h3 class="text-lg font-bold mb-4">My Profile & Wallet</h3>
+            <div class="space-y-4 text-xs">
+                 <div class="bg-black/20 p-3 rounded-lg">
+                    <label class="font-semibold block mb-2 text-white">Your Anonymous ID</label>
+                     <div class="relative code-block p-2 rounded-md break-all text-gray-400 text-[10px] leading-tight">
+                        <span id="myId-modal"></span>
+                    </div>
+                </div>
+                <div class="bg-black/20 p-3 rounded-lg">
+                    <h3 class="font-semibold text-white mb-2">Wallet & Staking (Simulation)</h3>
+                    <p class="text-gray-400 mb-2">Your SVT balance grows automatically through staking.</p>
+                    <div class="text-center p-2 rounded-md bg-gradient-to-r from-primary to-green">
+                        <p class="text-xs">Balance</p>
+                        <p class="text-2xl font-bold" id="walletBalance">10.00 <span class="text-sm font-normal">SVT</span></p>
+                    </div>
+                    <p class="text-xs text-center text-gray-400 mt-2">Yielding +<span id="staking-rate">0.005</span> SVT / minute</p>
+                </div>
+            </div>
+            <button class="absolute top-4 right-4 text-gray-400 hover:text-white" id="close-profile-modal-btn">X</button>
+        </div>
+    </div>
+
+    <div id="invite-modal" class="hidden fixed inset-0 bg-black/70 items-center justify-center">
+        <div class="glass-pane rounded-xl p-6 w-11/12 md:w-1/2 max-w-lg">
+            <h3 class="text-lg font-bold mb-4">Room Invitation Token</h3>
+            <p class="text-sm text-gray-300 mb-2">Share this token with others to invite them to this temporary, private room.</p>
+            <textarea id="invite-text" class="w-full h-40 bg-[#16161e] rounded-md p-2 resize-none focus:outline-none code-block" readonly></textarea>
+            <div class="mt-4 flex justify-end gap-3">
+                 <button id="copyInviteBtn" class="btn-primary font-bold py-2 px-4 rounded-md">Copy Invite</button>
+                 <button id="closeInviteBtn" class="btn-secondary font-bold py-2 px-4 rounded-md">Close</button>
             </div>
         </div>
     </div>
     
-    <div class="bottom-nav fixed bottom-0 left-0 right-0 flex justify-around py-3 z-50">
-        <button class="bottom-nav-btn active flex flex-col items-center gap-1 text-2xl" onclick="switchSection('home', this)">
-            <span>🏠</span> <span class="text-xs font-semibold">Home</span>
-        </button>
-        <button class="bottom-nav-btn flex flex-col items-center gap-1 text-2xl" onclick="switchSection('memorials', this)">
-            <span>🕯️</span> <span class="text-xs font-semibold">Memorials</span>
-        </button>
-    </div>
-
     <script>
-        const GEMINI_API_KEY = ''; 
-        const gun = Gun();
-        const posts = gun.get('safevoice-dapp-posts-v14');
-        const users = gun.get('safevoice-dapp-users-v14');
-        let web3Provider, signer, userAddress, userAnonymousId;
-        const ADJECTIVES = ['Brave', 'Strong', 'Hopeful', 'Kind', 'Wise', 'Calm', 'Proud', 'Valiant'];
-        const NOUNS = ['Panda', 'Tiger', 'Eagle', 'Lion', 'Wolf', 'Bear', 'Fox', 'Hawk'];
-
-        document.addEventListener('DOMContentLoaded', () => {
-            init();
-        });
-
-        async function init() {
-            const isConnected = localStorage.getItem('safevoice_connected') === 'true';
-
-            if (typeof window.ethereum !== 'undefined' && isConnected) {
-                 try {
-                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-                    if (accounts.length > 0) {
-                        await initializeDApp();
-                    } else {
-                        localStorage.removeItem('safevoice_connected');
-                        displayConnectScreen();
-                    }
-                 } catch (err) {
-                    console.error("Auto-connect error:", err);
-                    localStorage.removeItem('safevoice_connected');
-                    displayConnectScreen();
-                 }
-            } else if (typeof window.ethereum !== 'undefined') {
-                 displayConnectScreen();
-            } else {
-                displayInstallMetaMaskScreen();
-            }
-        }
+    // This is a browser-based simulation. No real blockchain or IPFS writes are performed.
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- DOM Elements ---
+        const myIdModalEl = document.getElementById('myId-modal');
+        const peerTokenEl = document.getElementById('peerToken');
+        const hostBtn = document.getElementById('hostBtn'); const joinBtn = document.getElementById('joinBtn'); const resetBtn = document.getElementById('resetBtn');
+        const messagesEl = document.getElementById('messages'); const messageInputEl = document.getElementById('messageInput'); const sendMessageBtn = document.getElementById('sendMessageBtn');
+        const statusDot = document.getElementById('status-dot'); const statusText = document.getElementById('status-text');
+        const membersListEl = document.getElementById('members-list'); const memberCountEl = document.getElementById('member-count');
+        const replyingToBanner = document.getElementById('replying-to-banner'); const replyingToUser = document.getElementById('replying-to-user'); const cancelReplyBtn = document.getElementById('cancel-reply-btn');
+        const profileHub = document.getElementById('profile-hub'); const myAvatar = document.getElementById('my-avatar'); const myName = document.getElementById('my-name'); const myIdShort = document.getElementById('my-id-short');
+        const walletBalanceEl = document.getElementById('walletBalance'); const stakingRateEl = document.getElementById('staking-rate');
         
-        function displayConnectScreen() {
-             document.getElementById('walletConnector').innerHTML = `
-                <h2 class="text-2xl font-bold mb-2">Connect Your Wallet</h2>
-                <p class="mb-5 text-gray-400">To post and interact, connect your Web3 wallet.</p>
-                <button class="btn inline-block w-auto px-8 py-3" onclick="manualConnect()">Connect Wallet</button>
-            `;
+        // Modals
+        const connectionModal = document.getElementById('connection-modal'); const closeConnectionModalBtn = document.getElementById('close-connection-modal-btn');
+        const profileModal = document.getElementById('profile-modal'); const closeProfileModalBtn = document.getElementById('close-profile-modal-btn');
+        const inviteModal = document.getElementById('invite-modal'); const inviteTextEl = document.getElementById('invite-text'); const copyInviteBtn = document.getElementById('copyInviteBtn'); const closeInviteBtn = document.getElementById('closeInviteBtn');
+
+        // --- App State ---
+        let me = { keyPair: null, id: null, name: null, avatar: null };
+        let wallet = { balance: 100.0, stakingRate: 0.05 };
+        let room = { host: false, members: new Map() };
+        let connections = new Map(); // key: peerId, value: { conn: RTCPeerConnection, channel: RTCDataChannel }
+        let replyingTo = null;
+        const STAKING_INTERVAL = 60000; // 1 minute
+
+        // --- Core Functions ---
+        async function initialize() {
+            me.keyPair = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey']);
+            const pubKeyJwk = await crypto.subtle.exportKey('jwk', me.keyPair.publicKey);
+            me.id = await digestMessage(JSON.stringify(pubKeyJwk));
+            me.name = generateAnonymousName();
+            me.avatar = generateAvatar(me.id);
+
+            // Update UI
+            myIdModalEl.textContent = me.id;
+            myName.textContent = me.name;
+            myIdShort.textContent = `ID: ${me.id.substring(0, 8)}...`;
+            myAvatar.innerHTML = me.avatar;
+            updateWalletBalance(0);
+            updateStatus('Offline', 'disconnected');
+            showConnectionModal();
+
+            setInterval(() => {
+                const yield = wallet.balance * (wallet.stakingRate / 100);
+                updateWalletBalance(yield);
+            }, STAKING_INTERVAL);
         }
 
-        function displayInstallMetaMaskScreen() {
-            const dappUrl = window.location.href.replace(/https?:\/\//, '');
-            const metamaskLink = `https://metamask.app.link/dapp/${dappUrl}`;
-            document.getElementById('walletConnector').innerHTML = `
-                <h2 class="text-2xl font-bold mb-2">MetaMask Not Detected</h2>
-                <p class="mb-5 text-gray-400">Please open this page in your MetaMask app's browser, or tap below to launch.</p>
-                <a href="${metamaskLink}" class="btn inline-block w-auto px-8 py-3">📱 Open in MetaMask App</a>
-            `;
-        }
-
-        async function manualConnect() {
-            try {
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
-                await initializeDApp();
-            } catch (error) {
-                 console.error("Manual connect error:", error);
-                 alert("Connection failed. Please ensure you select an account in MetaMask.");
-            }
-        }
-        
-        async function initializeDApp() {
-            try {
-                web3Provider = new ethers.providers.Web3Provider(window.ethereum);
-                signer = web3Provider.getSigner();
-                userAddress = await signer.getAddress();
-                userAnonymousId = generateAnonymousId(userAddress);
-
-                localStorage.setItem('safevoice_connected', 'true');
-
-                document.getElementById('walletConnector').style.display = 'none';
-                document.getElementById('dappContent').style.display = 'block';
-                document.getElementById('walletInfo').style.display = 'block';
-                document.getElementById('userWalletAddress').innerText = `${userAddress.substring(0, 6)}...${userAddress.substring(userAddress.length - 4)}`;
-                document.getElementById('userAnonymousId').innerText = userAnonymousId;
-
-                setupUserListeners();
-                switchSection('home', document.querySelector('.bottom-nav-btn.active'));
-
-                 window.ethereum.on('accountsChanged', (accounts) => {
-                    localStorage.removeItem('safevoice_connected');
-                    window.location.reload();
-                });
-
-            } catch (error) {
-                 localStorage.removeItem('safevoice_connected');
-                 alert("Failed to initialize the DApp. Please refresh and try again.");
-                 console.error("Initialization failed:", error);
-            }
-        }
-        
-        async function getAICommentSuggestion(postId) {
-            if (!GEMINI_API_KEY) {
-                return alert("The creator has not configured the AI assistant yet. Please add your Gemini API key to the code.");
-            }
-            const button = document.querySelector(`#comments-${postId} .suggest-reply-btn`);
-            const textarea = document.querySelector(`#comments-${postId} textarea`);
-            button.disabled = true;
-            button.innerHTML = '<span>✨</span> Thinking...';
-            try {
-                posts.get(postId).once(async (post) => {
-                    if (!post || !post.content) throw new Error("Post content not found.");
-                    const systemPrompt = "You are a compassionate friend. Read the following anonymous post from a student and write a short, empathetic, and supportive comment (under 50 words) that they could post in reply. Do not use hashtags. Be encouraging but not overly clinical.";
-                    const userQuery = `Here is the post: "${post.content}"`;
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_API_KEY}`;
-                    const payload = {
-                        contents: [{ parts: [{ text: userQuery }] }],
-                        systemInstruction: { parts: [{ text: systemPrompt }] }
-                    };
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if (!response.ok) throw new Error(`API error: ${response.statusText}`);
-                    const result = await response.json();
-                    const suggestedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if (suggestedText) {
-                        textarea.value = suggestedText.trim();
-                    } else {
-                        throw new Error("Could not generate a suggestion.");
-                    }
-                });
-            } catch (error) {
-                alert(`AI Assistant Error: ${error.message}`);
-            } finally {
-                button.disabled = false;
-                button.innerHTML = '<span>✨</span> Suggest Reply';
-            }
-        }
-
-        function switchSection(sectionId, element) {
-            document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-            document.getElementById(sectionId).style.display = 'block';
-            document.querySelectorAll('.bottom-nav-btn').forEach(btn => btn.classList.remove('active'));
-            element.classList.add('active');
-            if (sectionId === 'home') loadPosts(false);
-            if (sectionId === 'memorials') loadPosts(true);
-        }
-
-        function toggleMemorialFields() {
-            const isChecked = document.getElementById('memorialToggle').checked;
-            document.getElementById('memorialFields').style.display = isChecked ? 'block' : 'none';
-            document.getElementById('postBtn').innerHTML = isChecked ? '<span>🕯️</span> Create Memorial (+15 SP)' : '<span>🕊️</span> Post to the Network (+10 SP)';
-        }
-
-        function setupUserListeners() {
-            users.get(userAddress).get('supportPoints').on(points => {
-                document.getElementById('userSupportPoints').innerText = points || 0;
-            });
-        }
-
-        function updateUserPoints(amount) {
-            const userNode = users.get(userAddress);
-            userNode.get('supportPoints').once(currentPoints => {
-                userNode.get('supportPoints').put((currentPoints || 0) + amount);
-            });
-        }
-
-        async function createPost() {
-            if (!signer) return alert("Please connect your wallet first.");
-            const college = document.getElementById('collegeInput').value.trim();
-            const category = document.getElementById('categorySelect').value;
-            const content = document.getElementById('contentInput').value.trim();
-            const isMemorial = document.getElementById('memorialToggle').checked;
-            const memorialName = document.getElementById('memorialNameInput').value.trim();
-            const memorialMessage = document.getElementById('memorialMessageInput').value.trim();
-            if (!college || !content) return alert('College and story cannot be empty.');
-            const btn = document.getElementById('postBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<span>⏳</span> Posting...';
-            try {
-                const postData = {
-                    college, category, content, isMemorial, memorialName, memorialMessage,
-                    timestamp: new Date().toISOString(),
-                    author: userAddress,
-                    authorAnonymousId: userAnonymousId
-                };
-                posts.set(postData);
-                updateUserPoints(isMemorial ? 15 : 10);
-                alert(`Post successful! You earned ${isMemorial ? 15 : 10} SP.`);
-                document.getElementById('collegeInput').value = '';
-                document.getElementById('contentInput').value = '';
-                document.getElementById('memorialNameInput').value = '';
-                document.getElementById('memorialMessageInput').value = '';
-                document.getElementById('memorialToggle').checked = false;
-                toggleMemorialFields();
-            } catch (error) {
-                alert(`Error: ${error.message}`);
-            } finally {
-                btn.disabled = false;
-            }
-        }
-
-        async function createComment(event, postId) {
-            event.preventDefault();
-            if (!userAddress) return alert("Please connect wallet.");
-            const form = event.target;
-            const textarea = form.querySelector('textarea');
-            const content = textarea.value.trim();
-            if (!content) return;
-            const commentData = {
-                content,
-                author: userAddress,
-                authorAnonymousId: userAnonymousId,
-                timestamp: new Date().toISOString()
+        function createPeerConnection(peerId) {
+            const conn = new RTCPeerConnection({ 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] });
+            
+            conn.onicecandidate = e => {
+                if (e.candidate) {
+                    sendSignal({ type: 'candidate', candidate: e.candidate, to: peerId, from: me.id });
+                }
             };
-            posts.get(postId).get('comments').set(commentData);
-            updateUserPoints(5);
-            textarea.value = '';
-        }
-
-        function loadPosts(isMemorial) {
-            const containerId = isMemorial ? 'memorialsContainer' : 'postsContainer';
-            const container = document.getElementById(containerId);
-            container.innerHTML = `<div class="loading p-16 text-center">🔗 Loading from network...</div>`;
-            const renderedPosts = new Set();
-            let hasPosts = false;
-            posts.map().once((post, id) => {
-                if (post && post.content && post.isMemorial === isMemorial) {
-                    if (!hasPosts) {
-                        container.innerHTML = '';
-                        hasPosts = true;
-                    }
-                    if (!renderedPosts.has(id)) {
-                        renderedPosts.add(id);
-                        const postElement = document.createElement('div');
-                        postElement.className = `post-card p-6 rounded-2xl border ${post.isMemorial ? 'memorial' : ''}`;
-                        postElement.id = id;
-                        postElement.innerHTML = renderPostContent(post, id);
-                        container.prepend(postElement);
-                        setupReactionListeners(id);
-                    }
+            
+            conn.onconnectionstatechange = () => {
+                if (["disconnected", "closed", "failed"].includes(conn.connectionState)) {
+                    removeMember(peerId);
                 }
-            });
-            setTimeout(() => {
-                if (!hasPosts) container.innerHTML = `<div class="empty-state p-16 text-center">No ${isMemorial ? 'memorials' : 'posts'} found.</div>`;
-            }, 3000);
-        }
+            };
 
-        function renderPostContent(post, id) {
-            let tributeHTML = '';
-            if (post.isMemorial) {
-                tributeHTML = `<div class="memorial-tribute mt-4 p-4 rounded-lg border-l-4">
-                    <p class="font-bold">In memory of ${escapeHtml(post.memorialName) || 'a beloved student'}</p>
-                    <p>${escapeHtml(post.memorialMessage)}</p>
-                </div>`;
+            return conn;
+        }
+        
+        // --- WebRTC Signaling & Data Channel Logic ---
+        // This simulation uses a "host" model where the first user acts as the signaling server.
+        
+        // Host function to handle signals
+        function hostSignalHandler(signal) {
+            // Forward signal to the correct peer
+            const peerConn = connections.get(signal.to);
+            if (peerConn) {
+                peerConn.channel.send(JSON.stringify({ type: 'signal', signal }));
             }
-            return `
-                <div class="post-header flex justify-between items-start mb-4">
-                    <div class="post-meta text-sm">
-                        <strong class="text-base">${escapeHtml(post.authorAnonymousId)}</strong> from <strong>${escapeHtml(post.college)}</strong><br>
-                        <span>${new Date(post.timestamp).toLocaleString()}</span>
-                    </div>
-                    <span class="post-badge text-xs font-bold px-3 py-1 rounded-full ${post.isMemorial ? 'badge-memorial' : ''}">${post.isMemorial ? '🕯️ Memorial' : escapeHtml(post.category)}</span>
-                </div>
-                <div class="post-content my-4 whitespace-pre-wrap">${escapeHtml(post.content)}</div>
-                ${tributeHTML}
-                <div class="post-footer mt-5 pt-5 border-t border-gray-700 flex justify-between items-center">
-                    <div class="reactions flex gap-2">
-                        <button class="reaction-btn text-xl p-2 rounded-lg flex items-center gap-2 font-semibold" onclick="addReaction('${id}', 'support')">💚 <span class="text-sm">0</span></button>
-                        <button class="reaction-btn text-xl p-2 rounded-lg flex items-center gap-2 font-semibold" onclick="addReaction('${id}', 'love')">❤️ <span class="text-sm">0</span></button>
-                        <button class="reaction-btn text-xl p-2 rounded-lg flex items-center gap-2 font-semibold" onclick="addReaction('${id}', 'collab')">🙌 <span class="text-sm">0</span></button>
-                    </div>
-                    <button class="btn secondary text-sm px-4 py-2" onclick="toggleComments('${id}')">
-                        💬 Comments
-                    </button>
-                </div>
-                <div class="comments-section" style="display:none;" id="comments-${id}"></div>
-            `;
         }
-
-        function toggleComments(postId) {
-            const commentsSection = document.getElementById(`comments-${postId}`);
-            const isVisible = commentsSection.style.display === 'block';
-            commentsSection.style.display = isVisible ? 'none' : 'block';
-            if (!isVisible) loadComments(postId);
-        }
-
-        function loadComments(postId) {
-            const container = document.getElementById(`comments-${postId}`);
-            container.innerHTML = `<div class="loading text-center p-4">Loading comments...</div>`;
-            const commentsNode = posts.get(postId).get('comments');
-            const renderedComments = new Set();
-            let hasComments = false;
-            const setupCommentForm = () => `<div class="comments-list space-y-3"></div>
-                <form class="comment-form mt-4" onsubmit="createComment(event, '${postId}')">
-                    <textarea required placeholder="Add a supportive comment..." class="w-full p-2 rounded-lg text-sm"></textarea>
-                    <div class="comment-form-actions flex gap-2 mt-2">
-                        <button type="button" class="btn secondary w-full p-2 text-sm suggest-reply-btn" onclick="getAICommentSuggestion('${postId}')">✨ Suggest Reply</button>
-                        <button type="submit" class="btn w-full p-2 text-sm">Reply (+5 SP)</button>
-                    </div>
-                </form>`;
-            commentsNode.map().on((comment, commentId) => {
-                if (comment && comment.content && !renderedComments.has(commentId)) {
-                    if (!hasComments) {
-                        container.innerHTML = setupCommentForm();
-                        hasComments = true;
-                    }
-                    renderedComments.add(commentId);
-                    const list = container.querySelector('.comments-list');
-                    const commentEl = document.createElement('div');
-                    commentEl.className = 'comment p-4 rounded-lg';
-                    commentEl.innerHTML = renderComment(comment);
-                    list.prepend(commentEl);
+        
+        // Generic send signal function
+        function sendSignal(signal) {
+            if (room.host) {
+                hostSignalHandler(signal);
+            } else {
+                const hostConn = connections.get(room.hostId);
+                if (hostConn && hostConn.channel) {
+                    hostConn.channel.send(JSON.stringify({ type: 'signal', signal }));
                 }
-            });
-            setTimeout(() => {
-                if (!hasComments) container.innerHTML = setupCommentForm();
-            }, 3000);
+            }
         }
 
-        function renderComment(comment) {
-            return `<div class="comment-meta text-xs mb-1">
-                        <strong class="font-bold">${escapeHtml(comment.authorAnonymousId)}</strong>
-                        <span>• ${new Date(comment.timestamp).toLocaleString()}</span>
-                    </div>
-                    <p class="comment-content text-sm">${escapeHtml(comment.content)}</p>`;
+        function setupDataChannel(channel, peerId) {
+            channel.onopen = () => {
+                console.log(`Data channel with ${peerId} is open.`);
+                if(!room.host) {
+                    updateStatus('Online', 'connected');
+                    addMessage('System', 'Successfully joined the room!');
+                }
+            };
+            
+            channel.onmessage = async (e) => {
+                 const data = JSON.parse(e.data);
+                 switch(data.type) {
+                     case 'chat':
+                        const decrypted = await decryptMessage(data.payload, peerId);
+                        const sender = room.members.get(data.from);
+                        addMessage(sender, decrypted, { messageId: data.messageId });
+                        break;
+                 }
+            };
+        }
+        
+        async function deriveSharedSecret(peerId) {
+            // This needs to be implemented fully if encryption per-peer is desired.
         }
 
-        async function addReaction(postId, reactionType) {
-            if (!userAddress) return alert("Please connect wallet.");
-            posts.get(postId).once(post => {
-                if (post.author === userAddress) return;
-                const reactionNode = posts.get(postId).get('reactions').get(reactionType);
-                reactionNode.get(userAddress).once(data => {
-                    const isReacting = !data;
-                    reactionNode.get(userAddress).put(isReacting);
-                    updateUserPoints(isReacting ? 1 : -1);
-                });
-            });
+        async function encryptMessage(message, peerId) { return message; } // Encryption logic placeholder
+        async function decryptMessage(message, peerId) { return message; } // Decryption logic placeholder
+
+        // --- UI & Wallet Handlers ---
+        function addMessage(sender, message, options) { /* ... UI logic for adding messages ... */ }
+        function updateStatus(text, statusClass) { statusText.textContent = text; statusDot.className = `status-dot status-${statusClass}`; }
+        function showConnectionModal() { connectionModal.classList.remove('hidden'); connectionModal.classList.add('flex'); }
+        function hideConnectionModal() { connectionModal.classList.add('hidden'); connectionModal.classList.remove('flex'); }
+        function updateWalletBalance(amount) {
+            if (wallet.balance + amount < 0) return false;
+            wallet.balance += amount;
+            walletBalanceEl.innerHTML = `${wallet.balance.toFixed(2)} <span class="text-sm font-normal">SVT</span>`;
+            return true;
+        }
+        function updateMembersList() { /* ... UI logic for updating members list ... */ }
+        function addMember(member) { room.members.set(member.id, member); updateMembersList(); }
+        function removeMember(memberId) { room.members.delete(memberId); connections.delete(memberId); updateMembersList(); }
+
+        // --- Event Listeners ---
+        hostBtn.addEventListener('click', async () => { /* ... Host logic ... */ });
+        joinBtn.addEventListener('click', async () => { /* ... Join logic ... */ });
+        sendMessageBtn.addEventListener('click', () => { /* ... Send message logic ... */ });
+        profileHub.addEventListener('click', () => { profileModal.classList.remove('hidden'); profileModal.classList.add('flex'); });
+        closeProfileModalBtn.addEventListener('click', () => { profileModal.classList.add('hidden'); profileModal.classList.remove('flex'); });
+        // ... other event listeners
+        
+        // --- Utility Functions ---
+        async function digestMessage(message) {
+            const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(message));
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        function setupReactionListeners(postId) {
-            ['support', 'love', 'collab'].forEach(type => {
-                const reactionsNode = posts.get(postId).get('reactions').get(type);
-                reactionsNode.on(() => {
-                    let count = 0, userHasReacted = false;
-                    reactionsNode.map().once((data, key) => {
-                        if (data) {
-                            count++;
-                            if (key === userAddress) userHasReacted = true;
-                        }
-                    });
-                    const postElement = document.getElementById(postId);
-                    if (!postElement) return;
-                    const button = postElement.querySelector(`button[onclick*="'${type}'"]`);
-                    if (button) {
-                        button.querySelector('span').textContent = count;
-                        button.style.borderColor = userHasReacted ? 'var(--primary)' : 'var(--border)';
-                    }
-                });
-            });
+        function generateAvatar(seed) {
+            const size = 32;
+            const canvas = document.createElement('canvas');
+            canvas.width = size; canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = `#${seed.substring(0, 6)}`;
+            ctx.fillRect(0, 0, size, size);
+            ctx.fillStyle = `#${seed.substring(6, 12)}`;
+            for (let i = 0; i < 15; i++) {
+                const x = Math.floor(parseInt(seed.substring(i*2, i*2+2), 16) / 255 * size);
+                const y = Math.floor(parseInt(seed.substring(i*2+2, i*2+4), 16) / 255 * size);
+                ctx.fillRect(x, y, 2, 2);
+            }
+            return `<img src="${canvas.toDataURL()}" class="rounded-full">`;
         }
 
-        function generateAnonymousId(address) {
-            const hash = CryptoJS.SHA256(address).toString();
-            const adjIndex = parseInt(hash.substring(0, 5), 16) % ADJECTIVES.length;
-            const nounIndex = parseInt(hash.substring(5, 10), 16) % NOUNS.length;
-            return `${ADJECTIVES[adjIndex]} ${NOUNS[nounIndex]}`;
+        function generateAnonymousName() {
+            const adjectives = ["Silent", "Crimson", "Whispering", "Forgotten", "Azure", "Golden", "Hidden", "Wandering"];
+            const nouns = ["River", "Fox", "Echo", "Monolith", "Star", "Cipher", "Vagrant", "Oracle"];
+            return `${adjectives[Math.floor(Math.random()*adjectives.length)]} ${nouns[Math.floor(Math.random()*nouns.length)]}`;
         }
-
-        function escapeHtml(text) {
-            if (!text) return '';
-            const el = document.createElement('div');
-            el.innerText = text;
-            return el.innerHTML;
-        }
+        
+        initialize();
+    });
     </script>
 </body>
 </html>
