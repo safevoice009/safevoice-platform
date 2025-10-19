@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>SafeVoice v14.0.4 - Syntax Error Fix</title> 
+    <title>SafeVoice v14.0.5 - Targeted Syntax Fix</title> 
     <link rel="manifest" href="manifest.json">
 
     <style>
@@ -470,6 +470,9 @@
         .post-card.render-error {
             border: 1px dashed var(--danger);
             opacity: 0.7;
+            padding: 15px;
+            color: var(--danger);
+            font-size: 14px;
         }
 
         .post-header {
@@ -638,6 +641,9 @@
          .comment-card.render-error {
             border: 1px dashed var(--danger);
             opacity: 0.7;
+            padding: 10px;
+            color: var(--danger);
+            font-size: 13px;
         }
 
         
@@ -1269,10 +1275,10 @@
         }
 
         // ================================
-        // INITIALIZE APP (v14.0.3 - Ultimate Debugging)
+        // INITIALIZE APP (v14.0.5 - Targeted Fix)
         // ================================
         window.addEventListener('load', async function() {
-            console.log('🚀 [DEBUG] SafeVoice v14.0.3 - Ultimate Debugging Initializing...'); // DEBUG
+            console.log('🚀 [DEBUG] SafeVoice v14.0.5 - Targeted Syntax Fix Initializing...'); // DEBUG
             
             // Only proceed if Supabase client initialized
             if (!supabase) {
@@ -1311,7 +1317,7 @@
                  // Display a more prominent error if posts didn't load
                  const container = document.getElementById('postsContainer') || document.getElementById('memorialsContainer');
                   if(container && container.innerHTML.includes('loading-spinner')) {
-                      container.innerHTML = \`<div class="empty-state"><h3>⚠️ Initialization Failed</h3><p>Could not load initial data. Please check console (F12) and refresh.</p><p style="font-size:10px; color:var(--danger);">(\${initError.message})</p></div>\`;
+                      container.innerHTML = \`<div class="empty-state"><h3>⚠️ Initialization Failed</h3><p>Could not load initial data. Please check console (F12) and refresh.</p><p style="font-size:10px; color:var(--danger);">(\${escapeHtml(initError.message)})</p></div>\`;
                   }
             }
         });
@@ -1319,10 +1325,24 @@
         // v14.0.3 - Moved listener setup to a separate function
         function setupEventListeners() {
              try {
-                document.getElementById('contentInput').addEventListener('input', updateCharCount);
-                document.getElementById('memorialToggle').addEventListener('change', toggleMemorialFields);
-                document.getElementById('cameraInput').addEventListener('change', handleImageSelect);
-                document.getElementById('galleryInput').addEventListener('change', handleImageSelect);
+                 // Check if elements exist before adding listeners
+                 const contentInput = document.getElementById('contentInput');
+                 const memorialToggle = document.getElementById('memorialToggle');
+                 const cameraInput = document.getElementById('cameraInput');
+                 const galleryInput = document.getElementById('galleryInput');
+
+                 if (contentInput) contentInput.addEventListener('input', updateCharCount);
+                 else console.warn("⚠️ [DEBUG] contentInput not found for listener.");
+
+                 if (memorialToggle) memorialToggle.addEventListener('change', toggleMemorialFields);
+                 else console.warn("⚠️ [DEBUG] memorialToggle not found for listener.");
+
+                 if (cameraInput) cameraInput.addEventListener('change', handleImageSelect);
+                 else console.warn("⚠️ [DEBUG] cameraInput not found for listener.");
+
+                 if (galleryInput) galleryInput.addEventListener('change', handleImageSelect);
+                 else console.warn("⚠️ [DEBUG] galleryInput not found for listener.");
+
             } catch(e) {
                 console.error("🚨 [DEBUG] Error setting up listeners:", e); // DEBUG
             }
@@ -1409,7 +1429,8 @@
                      console.log(\`✅ [DEBUG] Section '\${section}' activated.\`); // DEBUG
                 } else {
                      console.error(\`🚨 [DEBUG] Section with ID "\${section}" not found. Defaulting to home.\`); // DEBUG
-                     document.getElementById('home').classList.add('active');
+                     const homeSection = document.getElementById('home');
+                     if(homeSection) homeSection.classList.add('active');
                      section = 'home'; // Update section variable to reflect reality
                 }
 
@@ -1529,8 +1550,11 @@
              console.log("🗑️ [DEBUG] Removing selected image."); // DEBUG
             try {
                 selectedImageFile = null;
-                document.getElementById('imagePreview').style.display = 'none';
-                document.getElementById('imagePreview').innerHTML = '';
+                const preview = document.getElementById('imagePreview');
+                if (preview) {
+                    preview.style.display = 'none';
+                    preview.innerHTML = '';
+                }
                 resetImageInputs();
             } catch (e) {
                  console.error("🚨 [DEBUG] Error removing image:", e); // DEBUG
@@ -1539,8 +1563,10 @@
         
         function resetImageInputs() {
             try {
-                document.getElementById('cameraInput').value = '';
-                document.getElementById('galleryInput').value = '';
+                const camInput = document.getElementById('cameraInput');
+                const galInput = document.getElementById('galleryInput');
+                if (camInput) camInput.value = '';
+                if (galInput) galInput.value = '';
                  console.log("ℹ️ [DEBUG] Image input fields reset."); // DEBUG
             } catch (e) {
                 console.error("🚨 [DEBUG] Error resetting image inputs:", e); // DEBUG
@@ -1553,14 +1579,20 @@
         function updateCharCount() {
              try {
                 const contentInput = document.getElementById('contentInput');
-                document.getElementById('charCount').textContent = contentInput.value.length;
+                const charCount = document.getElementById('charCount');
+                if (contentInput && charCount) {
+                    charCount.textContent = contentInput.value.length;
+                }
              } catch(e) { console.error("[DEBUG] Error updating char count:", e); }
         }
 
         function toggleMemorialFields() {
              try {
                 const memorialToggle = document.getElementById('memorialToggle');
-                document.getElementById('memorialFields').style.display = memorialToggle.checked ? 'block' : 'none';
+                const memorialFields = document.getElementById('memorialFields');
+                if (memorialToggle && memorialFields) {
+                    memorialFields.style.display = memorialToggle.checked ? 'block' : 'none';
+                }
              } catch(e) { console.error("[DEBUG] Error toggling memorial fields:", e); }
         }
 
@@ -1571,12 +1603,13 @@
             console.log("⏳ [DEBUG] Attempting to create post..."); // DEBUG
             if (!supabase) return showToast("🔴 Backend connection error.");
 
-            const college = document.getElementById('collegeInput').value.trim();
-            const category = document.getElementById('categorySelect').value;
-            const content = document.getElementById('contentInput').value.trim();
-            const isMemorial = document.getElementById('memorialToggle').checked;
-            const memorialName = document.getElementById('memorialName').value.trim();
-            const memorialMessage = document.getElementById('memorialMessage').value.trim();
+            // Safely get values from form elements
+            const college = document.getElementById('collegeInput')?.value.trim();
+            const category = document.getElementById('categorySelect')?.value;
+            const content = document.getElementById('contentInput')?.value.trim();
+            const isMemorial = document.getElementById('memorialToggle')?.checked;
+            const memorialName = document.getElementById('memorialName')?.value.trim();
+            const memorialMessage = document.getElementById('memorialMessage')?.value.trim();
 
             if (!college || !content) {
                 showToast('❌ Please fill in college and story');
@@ -1585,6 +1618,7 @@
             }
 
             const btn = document.getElementById('postBtn');
+            if (!btn) return console.error("🚨 [DEBUG] Post button not found!"); // DEBUG
             btn.disabled = true;
             btn.innerHTML = '<span>⏳</span> Posting...';
 
@@ -1623,10 +1657,10 @@
 
                 const postData = {
                     college: college,
-                    category: category,
+                    category: category || 'other', // Default category if somehow missing
                     content: content,
                     image_url: imageUrl, // **CRITICAL: Using image_url**
-                    is_memorial: isMemorial,
+                    is_memorial: !!isMemorial, // Ensure boolean
                     memorial_name: isMemorial ? memorialName : null,
                     memorial_message: isMemorial ? memorialMessage : null,
                     reaction_support: 0,
@@ -1656,45 +1690,55 @@
                 console.error("🚨🚨🚨 [DEBUG] CRITICAL ERROR creating post:", error); // DEBUG
                 showToast(\`❌ Error creating post: \${error.message}\`); // Show more specific error
             } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<span>🕊️</span> Post Anonymously';
+                if (btn) { // Check if button still exists
+                     btn.disabled = false;
+                     btn.innerHTML = '<span>🕊️</span> Post Anonymously';
+                }
             }
         }
         
         function resetPostForm() {
             try {
                  console.log("⚙️ [DEBUG] Resetting post form fields."); // DEBUG
-                document.getElementById('collegeInput').value = '';
-                document.getElementById('contentInput').value = '';
-                document.getElementById('charCount').textContent = '0';
-                document.getElementById('memorialToggle').checked = false;
-                document.getElementById('memorialFields').style.display = 'none';
-                document.getElementById('memorialName').value = '';
-                document.getElementById('memorialMessage').value = '';
-                removeImage();
+                 const collegeInput = document.getElementById('collegeInput');
+                 const contentInput = document.getElementById('contentInput');
+                 const charCount = document.getElementById('charCount');
+                 const memorialToggle = document.getElementById('memorialToggle');
+                 const memorialFields = document.getElementById('memorialFields');
+                 const memorialName = document.getElementById('memorialName');
+                 const memorialMessage = document.getElementById('memorialMessage');
+
+                 if (collegeInput) collegeInput.value = '';
+                 if (contentInput) contentInput.value = '';
+                 if (charCount) charCount.textContent = '0';
+                 if (memorialToggle) memorialToggle.checked = false;
+                 if (memorialFields) memorialFields.style.display = 'none';
+                 if (memorialName) memorialName.value = '';
+                 if (memorialMessage) memorialMessage.value = '';
+                 removeImage(); // Handles image preview and input reset
             } catch (e) {
                 console.error("🚨 [DEBUG] Error resetting post form:", e); // DEBUG
             }
         }
 
         // ================================
-        // LOAD POSTS (v14.0.3 - Ultimate Debugging)
+        // LOAD POSTS (v14.0.5 - Targeted Fix)
         // ================================
         async function loadPosts() {
             // Ensure Supabase client is available
             if (!supabase) {
                  console.error("🚨 [DEBUG] loadPosts aborted: Supabase client not available."); // DEBUG
-                 // Display error state immediately if Supabase is missing
                  const container = document.getElementById('postsContainer') || document.getElementById('memorialsContainer');
                  if(container) container.innerHTML = '<div class="empty-state"><h3>⚠️ Connection Error</h3><p>Cannot load posts. Backend connection failed.</p></div>';
                  return Promise.reject(new Error("Supabase client not available.")); // Return a rejected promise
             }
             
             console.log(\`⏳ [DEBUG] [loadPosts] Starting load with filter: \${currentFilter}\`); // DEBUG
-            const container = (currentFilter === 'memorial') ? document.getElementById('memorialsContainer') : document.getElementById('postsContainer');
+            const containerId = (currentFilter === 'memorial') ? 'memorialsContainer' : 'postsContainer';
+            const container = document.getElementById(containerId);
             if (!container) {
-                 console.error("🚨 [DEBUG] [loadPosts] Posts container element not found!"); // DEBUG
-                 return Promise.reject(new Error("Posts container element not found."));
+                 console.error(\`🚨 [DEBUG] [loadPosts] Container with ID '\${containerId}' not found!\`); // DEBUG
+                 return Promise.reject(new Error(\`Container '\${containerId}' not found.\`));
             }
             
             // Set loading state immediately
@@ -1794,30 +1838,26 @@
 
 
         // ================================
-        // RENDER POST (v14.0.3 - Ultimate Debugging)
+        // RENDER POST (v14.0.5 - Targeted Fix)
         // ================================
         function renderPost(post) {
-             // console.log(\`[DEBUG] Rendering post ID: \${post ? post.id : 'undefined'}\`); // DEBUG - Can be verbose
-             // Validate essential post data before proceeding
+             // console.log(\`[DEBUG] Rendering post ID: \${post ? post.id : 'undefined'}\`); // DEBUG
              if (!post || typeof post.id === 'undefined' || typeof post.college === 'undefined' || typeof post.content === 'undefined') {
-                console.error("🚨 [DEBUG] [renderPost] Invalid or incomplete post data received:", post); // Log the problematic data
-                return '<div class="post-card glassmorphism render-error">Error: Invalid post data. Cannot render.</div>'; // Return an error placeholder
+                console.error("🚨 [DEBUG] [renderPost] Invalid or incomplete post data received:", post);
+                return '<div class="post-card glassmorphism render-error">Error: Invalid post data. Cannot render.</div>';
             }
             
-            // Proceed with rendering inside a try...catch block
             try { 
-                const timeAgo = getTimeAgo(new Date(post.timestamp || Date.now())); // Provide fallback for timestamp
-                const category = post.category || 'other'; // Default category if missing
+                const timeAgo = getTimeAgo(new Date(post.timestamp || Date.now()));
+                const category = post.category || 'other';
                 const badgeClass = post.is_memorial ? 'memorial' : category;
 
-                // Generate image HTML safely
                 const imageHtml = post.image_url ? \`
                     <div class="post-image">
                         <img src="\${escapeHtml(post.image_url)}" alt="Post image" loading="lazy" onerror="this.style.display='none'; console.warn('⚠️ [DEBUG] Image failed to load:', this.src);"> 
                     </div>
                 \` : '';
                 
-                // Generate memorial HTML safely
                 const memorialHtml = post.is_memorial && (post.memorial_name || post.memorial_message) ? \`
                     <div class="memorial-tribute">
                         <h4>🕯️ In Memory \${post.memorial_name ? 'of ' + escapeHtml(post.memorial_name) : ''}</h4>
@@ -1825,13 +1865,27 @@
                     </div>
                 \` : '';
 
-                // Safely parse reaction counts, defaulting to 0
                 const supportCount = Number(post.reaction_support) || 0;
                 const helpfulCount = Number(post.reaction_helpful) || 0;
                 const solidarityCount = Number(post.reaction_solidarity) || 0;
 
-                // Construct the final HTML, ensuring all variables are escaped
-                return \`
+                // v14.0.5 - Log variables right before returning the template string
+                console.log(\`[DEBUG] renderPost Variables for ID \${post.id}:\`, {
+                    postId: post.id,
+                    college: post.college,
+                    timeAgo: timeAgo,
+                    badgeClass: badgeClass,
+                    category: category,
+                    contentLength: post.content.length, // Log length instead of full content for brevity
+                    imageHtmlExists: !!imageHtml,
+                    memorialHtmlExists: !!memorialHtml,
+                    supportCount: supportCount,
+                    helpfulCount: helpfulCount,
+                    solidarityCount: solidarityCount
+                });
+
+                // Construct the final HTML template literal
+                return \` 
                     <div class="post-card glassmorphism" id="post-\${post.id}">
                         <div class="post-header">
                             <div class="post-meta">
@@ -1868,12 +1922,12 @@
                             </button>
                         </div>
                     </div>
-                \`; // SYNTAX ERROR FIX: Ensure template literal backtick is here
-            } catch (renderError) { // Catch any unexpected errors during rendering
-                 console.error(\`🚨 [DEBUG] [renderPost] Unexpected error rendering post ID \${post.id}:\`, renderError, post); // Log error and post data
-                 return \`<div class="post-card glassmorphism render-error">Failed to render post ID: \${post.id}. Check console.</div>\`; // Return fallback UI
+                \`; // This closing backtick seems correct. Error must be inside.
+            } catch (renderError) { 
+                 console.error(\`🚨 [DEBUG] [renderPost] Unexpected error rendering post ID \${post.id}:\`, renderError, post); 
+                 return \`<div class="post-card glassmorphism render-error">Failed to render post ID: \${post.id}. Check console. (\${escapeHtml(renderError.message)})</div>\`; // Include error message
             }
-        } // SYNTAX ERROR FIX: Ensure closing brace for function is here
+        } 
 
 
         // ================================
@@ -1986,6 +2040,7 @@
                 if (event && event.target) { // If called from a click
                      targetButton = event.target;
                 } else { // If called programmatically (e.g., switchSection)
+                     // Corrected selector to find button based on filter value in onclick attribute
                     targetButton = document.querySelector(\`#postFilters .filter-btn[onclick*="='\${filter}'"]\`);
                 }
 
@@ -2007,7 +2062,7 @@
 
 
         // ================================
-        // STATS & PROFILE (v14.0.3 - Ultimate Debugging)
+        // STATS & PROFILE (v14.0.5 - Targeted Fix)
         // ================================
         async function fetchAndSetStats() {
             // Ensure Supabase client is available
@@ -2130,7 +2185,9 @@
              console.log(\`💬 [DEBUG] Showing comments for post: \${postId}\`); // DEBUG
             currentPostIdForComments = postId;
              try {
-                document.getElementById('commentsContainer').innerHTML = \`
+                 const commentsContainer = document.getElementById('commentsContainer');
+                 if (!commentsContainer) return console.error("🚨 [DEBUG] Comments container not found in showComments!");
+                 commentsContainer.innerHTML = \`
                     <div class="loading">
                         <div class="loading-spinner">💬</div>
                         <p>Loading comments...</p>
@@ -2139,8 +2196,7 @@
                 await loadComments(postId);
             } catch (e) {
                  console.error(\`🚨 [DEBUG] Failed to load comments initially for post \${postId}:\`, e); // DEBUG
-                // Error handled within loadComments, UI should show error state
-                 showToast("❌ Error loading comments. Check console.");
+                showToast("❌ Error loading comments. Check console.");
             }
         }
         
@@ -2242,6 +2298,8 @@
 
             const btn = document.getElementById('postCommentBtn');
             const input = document.getElementById('commentInput');
+             if (!btn || !input) return console.error("🚨 [DEBUG] Comment form elements not found!"); // DEBUG
+             
             const content = input.value.trim();
             
             if (!content || !currentPostIdForComments) {
@@ -2277,13 +2335,15 @@
                 console.error("🚨 CRITICAL ERROR posting comment:", error); // DEBUG
                 showToast(\`❌ Error posting comment: \${error.message}\`);
             } finally {
-                btn.disabled = false;
-                btn.textContent = 'Post';
+                if (btn) { // Check if still exists
+                     btn.disabled = false;
+                     btn.textContent = 'Post';
+                }
             }
         }
 
         // ================================
-        // HELPER FUNCTIONS (More Robust)
+        // HELPER FUNCTIONS (v14.0.5 - Targeted Fix)
         // ================================
         function getCategoryLabel(category) {
             const labels = {
@@ -2293,60 +2353,54 @@
                 bullying: '🚫 Bullying',
                 other: '💬 Other'
             };
-            // Return label or default to 'Other' if category is unknown or invalid
             return labels[category] || '💬 Other'; 
         }
 
         function getTimeAgo(date) {
             try {
-                 // Check if 'date' is a valid Date object
                  if (!(date instanceof Date) || isNaN(date.getTime())) {
-                     console.warn("⚠️ [DEBUG] Invalid date passed to getTimeAgo:", date); // DEBUG
-                     return 'a while ago'; // Return a default string for invalid dates
+                     // console.warn("⚠️ [DEBUG] Invalid date passed to getTimeAgo:", date); // DEBUG
+                     return 'a while ago'; 
                  }
                 const seconds = Math.floor((new Date() - date) / 1000);
-                // Check if seconds calculation resulted in NaN or negative (future date)
                 if (isNaN(seconds) || seconds < 0) return 'just now'; 
                 
-                const intervals = {
-                    year: 31536000, month: 2592000, week: 604800,
-                    day: 86400, hour: 3600, minute: 60
-                };
+                const intervals = { year: 31536000, month: 2592000, week: 604800, day: 86400, hour: 3600, minute: 60 };
 
                 for (const [unit, secondsInUnit] of Object.entries(intervals)) {
-                    // Ensure secondsInUnit is positive to prevent infinite loops or errors
                     if (secondsInUnit <= 0) continue; 
                     const interval = Math.floor(seconds / secondsInUnit);
                     if (interval >= 1) {
                         return \`\${interval} \${unit}\${interval !== 1 ? 's' : ''} ago\`;
                     }
                 }
-                return 'Just now'; // If less than a minute
+                return 'Just now'; 
             } catch (e) {
                  console.error("🚨 [DEBUG] Error calculating time ago:", e); // DEBUG
-                 return 'a while ago'; // Fallback string on error
+                 return 'a while ago'; 
             }
         }
 
+        // v14.0.5 FIX: Added backtick escaping
         function escapeHtml(text) {
              try {
-                 // Ensure input is treated as a string
                 if (typeof text !== 'string') {
-                     if (text === null || typeof text === 'undefined') return ''; // Return empty for null/undefined
-                     // console.warn("⚠️ [DEBUG] escapeHtml received non-string input, attempting conversion:", text); // DEBUG - Too verbose?
-                     text = String(text); // Convert to string
+                     if (text === null || typeof text === 'undefined') return ''; 
+                     // console.warn("⚠️ [DEBUG] escapeHtml received non-string input, attempting conversion:", text); // DEBUG
+                     text = String(text); 
                 }
-                // Define the map for HTML entity replacements
-                const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+                // Define the map including backtick `
+                const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '\`': '&#96;' }; // Added backtick
                 // Replace special characters using the map
-                let escapedText = text.replace(/[&<>"']/g, m => map[m]);
-                // Convert newline characters (\r\n, \r, \n) to <br> tags AFTER escaping
+                let escapedText = text.replace(/[&<>\"'\`]/g, m => map[m]); // Added backtick to regex
+                // Convert newline characters to <br> tags AFTER escaping
                 return escapedText.replace(/\\r\\n|\\r|\\n|\n/g, '<br>'); 
              } catch(e) {
                  console.error("🚨 [DEBUG] Error escaping HTML:", e); // DEBUG
-                 return 'Content display error'; // Return fallback text on error
+                 return 'Content display error'; 
              }
         }
+
 
         function showToast(message) {
              try {
@@ -2355,7 +2409,6 @@
                  if (!toast) return console.error("🚨 [DEBUG] Toast element not found!"); // DEBUG
                 toast.textContent = message;
                 toast.classList.add('show');
-                // Automatically hide the toast after 3 seconds
                 setTimeout(() => {
                     // Check if toast still exists before trying to remove class
                     if (document.body.contains(toast)) {
