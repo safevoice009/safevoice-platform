@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- Chosen Palette: Deep Indigo & Violet -->
+<!-- Application Structure Plan: The application is architected around a two-state user flow: disconnected and connected. Initially, it presents a single-purpose connection view that intelligently detects the user's environment (desktop vs. mobile) and pre-existing connections to provide a seamless entry point, which was a key bug fix. Once connected, the structure shifts to a task-oriented SPA with two primary sections accessible via persistent bottom navigation: "Home" for general interaction (posting, commenting, reacting) and "Memorials" as a dedicated, respectful space for tributes. This separation was chosen to honor the sensitive nature of memorial content while keeping the main feed dynamic and conversational. A persistent header acts as a dashboard, displaying the user's anonymous identity and their real-time Support Points (SP) balance, reinforcing the gamified reward system that is central to the project's vision. This structure prioritizes immediate user engagement and clear separation of core functionalities over mirroring a linear report. -->
+<!-- Visualization & Content Choices: Report Info -> Goal: Display real-time, user-generated content (posts, memorials, comments). -> Presentation Method: Dynamic HTML cards generated via JavaScript. -> Interaction: Users can create, view, and react to content. -> Justification: A card-based feed is the most intuitive UI for a social-style platform, allowing for easy consumption of individual stories. No data charts are necessary as the report's content is qualitative and social. Report Info -> Goal: Track and display user contributions. -> Presentation Method: A real-time updating numeric display for "Support Points" (SP). -> Interaction: The balance changes dynamically based on user actions (posting, commenting, reacting). -> Justification: This provides immediate positive feedback and visualizes the user's growing stake in the community, which is a core requirement for the future tokenomics. Report Info -> Goal: Facilitate supportive user conversations. -> Presentation Method: Toggleable comment sections within each post card, populated with dynamic HTML. -> Interaction: Users can write comments and use the "AI Suggest Reply" button. -> Justification: This keeps the main feed clean while allowing for deep, focused conversations on individual posts. The Gemini AI integration lowers the barrier to entry for providing support. All interactions are handled with vanilla JS and the Gun.js library for decentralized data storage. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SafeVoice - Decentralized</title>
-    <!-- Web3 Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.js"></script>
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
@@ -15,90 +19,55 @@
             --surface-light: #334155; --text: #f1f5f9; --text-secondary: #94a3b8; --success: #10b981;
             --warning: #f59e0b; --danger: #ef4444; --border: #334155; --memorial-gold: #f59e0b;
         }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; overflow-x: hidden; padding-bottom: 90px; }
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-        .header { background: var(--surface); padding: 24px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--border); }
-        .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-        .logo-icon { font-size: 36px; }
-        .logo h1 { font-size: 28px; font-weight: 700; background: linear-gradient(135deg, var(--primary), #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .tagline { color: var(--text-secondary); font-size: 14px; margin-top: 4px; }
-        .wallet-info { background: var(--bg); padding: 12px; border-radius: 8px; margin-top: 16px; border: 1px solid var(--border); }
-        .wallet-info p { font-size: 12px; color: var(--text-secondary); word-break: break-all; margin: 4px 0; }
-        .wallet-info strong { font-size: 18px; color: var(--primary); }
-        .btn { background: linear-gradient(135deg, var(--primary), #8b5cf6); color: white; padding: 16px 32px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 700; width: 100%; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+        body { background-color: var(--bg); color: var(--text); }
+        .btn { background: linear-gradient(135deg, var(--primary), #8b5cf6); }
         .btn.secondary { background: var(--surface-light); }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .post-form { background: var(--surface); padding: 24px; border-radius: 16px; margin-bottom: 24px; border: 1px solid var(--border); }
-        .form-group { margin-bottom: 16px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; font-size: 14px; color: var(--text-secondary); }
-        input, select, textarea { width: 100%; padding: 12px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 15px; font-family: inherit; }
-        textarea { resize: vertical; min-height: 120px; }
-        .posts-container { display: flex; flex-direction: column; gap: 16px; }
-        .post-card { background: var(--surface); padding: 24px; border-radius: 16px; border: 1px solid var(--border); }
+        .post-card { background-color: var(--surface); border-color: var(--border); }
         .post-card.memorial { border-color: var(--memorial-gold); }
-        .post-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px; }
-        .post-meta { font-size: 13px; color: var(--text-secondary); }
-        .post-meta strong { color: var(--text); font-size: 15px; }
-        .post-badge { padding: 6px 14px; border-radius: 12px; font-size: 12px; font-weight: 700; }
-        .badge-memorial { background: var(--memorial-gold); color: white; }
-        .post-content { margin: 16px 0; line-height: 1.8; font-size: 15px; white-space: pre-wrap; }
-        .memorial-tribute { background: rgba(245, 158, 11, 0.1); padding: 16px; border-radius: 8px; border-left: 4px solid var(--memorial-gold); margin-top: 16px; }
-        .memorial-tribute p { margin: 0; color: var(--text); }
-        .post-footer { border-top: 1px solid var(--border); margin-top: 20px; padding-top: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .reactions { display: flex; gap: 10px; }
-        .reaction-btn { padding: 10px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 18px; display: flex; align-items: center; gap: 8px; font-weight: 600; transition: border-color 0.2s; }
-        .loading, .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
-        .wallet-connector { text-align: center; padding: 40px 20px; background: var(--surface); border-radius: 16px; margin-bottom: 24px; }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; }
-        .bottom-nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 8px; font-size: 24px; transition: all 0.2s; }
-        .bottom-nav-btn span { font-size: 11px; font-weight: 600; }
+        .badge-memorial { background-color: var(--memorial-gold); }
+        .memorial-tribute { background-color: rgba(245, 158, 11, 0.1); border-left-color: var(--memorial-gold); }
+        .reaction-btn { background-color: var(--bg); border-color: var(--border); }
+        .wallet-connector, .header, .post-form { background-color: var(--surface); border-color: var(--border); }
+        .wallet-info { background-color: var(--bg); border-color: var(--border); }
+        .wallet-info strong { color: var(--primary); }
+        input, select, textarea { background-color: var(--bg); border-color: var(--border); color: var(--text); }
+        .bottom-nav { background-color: rgba(30, 41, 59, 0.7); border-top-color: var(--border); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        .bottom-nav-btn { color: var(--text-secondary); }
         .bottom-nav-btn.active { color: var(--primary); }
-        .section { display: none; }
-        .section.active { display: block; }
-        .comments-section { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; display: none; }
-        .comments-list { display: flex; flex-direction: column; gap: 12px; max-height: 300px; overflow-y: auto; padding-right: 8px; margin-bottom: 16px; }
-        .comment { background: var(--bg); padding: 14px; border-radius: 8px; }
-        .comment-meta { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
-        .comment-meta strong { color: var(--text); }
-        .comment-content { font-size: 14px; }
-        .comment-form { margin-top: 16px; }
-        .comment-form-actions { display: flex; gap: 10px; margin-top: 8px; }
-        .comment-form-actions button { flex: 1; }
-        .comment-form textarea { min-height: 40px; height: 40px; }
+        .comment { background-color: var(--bg); }
     </style>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="logo">
-                <span class="logo-icon">🔗</span>
+<body class="antialiased font-sans">
+    <div class="container mx-auto px-4">
+        <div class="header my-6 p-6 rounded-2xl border">
+            <div class="logo flex items-center gap-3 mb-3">
+                <span class="text-4xl">🔗</span>
                 <div>
-                    <h1>SafeVoice DApp</h1>
-                    <p class="tagline">Decentralized & Unstoppable</p>
+                    <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-indigo-500">SafeVoice DApp</h1>
+                    <p class="text-sm tagline">Decentralized & Unstoppable</p>
                 </div>
             </div>
-            <div id="walletInfo" class="wallet-info" style="display: none;">
-                 <p>Connected: <span id="userWalletAddress"></span></p>
-                 <p>Anonymous ID: <strong id="userAnonymousId"></strong></p>
-                 <p>Balance: <strong id="userSupportPoints">0</strong> SP</p>
+            <div id="walletInfo" class="wallet-info mt-4 p-3 rounded-lg border" style="display: none;">
+                 <p class="text-xs">Connected: <span id="userWalletAddress" class="font-mono"></span></p>
+                 <p class="text-xs">Anonymous ID: <strong id="userAnonymousId" class="text-base"></strong></p>
+                 <p class="text-xs">Balance: <strong id="userSupportPoints" class="text-lg">0</strong> SP</p>
             </div>
         </div>
 
-        <div id="walletConnector" class="wallet-connector">
-            <!-- This content will be changed dynamically by JavaScript -->
+        <div id="walletConnector" class="wallet-connector my-6 p-10 rounded-2xl border">
         </div>
 
-        <div id="dappContent" style="display: none;">
+        <div id="dappContent" class="hidden">
             <div id="home" class="section active">
-                <div class="post-form">
-                    <h2 style="margin-bottom: 20px; font-size: 22px;">Share Anonymously</h2>
-                    <div class="form-group">
-                        <label>Your College/University</label>
-                        <input type="text" id="collegeInput" placeholder="e.g., IIT Kharagpur" required>
+                <div class="post-form mb-6 p-6 rounded-2xl border">
+                    <h2 class="text-2xl font-bold mb-5">Share Anonymously</h2>
+                    <div class="form-group mb-4">
+                        <label class="block mb-2 text-sm font-semibold">Your College/University</label>
+                        <input type="text" id="collegeInput" placeholder="e.g., IIT Kharagpur" required class="w-full p-3 rounded-lg text-base">
                     </div>
-                    <div class="form-group">
-                        <label>Category</label>
-                        <select id="categorySelect">
+                    <div class="form-group mb-4">
+                        <label class="block mb-2 text-sm font-semibold">Category</label>
+                        <select id="categorySelect" class="w-full p-3 rounded-lg text-base">
                             <option value="mental">💭 Mental Health</option>
                             <option value="academic">📚 Academic Pressure</option>
                             <option value="social">👥 Social Issues</option>
@@ -106,92 +75,89 @@
                             <option value="other">💬 Other</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Your Story</label>
-                        <textarea id="contentInput" placeholder="Share your story..."></textarea>
+                    <div class="form-group mb-4">
+                        <label class="block mb-2 text-sm font-semibold">Your Story</label>
+                        <textarea id="contentInput" placeholder="Share your story..." class="w-full p-3 rounded-lg text-base min-h-[120px]"></textarea>
                     </div>
-                    <div class="form-group">
-                        <input type="checkbox" id="memorialToggle" onchange="toggleMemorialFields()" style="width: auto; margin-right: 8px;">
-                        <label for="memorialToggle" style="display: inline;">🕯️ This is a memorial tribute</label>
+                    <div class="form-group mb-4 flex items-center">
+                        <input type="checkbox" id="memorialToggle" onchange="toggleMemorialFields()" class="h-5 w-5 rounded mr-2">
+                        <label for="memorialToggle" class="font-semibold">🕯️ This is a memorial tribute</label>
                     </div>
-                    <div id="memorialFields" style="display:none;">
-                         <div class="form-group">
-                            <label>Name of Person (Optional)</label>
-                            <input type="text" id="memorialNameInput" placeholder="e.g., Priya Sharma">
+                    <div id="memorialFields" class="hidden">
+                         <div class="form-group mb-4">
+                            <label class="block mb-2 text-sm font-semibold">Name of Person (Optional)</label>
+                            <input type="text" id="memorialNameInput" placeholder="e.g., Priya Sharma" class="w-full p-3 rounded-lg text-base">
                         </div>
-                        <div class="form-group">
-                            <label>Tribute Message</label>
-                            <textarea id="memorialMessageInput" placeholder="A message to remember them..."></textarea>
+                        <div class="form-group mb-4">
+                            <label class="block mb-2 text-sm font-semibold">Tribute Message</label>
+                            <textarea id="memorialMessageInput" placeholder="A message to remember them..." class="w-full p-3 rounded-lg text-base"></textarea>
                         </div>
                     </div>
-                    <button class="btn" id="postBtn" onclick="createPost()">
+                    <button class="btn w-full p-4 rounded-lg font-bold text-lg flex items-center justify-center gap-2" id="postBtn" onclick="createPost()">
                         <span>🕊️</span> Post to the Network (+10 SP)
                     </button>
                 </div>
-                <div id="postsContainer" class="posts-container"></div>
+                <div id="postsContainer" class="posts-container space-y-4"></div>
             </div>
 
-            <div id="memorials" class="section">
-                 <h2 style="margin-bottom: 20px; font-size: 22px;">🕯️ Permanent Memorials</h2>
-                 <p style="color: var(--text-secondary); margin-bottom: 24px;">A permanent, decentralized space to honor and remember students we have lost. These tributes live forever on the network.</p>
-                 <div id="memorialsContainer" class="posts-container"></div>
+            <div id="memorials" class="section hidden">
+                 <h2 class="text-2xl font-bold mb-2">🕯️ Permanent Memorials</h2>
+                 <p class="mb-6">A permanent, decentralized space to honor and remember students we have lost. These tributes live forever on the network.</p>
+                 <div id="memorialsContainer" class="posts-container space-y-4"></div>
             </div>
         </div>
     </div>
     
-    <div class="bottom-nav">
-        <button class="bottom-nav-btn active" onclick="switchSection('home', this)">
-            <div>🏠</div> <span>Home</span>
+    <div class="bottom-nav fixed bottom-0 left-0 right-0 flex justify-around py-3 z-50">
+        <button class="bottom-nav-btn active flex flex-col items-center gap-1 text-2xl" onclick="switchSection('home', this)">
+            <span>🏠</span> <span class="text-xs font-semibold">Home</span>
         </button>
-        <button class="bottom-nav-btn" onclick="switchSection('memorials', this)">
-            <div>🕯️</div> <span>Memorials</span>
+        <button class="bottom-nav-btn flex flex-col items-center gap-1 text-2xl" onclick="switchSection('memorials', this)">
+            <span>🕯️</span> <span class="text-xs font-semibold">Memorials</span>
         </button>
     </div>
 
     <script>
-        // ================================
-        // CONFIG & STATE
-        // ================================
-        const GEMINI_API_KEY = ''; // IMPORTANT: PASTE YOUR GEMINI API KEY HERE
+        const GEMINI_API_KEY = ''; 
         const gun = Gun();
-        const posts = gun.get('safevoice-dapp-posts-v7');
-        const users = gun.get('safevoice-dapp-users-v7');
+        const posts = gun.get('safevoice-dapp-posts-v8');
+        const users = gun.get('safevoice-dapp-users-v8');
         let web3Provider, signer, userAddress, userAnonymousId;
         const ADJECTIVES = ['Brave', 'Strong', 'Hopeful', 'Kind', 'Wise', 'Calm', 'Proud', 'Valiant'];
         const NOUNS = ['Panda', 'Tiger', 'Eagle', 'Lion', 'Wolf', 'Bear', 'Fox', 'Hawk'];
 
-        // ================================
-        // INITIALIZATION
-        // ================================
         document.addEventListener('DOMContentLoaded', () => {
             init();
         });
 
-        function init() {
+        async function init() {
+            const walletConnector = document.getElementById('walletConnector');
             if (typeof window.ethereum !== 'undefined') {
-                // MetaMask is likely installed (or another wallet)
-                const walletConnector = document.getElementById('walletConnector');
-                walletConnector.innerHTML = `
-                    <h2>Connect Your Wallet</h2>
-                    <p>To post and interact, connect your Web3 wallet.</p>
-                    <button class="btn" onclick="connectWallet()" style="margin-top: 20px; width: auto;">Connect Wallet</button>
-                `;
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                    if (accounts.length > 0) {
+                        await connectWallet(true);
+                    } else {
+                        walletConnector.innerHTML = `
+                            <h2 class="text-2xl font-bold mb-2">Connect Your Wallet</h2>
+                            <p class="mb-5">To post and interact, connect your Web3 wallet.</p>
+                            <button class="btn inline-block w-auto px-8 py-3" onclick="connectWallet(false)">Connect Wallet</button>
+                        `;
+                    }
+                } catch (err) {
+                     walletConnector.innerHTML = `<h2 class="text-2xl font-bold text-red-400">Error</h2><p>Could not check wallet status. Please refresh.</p>`;
+                }
             } else {
-                // MetaMask is not installed, provide a deep link for mobile
-                const walletConnector = document.getElementById('walletConnector');
                 const dappUrl = window.location.href;
                 const metamaskLink = `https://metamask.app.link/dapp/${dappUrl.replace(/https?:\/\//, '')}`;
                 walletConnector.innerHTML = `
-                    <h2>MetaMask Not Detected</h2>
-                    <p>Please open this page in your MetaMask app's browser, or tap the button below to launch MetaMask.</p>
-                    <a href="${metamaskLink}" class="btn" style="margin-top: 20px; width: auto;">📱 Open in MetaMask App</a>
+                    <h2 class="text-2xl font-bold mb-2">MetaMask Not Detected</h2>
+                    <p class="mb-5">Please open this page in your MetaMask app's browser, or tap below to launch.</p>
+                    <a href="${metamaskLink}" class="btn inline-block w-auto px-8 py-3">📱 Open in MetaMask App</a>
                 `;
             }
         }
 
-        // ================================
-        // GEMINI API INTEGRATION
-        // ================================
         async function getAICommentSuggestion(postId) {
             if (!GEMINI_API_KEY) {
                 return alert("The creator has not configured the AI assistant yet.");
@@ -225,7 +191,6 @@
                     }
                 });
             } catch (error) {
-                console.error("Gemini API Error:", error);
                 alert(`AI Assistant Error: ${error.message}`);
             } finally {
                 button.disabled = false;
@@ -233,32 +198,37 @@
             }
         }
 
-        // ================================
-        // CORE APP LOGIC
-        // ================================
-        async function connectWallet() {
+        async function connectWallet(isAutoConnect = false) {
             try {
-                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                if (!isAutoConnect) {
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                }
                 web3Provider = new ethers.providers.Web3Provider(window.ethereum);
                 signer = web3Provider.getSigner();
                 userAddress = await signer.getAddress();
                 userAnonymousId = generateAnonymousId(userAddress);
+
                 document.getElementById('walletConnector').style.display = 'none';
-                document.getElementById('dappContent').style.display = 'block';
+                document.getElementById('dappContent').classList.remove('hidden');
                 document.getElementById('walletInfo').style.display = 'block';
                 document.getElementById('userWalletAddress').innerText = `${userAddress.substring(0, 6)}...${userAddress.substring(userAddress.length - 4)}`;
                 document.getElementById('userAnonymousId').innerText = userAnonymousId;
+
                 setupUserListeners();
                 switchSection('home', document.querySelector('.bottom-nav-btn.active'));
+
+                 window.ethereum.on('accountsChanged', (accounts) => {
+                    window.location.reload();
+                });
+
             } catch (error) {
-                console.error("Connection error:", error);
                 alert("You must connect your wallet to use the DApp.");
             }
         }
 
         function switchSection(sectionId, element) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.getElementById(sectionId).classList.add('active');
+            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+            document.getElementById(sectionId).classList.remove('hidden');
             document.querySelectorAll('.bottom-nav-btn').forEach(btn => btn.classList.remove('active'));
             element.classList.add('active');
             if (sectionId === 'home') loadPosts(false);
@@ -267,7 +237,7 @@
 
         function toggleMemorialFields() {
             const isChecked = document.getElementById('memorialToggle').checked;
-            document.getElementById('memorialFields').style.display = isChecked ? 'block' : 'none';
+            document.getElementById('memorialFields').classList.toggle('hidden', !isChecked);
             document.getElementById('postBtn').innerHTML = isChecked ? '<span>🕯️</span> Create Memorial (+15 SP)' : '<span>🕊️</span> Post to the Network (+10 SP)';
         }
 
@@ -313,7 +283,6 @@
                 document.getElementById('memorialToggle').checked = false;
                 toggleMemorialFields();
             } catch (error) {
-                console.error('Error creating post:', error);
                 alert(`Error: ${error.message}`);
             } finally {
                 btn.disabled = false;
@@ -341,7 +310,7 @@
         function loadPosts(isMemorial) {
             const containerId = isMemorial ? 'memorialsContainer' : 'postsContainer';
             const container = document.getElementById(containerId);
-            container.innerHTML = `<div class="loading">🔗 Loading from network...</div>`;
+            container.innerHTML = `<div class="loading p-16 text-center">🔗 Loading from network...</div>`;
             const renderedPosts = new Set();
             let hasPosts = false;
             posts.map().once((post, id) => {
@@ -353,7 +322,7 @@
                     if (!renderedPosts.has(id)) {
                         renderedPosts.add(id);
                         const postElement = document.createElement('div');
-                        postElement.className = `post-card ${post.isMemorial ? 'memorial' : ''}`;
+                        postElement.className = `post-card p-6 rounded-2xl border ${post.isMemorial ? 'memorial' : ''}`;
                         postElement.id = id;
                         postElement.innerHTML = renderPostContent(post, id);
                         container.prepend(postElement);
@@ -362,61 +331,61 @@
                 }
             });
             setTimeout(() => {
-                if (!hasPosts) container.innerHTML = `<div class="empty-state">No ${isMemorial ? 'memorials' : 'posts'} found.</div>`;
+                if (!hasPosts) container.innerHTML = `<div class="empty-state p-16 text-center">No ${isMemorial ? 'memorials' : 'posts'} found.</div>`;
             }, 3000);
         }
 
         function renderPostContent(post, id) {
             let tributeHTML = '';
             if (post.isMemorial) {
-                tributeHTML = `<div class="memorial-tribute">
-                    <p><strong>In memory of ${escapeHtml(post.memorialName) || 'a beloved student'}</strong></p>
+                tributeHTML = `<div class="memorial-tribute mt-4 p-4 rounded-lg border-l-4">
+                    <p class="font-bold">In memory of ${escapeHtml(post.memorialName) || 'a beloved student'}</p>
                     <p>${escapeHtml(post.memorialMessage)}</p>
                 </div>`;
             }
             return `
-                <div class="post-header">
-                    <div class="post-meta">
-                        <strong>${escapeHtml(post.authorAnonymousId)}</strong> from <strong>${escapeHtml(post.college)}</strong><br>
+                <div class="post-header flex justify-between items-start mb-4">
+                    <div class="post-meta text-sm">
+                        <strong class="text-base">${escapeHtml(post.authorAnonymousId)}</strong> from <strong>${escapeHtml(post.college)}</strong><br>
                         <span>${new Date(post.timestamp).toLocaleString()}</span>
                     </div>
-                    <span class="post-badge ${post.isMemorial ? 'badge-memorial' : ''}">${post.isMemorial ? '🕯️ Memorial' : escapeHtml(post.category)}</span>
+                    <span class="post-badge text-xs font-bold px-3 py-1 rounded-full ${post.isMemorial ? 'badge-memorial' : ''}">${post.isMemorial ? '🕯️ Memorial' : escapeHtml(post.category)}</span>
                 </div>
-                <div class="post-content">${escapeHtml(post.content)}</div>
+                <div class="post-content my-4 whitespace-pre-wrap">${escapeHtml(post.content)}</div>
                 ${tributeHTML}
-                <div class="post-footer">
-                    <div class="reactions">
-                        <button class="reaction-btn" onclick="addReaction('${id}', 'support')">💚 <span>0</span></button>
-                        <button class="reaction-btn" onclick="addReaction('${id}', 'love')">❤️ <span>0</span></button>
-                        <button class="reaction-btn" onclick="addReaction('${id}', 'collab')">🙌 <span>0</span></button>
+                <div class="post-footer mt-5 pt-5 border-t border-gray-700 flex justify-between items-center">
+                    <div class="reactions flex gap-2">
+                        <button class="reaction-btn text-xl p-2 rounded-lg flex items-center gap-2 font-semibold" onclick="addReaction('${id}', 'support')">💚 <span class="text-sm">0</span></button>
+                        <button class="reaction-btn text-xl p-2 rounded-lg flex items-center gap-2 font-semibold" onclick="addReaction('${id}', 'love')">❤️ <span class="text-sm">0</span></button>
+                        <button class="reaction-btn text-xl p-2 rounded-lg flex items-center gap-2 font-semibold" onclick="addReaction('${id}', 'collab')">🙌 <span class="text-sm">0</span></button>
                     </div>
-                    <button class="btn secondary" style="width:auto; padding: 8px 16px;" onclick="toggleComments('${id}')">
+                    <button class="btn secondary text-sm px-4 py-2" onclick="toggleComments('${id}')">
                         💬 Comments
                     </button>
                 </div>
-                <div class="comments-section" id="comments-${id}"></div>
+                <div class="comments-section hidden mt-5 pt-5 border-t border-gray-700" id="comments-${id}"></div>
             `;
         }
 
         function toggleComments(postId) {
             const commentsSection = document.getElementById(`comments-${postId}`);
-            const isVisible = commentsSection.style.display === 'block';
-            commentsSection.style.display = isVisible ? 'none' : 'block';
+            const isVisible = !commentsSection.classList.contains('hidden');
+            commentsSection.classList.toggle('hidden', isVisible);
             if (!isVisible) loadComments(postId);
         }
 
         function loadComments(postId) {
             const container = document.getElementById(`comments-${postId}`);
-            container.innerHTML = `<div class="loading">Loading comments...</div>`;
+            container.innerHTML = `<div class="loading text-center p-4">Loading comments...</div>`;
             const commentsNode = posts.get(postId).get('comments');
             const renderedComments = new Set();
             let hasComments = false;
-            const setupCommentForm = () => `<div class="comments-list"></div>
-                <form class="comment-form" onsubmit="createComment(event, '${postId}')">
-                    <textarea required placeholder="Add a supportive comment..."></textarea>
-                    <div class="comment-form-actions">
-                        <button type="button" class="btn secondary suggest-reply-btn" onclick="getAICommentSuggestion('${postId}')">✨ Suggest Reply</button>
-                        <button type="submit" class="btn">Reply (+5 SP)</button>
+            const setupCommentForm = () => `<div class="comments-list space-y-3"></div>
+                <form class="comment-form mt-4" onsubmit="createComment(event, '${postId}')">
+                    <textarea required placeholder="Add a supportive comment..." class="w-full p-2 rounded-lg text-sm"></textarea>
+                    <div class="comment-form-actions flex gap-2 mt-2">
+                        <button type="button" class="btn secondary w-full p-2 text-sm suggest-reply-btn" onclick="getAICommentSuggestion('${postId}')">✨ Suggest Reply</button>
+                        <button type="submit" class="btn w-full p-2 text-sm">Reply (+5 SP)</button>
                     </div>
                 </form>`;
             commentsNode.map().on((comment, commentId) => {
@@ -428,22 +397,22 @@
                     renderedComments.add(commentId);
                     const list = container.querySelector('.comments-list');
                     const commentEl = document.createElement('div');
-                    commentEl.className = 'comment';
+                    commentEl.className = 'comment p-4 rounded-lg';
                     commentEl.innerHTML = renderComment(comment);
                     list.prepend(commentEl);
                 }
             });
             setTimeout(() => {
                 if (!hasComments) container.innerHTML = setupCommentForm();
-            }, 2000);
+            }, 3000);
         }
 
         function renderComment(comment) {
-            return `<div class="comment-meta">
-                        <strong>${escapeHtml(comment.authorAnonymousId)}</strong>
+            return `<div class="comment-meta text-xs mb-1">
+                        <strong class="font-bold">${escapeHtml(comment.authorAnonymousId)}</strong>
                         <span>• ${new Date(comment.timestamp).toLocaleString()}</span>
                     </div>
-                    <p class="comment-content">${escapeHtml(comment.content)}</p>`;
+                    <p class="comment-content text-sm">${escapeHtml(comment.content)}</p>`;
         }
 
         async function addReaction(postId, reactionType) {
