@@ -2,346 +2,874 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale-1.0">
-    <title>D-Chat: The Nexus Edition</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#6366f1">
+    <title>SafeVoice - Anonymous Student Platform</title>
+
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         :root {
-            --background: #1a1c23; --surface: #242731; --primary: #8a78ff;
-            --primary-hover: #7a68ea; --text-primary: #ffffff; --text-secondary: #a9b1d6;
-            --border-color: rgba(255, 255, 255, 0.1); --green: #9ece6a; --orange: #e0af68; --red: #f7768e;
+            --primary: #6366f1; --primary-dark: #4f46e5; --bg: #0f172a;
+            --surface: #1e293b; --surface-light: #334155; --text: #f1f5f9;
+            --text-secondary: #94a3b8; --success: #10b981; --warning: #f59e0b;
+            --danger: #ef4444; --border: #475569;
         }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--surface); }
-        ::-webkit-scrollbar-thumb { background-color: var(--primary); border-radius: 10px; border: 2px solid var(--surface); }
-        body { font-family: 'Inter', sans-serif; background-color: var(--background); color: var(--text-primary); overflow: hidden; }
-        .glass-pane { background: rgba(36, 39, 49, 0.7); backdrop-filter: blur(12px); border: 1px solid var(--border-color); }
-        .nav-item.active { background-color: var(--primary); }
-        .topic-item:hover, .space-item:hover { background-color: rgba(255,255,255,0.05); }
-        .topic-item.active { background-color: var(--primary) !important; color: white; }
-        .space-item.active { border-color: var(--primary); }
-        .comment-thread { border-left: 2px solid var(--border-color); }
-        .vote-btn:hover { background-color: rgba(255,255,255,0.1); }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg); color: var(--text); line-height: 1.6;
+            padding-bottom: 80px; overflow-x: hidden;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; padding: 16px; }
+
+        /* FIXED: Proper Header */
+        .header {
+            background: var(--surface); padding: 20px; border-radius: 16px;
+            margin-bottom: 20px; border: 1px solid var(--border);
+        }
+        .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+        .logo h1 {
+            font-size: 24px; font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .tagline { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
+
+        /* FIXED: Proper Stats Grid */
+        .stats {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+            padding-top: 16px; border-top: 1px solid var(--border);
+        }
+        .stat-item { text-align: center; padding: 8px; }
+        .stat-value { font-size: 24px; font-weight: 700; color: var(--primary); }
+        .stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+
+        /* FIXED: Wallet Card - Even Sizing */
+        .wallet-card {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            padding: 24px; border-radius: 16px; margin-bottom: 20px;
+            text-align: center; border: 2px solid rgba(99, 102, 241, 0.3);
+        }
+        .wallet-card.connected {
+            background: var(--surface); border: 2px solid var(--success);
+        }
+        .wallet-icon { font-size: 48px; margin-bottom: 12px; }
+        .wallet-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: white; }
+        .wallet-connected-title { color: var(--text); }
+        .wallet-desc { color: rgba(255,255,255,0.9); font-size: 14px; margin-bottom: 20px; }
+        .wallet-address {
+            background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px;
+            font-family: 'Courier New', monospace; font-size: 14px;
+            color: white; margin: 16px 0;
+        }
+
+        /* FIXED: Wallet Stats Grid - Even Sizing */
+        .wallet-stats {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+            margin-top: 16px; padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        .wallet-stat { text-align: center; }
+        .wallet-stat-value { font-size: 28px; font-weight: 700; color: white; }
+        .wallet-stat-label { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+
+        /* Search */
+        .search-bar {
+            background: var(--surface); padding: 12px; border-radius: 12px;
+            margin-bottom: 20px; border: 1px solid var(--border);
+        }
+        .search-input {
+            width: 100%; padding: 12px 16px; background: var(--bg);
+            border: 1px solid var(--border); border-radius: 8px;
+            color: var(--text); font-size: 15px;
+        }
+        .search-input:focus { outline: none; border-color: var(--primary); }
+
+        /* Crisis Banner */
+        .crisis-banner {
+            background: linear-gradient(135deg, var(--danger), #dc2626);
+            padding: 16px; border-radius: 12px; margin-bottom: 20px;
+            color: white; display: flex; align-items: center; gap: 12px;
+        }
+        .crisis-icon { font-size: 32px; flex-shrink: 0; }
+        .crisis-content h3 { font-size: 16px; margin-bottom: 4px; }
+        .crisis-content p { font-size: 13px; margin-bottom: 12px; opacity: 0.95; }
+        .crisis-btn {
+            background: white; color: var(--danger); padding: 10px 20px;
+            border-radius: 8px; text-decoration: none; font-weight: 700;
+            font-size: 14px; display: inline-block;
+        }
+
+        /* Navigation Tabs */
+        .nav {
+            display: flex; gap: 8px; margin-bottom: 20px;
+            overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;
+        }
+        .nav::-webkit-scrollbar { display: none; }
+        .nav-btn {
+            padding: 10px 20px; background: var(--surface);
+            border: 1px solid var(--border); border-radius: 20px;
+            color: var(--text); cursor: pointer; font-size: 14px;
+            font-weight: 600; white-space: nowrap; flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .nav-btn:hover { background: var(--surface-light); }
+        .nav-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+        /* Sections */
+        .section { display: none; }
+        .section.active { display: block; }
+
+        /* Post Form */
+        .post-form {
+            background: var(--surface); padding: 20px; border-radius: 16px;
+            margin-bottom: 20px; border: 1px solid var(--border);
+        }
+        .post-form h2 { font-size: 18px; margin-bottom: 16px; }
+        .form-group { margin-bottom: 14px; }
+        label {
+            display: block; margin-bottom: 8px; font-weight: 600;
+            font-size: 13px; color: var(--text-secondary);
+        }
+        input, select, textarea {
+            width: 100%; padding: 12px 16px; background: var(--bg);
+            border: 1px solid var(--border); border-radius: 8px;
+            color: var(--text); font-size: 15px; font-family: inherit;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none; border-color: var(--primary);
+        }
+        textarea { resize: vertical; min-height: 100px; }
+        .char-count {
+            text-align: right; font-size: 12px;
+            color: var(--text-secondary); margin-top: 4px;
+        }
+        .btn {
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            color: white; padding: 14px 28px; border: none;
+            border-radius: 8px; cursor: pointer; font-size: 16px;
+            font-weight: 700; width: 100%; transition: transform 0.2s;
+        }
+        .btn:hover { transform: translateY(-1px); }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+        /* Posts */
+        .posts-container { display: flex; flex-direction: column; gap: 16px; }
+        .post-card {
+            background: var(--surface); padding: 20px; border-radius: 12px;
+            border: 1px solid var(--border); transition: transform 0.2s;
+        }
+        .post-card:hover { transform: translateY(-2px); }
+        .post-meta {
+            font-size: 13px; color: var(--text-secondary);
+            margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+        }
+        .post-badge {
+            padding: 6px 12px; border-radius: 12px; font-size: 12px;
+            font-weight: 700; display: inline-block; margin-bottom: 10px;
+        }
+        .badge-mental { background: #8b5cf6; color: white; }
+        .badge-academic { background: #3b82f6; color: white; }
+        .badge-social { background: #10b981; color: white; }
+        .badge-bullying { background: #ef4444; color: white; }
+        .badge-other { background: #6b7280; color: white; }
+        .post-content { margin: 12px 0; line-height: 1.7; word-wrap: break-word; }
+
+        /* Reactions */
+        .reactions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+        .reaction-btn {
+            padding: 10px; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 8px; cursor: pointer; font-size: 18px;
+            text-align: center; transition: all 0.2s;
+        }
+        .reaction-btn:hover { background: var(--surface-light); transform: scale(1.05); }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: var(--surface); border-top: 1px solid var(--border);
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            padding: 8px 0; z-index: 100; backdrop-filter: blur(10px);
+        }
+        .bottom-nav-btn {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 4px; color: var(--text-secondary); cursor: pointer;
+            font-size: 24px; background: none; border: none;
+            padding: 8px; transition: color 0.2s;
+        }
+        .bottom-nav-btn:hover { color: var(--primary); }
+        .bottom-nav-btn.active { color: var(--primary); }
+        .bottom-nav-btn span { font-size: 11px; font-weight: 600; }
+
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+            background: var(--surface); color: var(--text); padding: 14px 20px;
+            border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000; opacity: 0; transition: opacity 0.3s;
+            border: 1px solid var(--border); max-width: 90%;
+        }
+        .toast.show { opacity: 1; }
+
+        /* Loading & Empty States */
+        .loading { text-align: center; padding: 40px; color: var(--text-secondary); }
+        .loading-icon { font-size: 48px; margin-bottom: 12px; }
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
+        .empty-icon { font-size: 72px; margin-bottom: 16px; }
+        .empty-state h3 { margin-top: 12px; color: var(--text); font-size: 18px; }
+        .empty-state p { margin-top: 8px; font-size: 14px; }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .container { padding: 12px; }
+            .crisis-banner { flex-direction: column; text-align: center; }
+            .crisis-icon { font-size: 48px; }
+        }
     </style>
 </head>
-<body class="antialiased text-sm">
-    <div class="flex h-screen w-screen">
-        <!-- Main Navigation -->
-        <nav class="w-20 bg-black/20 flex flex-col items-center py-4 space-y-4 flex-shrink-0">
-            <div id="agora-nav-btn" class="nav-item w-12 h-12 rounded-full bg-surface flex items-center justify-center cursor-pointer" title="The Agora (Public Feed)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <span style="font-size: 32px;">🕊️</span>
+                <div>
+                    <h1>SafeVoice</h1>
+                    <p class="tagline">Anonymous platform for students • Your voice matters</p>
+                </div>
             </div>
-            <div class="w-full border-t border-white/10"></div>
-            <div id="spaces-list" class="space-y-3">
-                <!-- Spaces will be rendered here -->
-            </div>
-            <button id="add-space-btn" class="w-12 h-12 rounded-full bg-surface flex items-center justify-center cursor-pointer border-2 border-dashed border-gray-500 hover:border-primary transition-all" title="Create or Join Space">+</button>
-        </nav>
-
-        <!-- Dynamic Content Area -->
-        <div id="spaces-view" class="flex flex-1">
-            <!-- Topics Panel -->
-            <aside class="w-80 bg-surface flex-shrink-0 flex flex-col">
-                <header class="h-14 flex-shrink-0 flex items-center justify-between px-4 border-b border-white/10">
-                    <h2 id="space-title" class="font-bold text-lg"></h2>
-                </header>
-                <div id="topics-list" class="flex-grow p-3 space-y-2 overflow-y-auto"></div>
-                <div class="p-3 border-t border-white/10">
-                    <button id="create-topic-btn" class="w-full btn-primary font-bold py-2 rounded-md">Create Topic</button>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalPosts">0</div>
+                    <div class="stat-label">Stories</div>
                 </div>
-            </aside>
-            <!-- Main Content Area -->
-            <main class="flex-1 flex flex-col bg-black/10">
-                <div id="topic-view" class="flex-1 p-6 overflow-y-auto hidden">
-                    <div id="topic-content" class="pb-6 border-b border-white/10"></div>
-                    <div id="comments-section" class="mt-6 space-y-4"></div>
+                <div class="stat-item">
+                    <div class="stat-value" id="totalReactions">0</div>
+                    <div class="stat-label">Support</div>
                 </div>
-                <div id="welcome-view" class="flex-1 flex items-center justify-center text-center text-gray-400">
-                    <div>
-                        <h2 class="text-2xl font-bold text-white">Welcome to Metropolis</h2>
-                        <p class="max-w-md mt-2">Select a topic to read, or create a new one to start a conversation.</p>
-                    </div>
-                </div>
-                <div id="comment-input-area" class="p-6 flex-shrink-0 hidden">
-                    <div class="bg-surface rounded-lg px-4 py-2 flex items-center gap-4"><input type="text" id="comment-input" class="flex-grow bg-transparent focus:outline-none" placeholder="Add a comment..."><button id="post-comment-btn" class="btn-primary rounded-md p-2">Post</button></div>
-                </div>
-            </main>
-        </div>
-        
-        <div id="agora-view" class="hidden flex-1 flex flex-col bg-black/10">
-            <header class="h-14 flex-shrink-0 flex items-center justify-between px-6 border-b border-white/10">
-                <h2 class="font-bold text-lg">The Agora</h2>
-            </header>
-            <div class="flex-1 flex flex-col">
-                <div class="p-4 border-b border-white/10">
-                    <textarea id="shout-input" class="w-full bg-surface rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-primary resize-none" rows="3" placeholder="What's happening in the nexus?" maxlength="280"></textarea>
-                    <div class="flex justify-end items-center mt-2">
-                        <span id="shout-char-count" class="text-xs text-gray-400 mr-4">280</span>
-                        <button id="post-shout-btn" class="btn-primary font-bold py-2 px-4 rounded-md">Shout</button>
-                    </div>
-                </div>
-                <div id="shouts-feed" class="flex-1 p-4 overflow-y-auto space-y-4">
-                    <!-- Shouts will be rendered here -->
+                <div class="stat-item">
+                    <div class="stat-value" id="totalUsers">0</div>
+                    <div class="stat-label">Users</div>
                 </div>
             </div>
         </div>
 
-        <!-- Profile & Wallet Panel -->
-        <section class="w-72 bg-surface flex-shrink-0 flex flex-col p-3 border-l border-white/10">
-            <h2 class="font-bold text-lg mb-4 px-2">Profile & Wallet</h2>
-            <div class="p-2 bg-black/20 rounded-lg">
-                <div class="flex items-center gap-3">
-                    <div id="my-avatar" class="w-10 h-10 rounded-full flex-shrink-0 bg-gray-700"></div>
-                    <div><p id="my-name" class="font-bold text-white">Generating...</p><p id="my-id-short" class="text-xs text-gray-400 truncate">ID loading...</p></div>
+        <!-- Search -->
+        <div class="search-bar">
+            <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search stories, colleges, topics..." onkeyup="searchPosts()">
+        </div>
+
+        <!-- Wallet Section (Hidden by default) -->
+        <div id="walletSection" class="wallet-card" style="display:none;">
+            <div class="wallet-icon">🔗</div>
+            <div class="wallet-title">Connect Wallet</div>
+            <p class="wallet-desc">Earn VOICE tokens by sharing & supporting</p>
+            <button class="btn" onclick="connectWallet()">🦊 Connect MetaMask</button>
+            <p style="color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 12px;">
+                💡 Open this page in MetaMask Browser to connect
+            </p>
+        </div>
+
+        <div id="walletConnected" class="wallet-card connected" style="display:none;">
+            <div class="wallet-icon">✅</div>
+            <div class="wallet-title wallet-connected-title">Wallet Connected</div>
+            <div class="wallet-address" id="walletAddress">0x0000...0000</div>
+            <div class="wallet-stats">
+                <div class="wallet-stat">
+                    <div class="wallet-stat-value" id="voiceBalance">0</div>
+                    <div class="wallet-stat-label">VOICE Tokens</div>
+                </div>
+                <div class="wallet-stat">
+                    <div class="wallet-stat-value" id="userPostCount">0</div>
+                    <div class="wallet-stat-label">Your Posts</div>
                 </div>
             </div>
-            <div class="bg-black/20 p-3 rounded-lg mt-4">
-                <h3 class="font-semibold text-white mb-2">Wallet (Simulation)</h3>
-                <div class="text-center p-2 rounded-md bg-gradient-to-r from-primary to-green">
-                    <p class="text-xs">Balance</p><p id="walletBalance" class="text-2xl font-bold">100.00 <span class="text-sm font-normal">SVT</span></p>
-                </div>
-                <p class="text-xs text-center text-gray-400 mt-2">Staking Yield: +<span id="staking-rate">0.05</span>% / min</p>
+            <button class="btn" onclick="disconnectWallet()" style="background: var(--danger); margin-top: 16px;">Disconnect Wallet</button>
+        </div>
+
+        <!-- Crisis Banner -->
+        <div class="crisis-banner">
+            <div class="crisis-icon">🆘</div>
+            <div class="crisis-content">
+                <h3>Need Help Now?</h3>
+                <p>You're not alone. Help is available 24/7.</p>
+                <a href="tel:1860-2662-345" class="crisis-btn">📞 Call 1860-2662-345</a>
             </div>
-             <div class="flex-grow mt-4">
-                <h3 class="font-semibold text-white mb-2 px-2">Connection (Simulated)</h3>
-                <div class="flex items-center gap-2 px-2">
-                    <span id="status-dot" class="status-dot status-disconnected"></span>
-                    <span id="status-text" class="font-medium">Offline</span>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav">
+            <button class="nav-btn active" onclick="switchSection('home')">🏠 Feed</button>
+            <button class="nav-btn" onclick="switchSection('helplines')">📞 Helplines</button>
+            <button class="nav-btn" onclick="switchSection('memorials')">🕯️ Memorials</button>
+            <button class="nav-btn" onclick="switchSection('community')">👥 Community</button>
+        </div>
+
+        <!-- Home Section -->
+        <div id="home" class="section active">
+            <div class="post-form">
+                <h2>📝 Share Your Story Anonymously</h2>
+                <div class="form-group">
+                    <label>Your College/University *</label>
+                    <input type="text" id="collegeInput" placeholder="e.g., IIT Delhi, DU" maxlength="100">
+                </div>
+                <div class="form-group">
+                    <label>Category *</label>
+                    <select id="categorySelect">
+                        <option value="mental">💭 Mental Health</option>
+                        <option value="academic">📚 Academic Pressure</option>
+                        <option value="social">👥 Social Issues</option>
+                        <option value="bullying">🚫 Bullying/Harassment</option>
+                        <option value="other">💬 Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Your Story *</label>
+                    <textarea id="contentInput" maxlength="1000" placeholder="Share your story anonymously. Your identity is protected."></textarea>
+                    <div class="char-count"><span id="charCount">0</span>/1000</div>
+                </div>
+                <button class="btn" onclick="createPost()">🕊️ Post Anonymously</button>
+            </div>
+
+            <div id="postsContainer" class="posts-container">
+                <div class="loading">
+                    <div class="loading-icon">🕊️</div>
+                    <p>Loading stories...</p>
                 </div>
             </div>
-        </section>
+        </div>
+
+        <!-- Helplines Section -->
+        <div id="helplines" class="section">
+            <h2 style="margin-bottom: 20px;">🆘 24/7 Crisis Helplines</h2>
+            <div style="background: var(--surface); padding: 20px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--border);">
+                <h3 style="font-size: 18px; margin-bottom: 8px;">💚 Vandrevala Foundation</h3>
+                <p style="color: var(--text-secondary); font-size: 14px; margin: 8px 0;">24/7 • Mental health support & crisis intervention</p>
+                <a href="tel:1860-2662-345" style="background: var(--success); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 12px; font-weight: 700;">📞 Call 1860-2662-345</a>
+            </div>
+            <div style="background: var(--surface); padding: 20px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--border);">
+                <h3 style="font-size: 18px; margin-bottom: 8px;">🆘 iCall - TISS</h3>
+                <p style="color: var(--text-secondary); font-size: 14px; margin: 8px 0;">24/7 • Suicide prevention & counseling</p>
+                <a href="tel:9152987821" style="background: var(--success); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 12px; font-weight: 700;">📞 Call 9152-987821</a>
+            </div>
+            <div style="background: var(--warning); color: white; padding: 16px; border-radius: 12px; margin-top: 20px;">
+                <strong>⚠️ All helplines maintain strict confidentiality.</strong> Your identity is protected.
+            </div>
+        </div>
+
+        <!-- Memorials Section -->
+        <div id="memorials" class="section">
+            <h2 style="margin-bottom: 20px;">🕯️ In Loving Memory</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 20px;">Honoring those we've lost • Celebrating their lives</p>
+            <div id="memorialsContainer" class="posts-container">
+                <div class="loading">
+                    <div class="loading-icon">🕯️</div>
+                    <p>Loading memorials...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Community Section -->
+        <div id="community" class="section">
+            <h2 style="margin-bottom: 20px;">👥 Community Guidelines</h2>
+            <div style="background: var(--surface); padding: 24px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--border);">
+                <h3 style="font-size: 18px; margin-bottom: 12px;">🕊️ Our Mission</h3>
+                <p style="color: var(--text-secondary); line-height: 1.8;">
+                    SafeVoice provides a secure, anonymous platform for students to share their experiences with mental health, academic pressure, and other challenges. We believe every voice matters.
+                </p>
+            </div>
+            <div style="background: var(--surface); padding: 24px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--border);">
+                <h3 style="font-size: 18px; margin-bottom: 12px;">💎 Web3 & Tokenomics</h3>
+                <p style="color: var(--text-secondary); line-height: 1.8;">
+                    Connect your wallet to earn VOICE tokens. Posts earn 10 VOICE, reactions earn 1 VOICE. Build wealth while helping others.
+                </p>
+            </div>
+            <div style="background: var(--surface); padding: 24px; border-radius: 12px; border: 1px solid var(--border);">
+                <h3 style="font-size: 18px; margin-bottom: 12px;">🛡️ Your Privacy</h3>
+                <p style="color: var(--text-secondary); line-height: 1.8;">
+                    All posts are completely anonymous. We never collect personal information. Your wallet connection is optional.
+                </p>
+            </div>
+        </div>
     </div>
 
-    <!-- Modals -->
-    <div id="generic-modal" class="hidden fixed inset-0 bg-black/70 items-center justify-center z-50">
-        <div class="glass-pane rounded-xl p-6 w-11/12 md:w-1/2 max-w-lg">
-            <div class="flex justify-between items-center mb-4"><h3 id="modal-title" class="text-lg font-bold">Modal</h3><button class="modal-close-btn font-bold text-gray-400 hover:text-white">&times;</button></div>
-            <div id="modal-content"></div>
-        </div>
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <button class="bottom-nav-btn active" onclick="switchSection('home')">
+            <div>🏠</div><span>Feed</span>
+        </button>
+        <button class="bottom-nav-btn" onclick="switchSection('helplines')">
+            <div>📞</div><span>Help</span>
+        </button>
+        <button class="bottom-nav-btn" onclick="switchSection('memorials')">
+            <div>🕯️</div><span>Memorial</span>
+        </button>
+        <button class="bottom-nav-btn" onclick="switchSection('community')">
+            <div>👥</div><span>Community</span>
+        </button>
     </div>
-    
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // --- DOM Elements ---
-        const agoraNavBtn = document.getElementById('agora-nav-btn');
-        const spacesView = document.getElementById('spaces-view');
-        const agoraView = document.getElementById('agora-view');
-        const spaceTitleEl = document.getElementById('space-title');
-        const spacesListEl = document.getElementById('spaces-list');
-        const addSpaceBtn = document.getElementById('add-space-btn');
-        const topicsListEl = document.getElementById('topics-list');
-        const createTopicBtn = document.getElementById('create-topic-btn');
-        const topicViewEl = document.getElementById('topic-view');
-        const welcomeViewEl = document.getElementById('welcome-view');
-        const topicContentEl = document.getElementById('topic-content');
-        const commentsSectionEl = document.getElementById('comments-section');
-        const commentInputArea = document.getElementById('comment-input-area');
-        const commentInput = document.getElementById('comment-input');
-        const postCommentBtn = document.getElementById('post-comment-btn');
-        const myAvatar = document.getElementById('my-avatar');
-        const myName = document.getElementById('my-name');
-        const myIdShort = document.getElementById('my-id-short');
-        const walletBalanceEl = document.getElementById('walletBalance');
-        const genericModal = document.getElementById('generic-modal');
-        const modalTitle = document.getElementById('modal-title');
-        const modalContent = document.getElementById('modal-content');
-        // Agora elements
-        const shoutInput = document.getElementById('shout-input');
-        const shoutCharCount = document.getElementById('shout-char-count');
-        const postShoutBtn = document.getElementById('post-shout-btn');
-        const shoutsFeed = document.getElementById('shouts-feed');
+        // ==================== CONFIGURATION ====================
+        const SUPABASE_URL = 'https://jjfkwkmdvpxzjzbblodz.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZmt3a21kdnB4emp6YmJsb2R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjk0NzAwOTQsImV4cCI6MjA0NTA0NjA5NH0.rN8oDm5T_JXOG8KN_wBKiBdVTsE7OUOmBBkKJ4VF9TI';
 
-        // --- App State ---
-        let me = {};
-        let wallet = { balance: 100.0, stakingRate: 0.05 };
-        let state = {
-            spaces: new Map(),
-            agora: new Map(),
-            currentView: 'spaces',
-            currentSpaceId: 'default',
-            currentTopicId: null,
-        };
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // --- Core Functions ---
-        async function initialize() {
-            // ... (user & wallet setup as before)
-            const keyPair = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveKey']);
-            const pubKeyJwk = await crypto.subtle.exportKey('jwk', keyPair.publicKey);
-            me = {
-                id: await digestMessage(JSON.stringify(pubKeyJwk)),
-                name: generateAnonymousName(),
-                avatar: generateAvatar(await digestMessage(new Date().toISOString() + Math.random())),
-            };
-            
-            myName.textContent = me.name;
-            myIdShort.textContent = `ID: ${me.id.substring(0, 8)}...`;
-            myAvatar.innerHTML = me.avatar;
-            updateWalletBalance(0);
+        let anonymousId = localStorage.getItem('anonymousId') || ('anon_' + Math.random().toString(36).substr(2, 9));
+        localStorage.setItem('anonymousId', anonymousId);
 
-            const defaultSpace = { id: 'default', name: 'General', topics: new Map() };
-            state.spaces.set('default', defaultSpace);
-            
-            // Staking Interval
-            setInterval(() => {
-                const yield = wallet.balance * (wallet.stakingRate / 100);
-                updateWalletBalance(yield);
-            }, 60000);
+        let web3 = null;
+        let userWalletAddress = null;
+        let isWalletConnected = false;
+        let allPosts = []; // For search
 
-            // Set initial view
-            switchView('spaces');
+        console.log('🚀 SafeVoice initialized');
+        console.log('📊 Anonymous ID:', anonymousId);
+
+        // ==================== CHARACTER COUNTER ====================
+        document.getElementById('contentInput').addEventListener('input', function() {
+            document.getElementById('charCount').textContent = this.value.length;
+        });
+
+        // ==================== NAVIGATION ====================
+        function switchSection(section) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(section).classList.add('active');
+
+            document.querySelectorAll('.nav-btn, .bottom-nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (section === 'home') loadPosts();
+            else if (section === 'memorials') loadMemorials();
         }
 
-        // --- View Switching ---
-        function switchView(view) {
-            state.currentView = view;
-            if (view === 'agora') {
-                agoraView.classList.remove('hidden');
-                agoraView.classList.add('flex');
-                spacesView.classList.add('hidden');
-                spacesView.classList.remove('flex');
-                agoraNavBtn.classList.add('active');
-                document.querySelectorAll('.space-item').forEach(el => el.classList.remove('active'));
-                renderAgoraFeed();
-            } else {
-                agoraView.classList.add('hidden');
-                agoraView.classList.remove('flex');
-                spacesView.classList.remove('hidden');
-                spacesView.classList.add('flex');
-                agoraNavBtn.classList.remove('active');
-                selectSpace(state.currentSpaceId);
+        // ==================== WEB3 WALLET ====================
+        async function connectWallet() {
+            if (typeof window.ethereum === 'undefined') {
+                showToast('❌ MetaMask not installed! Please open in MetaMask Browser');
+                return;
+            }
+
+            try {
+                const btn = event.target;
+                btn.disabled = true;
+                btn.innerHTML = '⏳ Connecting...';
+
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+                if (accounts.length === 0) {
+                    throw new Error('No accounts found');
+                }
+
+                userWalletAddress = accounts[0];
+                web3 = new Web3(window.ethereum);
+
+                await saveWalletToDatabase(userWalletAddress);
+
+                isWalletConnected = true;
+                document.getElementById('walletSection').style.display = 'none';
+                document.getElementById('walletConnected').style.display = 'block';
+                document.getElementById('walletAddress').textContent = 
+                    userWalletAddress.slice(0, 6) + '...' + userWalletAddress.slice(-4);
+
+                localStorage.setItem('walletAddress', userWalletAddress);
+                localStorage.setItem('walletConnected', 'true');
+
+                showToast('✅ Wallet connected! You can now earn VOICE tokens');
+
+                await loadUserStats();
+
+            } catch (error) {
+                console.error('Wallet connection error:', error);
+                showToast('❌ Failed to connect wallet');
+
+                const btn = document.querySelector('#walletSection .btn');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '🦊 Connect MetaMask';
+                }
             }
         }
-        
-        // --- Rendering Functions (Spaces) ---
-        function renderSpaces() { /* ... same as before ... */ }
-        function renderTopics() { /* ... same as before ... */ }
-        function renderTopicView() { /* ... same as before ... */ }
-        function renderComments() { /* ... same as before ... */ }
 
-        // --- Rendering Functions (Agora) ---
-        function renderAgoraFeed() {
-            shoutsFeed.innerHTML = '';
-            const sortedShouts = Array.from(state.agora.values()).sort((a,b) => b.timestamp - a.timestamp);
-            sortedShouts.forEach(shout => {
-                const shoutEl = document.createElement('div');
-                shoutEl.className = 'p-4 rounded-lg bg-surface flex gap-4';
-                shoutEl.innerHTML = `
-                    <div class="w-10 h-10 rounded-full flex-shrink-0">${shout.author.avatar}</div>
-                    <div class="flex-1">
-                        <p class="font-bold text-white">${shout.author.name} <span class="font-normal text-xs text-gray-400 ml-2">${new Date(shout.timestamp).toLocaleString()}</span></p>
-                        <p class="mt-1 text-gray-300 whitespace-pre-wrap">${shout.content}</p>
-                        <div class="flex items-center gap-2 mt-3 text-xs text-gray-400">
-                            <button class="vote-btn p-1 rounded-md flex items-center gap-1" onclick="handleShoutUpvote('${shout.id}')">
-                                ▲ <span class="font-bold text-white">${shout.votes}</span>
-                            </button>
+        async function disconnectWallet() {
+            userWalletAddress = null;
+            isWalletConnected = false;
+            web3 = null;
+
+            localStorage.removeItem('walletAddress');
+            localStorage.removeItem('walletConnected');
+
+            document.getElementById('walletSection').style.display = 'block';
+            document.getElementById('walletConnected').style.display = 'none';
+
+            showToast('👋 Wallet disconnected');
+        }
+
+        async function saveWalletToDatabase(address) {
+            try {
+                const { data: existing } = await supabase
+                    .from('wallets')
+                    .select('*')
+                    .eq('wallet_address', address)
+                    .single();
+
+                if (!existing) {
+                    await supabase.from('wallets').insert([{
+                        wallet_address: address,
+                        anonymous_id: anonymousId,
+                        connected_at: new Date().toISOString()
+                    }]);
+                    console.log('✅ Wallet saved to database');
+                }
+            } catch (error) {
+                console.error('Save wallet error:', error);
+            }
+        }
+
+        async function loadUserStats() {
+            try {
+                const { count } = await supabase
+                    .from('posts')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('anonymous_id', anonymousId);
+
+                document.getElementById('userPostCount').textContent = count || 0;
+                document.getElementById('voiceBalance').textContent = (count || 0) * 10;
+
+            } catch (error) {
+                console.error('Load user stats error:', error);
+            }
+        }
+
+        // Check if wallet was previously connected
+        window.addEventListener('load', function() {
+            const savedWallet = localStorage.getItem('walletAddress');
+            const wasConnected = localStorage.getItem('walletConnected') === 'true';
+
+            if (savedWallet && wasConnected && typeof window.ethereum !== 'undefined') {
+                userWalletAddress = savedWallet;
+                isWalletConnected = true;
+                document.getElementById('walletSection').style.display = 'none';
+                document.getElementById('walletConnected').style.display = 'block';
+                document.getElementById('walletAddress').textContent = 
+                    savedWallet.slice(0, 6) + '...' + savedWallet.slice(-4);
+                loadUserStats();
+            } else if (typeof window.ethereum !== 'undefined') {
+                // Show wallet section if MetaMask is available
+                document.getElementById('walletSection').style.display = 'block';
+            }
+        });
+
+        // ==================== POST CREATION ====================
+        async function createPost() {
+            const college = document.getElementById('collegeInput').value.trim();
+            const topic = document.getElementById('categorySelect').value;
+            const content = document.getElementById('contentInput').value.trim();
+
+            if (!college || !content) {
+                showToast('❌ Please fill all required fields');
+                return;
+            }
+
+            if (content.length < 10) {
+                showToast('❌ Story must be at least 10 characters');
+                return;
+            }
+
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Posting...';
+
+            try {
+                const postData = {
+                    college: college,
+                    topic: topic,
+                    content: content,
+                    anonymous_id: anonymousId,
+                    wallet_address: userWalletAddress,
+                    created_at: new Date().toISOString()
+                };
+
+                console.log('📝 Creating post:', postData);
+
+                const { data, error } = await supabase
+                    .from('posts')
+                    .insert([postData])
+                    .select()
+                    .single();
+
+                if (error) {
+                    console.error('Supabase error:', error);
+                    throw error;
+                }
+
+                console.log('✅ Post created:', data);
+
+                showToast('✅ Post shared successfully!' + (isWalletConnected ? ' +10 VOICE tokens earned' : ''));
+
+                document.getElementById('collegeInput').value = '';
+                document.getElementById('contentInput').value = '';
+                document.getElementById('charCount').textContent = '0';
+
+                await loadPosts();
+
+                if (isWalletConnected) {
+                    await loadUserStats();
+                }
+            } catch (error) {
+                console.error('Post creation error:', error);
+                showToast('❌ Failed to post. Please try again.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🕊️ Post Anonymously';
+            }
+        }
+
+        // ==================== LOAD POSTS ====================
+        async function loadPosts() {
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = '<div class="loading"><div class="loading-icon">🕊️</div><p>Loading stories...</p></div>';
+
+            try {
+                console.log('📥 Loading posts from Supabase...');
+
+                const { data: posts, error } = await supabase
+                    .from('posts')
+                    .select('*')
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+
+                if (error) {
+                    console.error('Supabase error:', error);
+                    throw error;
+                }
+
+                console.log(`✅ Loaded ${posts ? posts.length : 0} posts`);
+
+                allPosts = posts || [];
+
+                if (!posts || posts.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">🕊️</div>
+                            <h3>No posts yet</h3>
+                            <p>Be the first to share your story</p>
                         </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = posts.map(post => renderPost(post)).join('');
+                await updateStats(posts);
+
+            } catch (error) {
+                console.error('Load posts error:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">⚠️</div>
+                        <h3>Error loading posts</h3>
+                        <p>Please refresh the page</p>
                     </div>
                 `;
-                shoutsFeed.appendChild(shoutEl);
-            });
+            }
         }
 
-        // --- State Selection ---
-        function selectSpace(spaceId) {
-            if (state.currentView !== 'spaces') switchView('spaces');
-            state.currentSpaceId = spaceId;
-            state.currentTopicId = null;
-            spaceTitleEl.textContent = state.spaces.get(spaceId).name;
-            welcomeViewEl.classList.remove('hidden');
-            topicViewEl.classList.add('hidden');
-            commentInputArea.classList.add('hidden');
-            renderSpaces();
-            renderTopics();
-        }
-        function selectTopic(topicId) { /* ... same as before ... */ }
+        // ==================== SEARCH POSTS ====================
+        function searchPosts() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
 
-        // --- Action Handlers (Agora) ---
-        async function handlePostShout() {
-            const content = shoutInput.value.trim();
-            if (!content) return;
-            const newShout = {
-                id: await digestMessage(content + new Date().toISOString()),
-                content,
-                author: me,
-                timestamp: Date.now(),
-                votes: 0,
+            if (!query) {
+                loadPosts();
+                return;
+            }
+
+            const filtered = allPosts.filter(post => 
+                post.content.toLowerCase().includes(query) ||
+                post.college.toLowerCase().includes(query) ||
+                post.topic.toLowerCase().includes(query)
+            );
+
+            const container = document.getElementById('postsContainer');
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🔍</div>
+                        <h3>No results found</h3>
+                        <p>Try different keywords</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(post => renderPost(post)).join('');
+        }
+
+        // ==================== RENDER POST ====================
+        function renderPost(post) {
+            const badgeClass = `badge-${post.topic || 'other'}`;
+            const badgeText = getCategoryLabel(post.topic || 'other');
+            const timeAgo = getTimeAgo(new Date(post.created_at));
+
+            return `
+                <div class="post-card">
+                    <div class="post-meta">
+                        <strong>Anonymous Student • ${escapeHtml(post.college)}</strong>
+                        <span>•</span>
+                        <span>${timeAgo}</span>
+                    </div>
+                    <div class="post-badge ${badgeClass}">${badgeText}</div>
+                    <div class="post-content">${escapeHtml(post.content)}</div>
+                    <div class="reactions">
+                        <button class="reaction-btn" onclick="react('${post.id}', 'support')" title="Show support">
+                            💚 Support
+                        </button>
+                        <button class="reaction-btn" onclick="react('${post.id}', 'helpful')" title="This helped me">
+                            🙌 Helpful
+                        </button>
+                        <button class="reaction-btn" onclick="react('${post.id}', 'solidarity')" title="Me too">
+                            🤝 Together
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ==================== REACTIONS ====================
+        async function react(postId, type) {
+            const key = `react_${postId}_${anonymousId}`;
+            if (localStorage.getItem(key)) {
+                showToast('ℹ️ You already reacted to this post');
+                return;
+            }
+
+            try {
+                await supabase.from('reactions').insert([{
+                    post_id: postId,
+                    type: type,
+                    anonymous_id: anonymousId
+                }]);
+
+                localStorage.setItem(key, type);
+                showToast('✅ Reaction added!' + (isWalletConnected ? ' +1 VOICE token' : ''));
+
+                if (isWalletConnected) {
+                    await loadUserStats();
+                }
+            } catch (error) {
+                console.error('Reaction error:', error);
+                showToast('❌ Failed to add reaction');
+            }
+        }
+
+        // ==================== LOAD MEMORIALS ====================
+        async function loadMemorials() {
+            const container = document.getElementById('memorialsContainer');
+            container.innerHTML = '<div class="loading"><div class="loading-icon">🕯️</div><p>Loading memorials...</p></div>';
+
+            try {
+                const { data, error } = await supabase
+                    .from('posts')
+                    .select('*')
+                    .eq('is_memorial', true)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">🕯️</div>
+                            <h3>No memorials yet</h3>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = data.map(p => renderPost(p)).join('');
+            } catch (error) {
+                console.error('Memorials error:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">⚠️</div>
+                        <h3>Error loading memorials</h3>
+                    </div>
+                `;
+            }
+        }
+
+        // ==================== UPDATE STATS ====================
+        async function updateStats(posts) {
+            document.getElementById('totalPosts').textContent = posts.length;
+
+            try {
+                const { count: reactionsCount } = await supabase
+                    .from('reactions')
+                    .select('*', { count: 'exact', head: true });
+                document.getElementById('totalReactions').textContent = reactionsCount || 0;
+
+                const { count: walletsCount } = await supabase
+                    .from('wallets')
+                    .select('*', { count: 'exact', head: true });
+                document.getElementById('totalUsers').textContent = walletsCount || 0;
+            } catch (error) {
+                console.error('Stats error:', error);
+            }
+        }
+
+        // ==================== UTILITY FUNCTIONS ====================
+        function getCategoryLabel(topic) {
+            const labels = {
+                mental: '💭 Mental Health',
+                academic: '📚 Academic Pressure',
+                social: '👥 Social Issues',
+                bullying: '🚫 Bullying/Harassment',
+                other: '💬 Other'
             };
-            state.agora.set(newShout.id, newShout);
-            shoutInput.value = '';
-            shoutCharCount.textContent = '280';
-            renderAgoraFeed();
-        }
-        
-        window.handleShoutUpvote = (shoutId) => {
-            const shout = state.agora.get(shoutId);
-            if (shout && wallet.balance >= 0.1) {
-                updateWalletBalance(-0.1);
-                shout.votes++;
-                renderAgoraFeed();
-            } else if (wallet.balance < 0.1) {
-                alert('Not enough SVT to upvote.');
-            }
-        };
-
-        // --- All other functions (Modals, Upvoting, Utils, etc.) remain largely the same ---
-        // Stubs for brevity, they are the same as the previous version.
-        function showModal(title, contentHTML) { /*...*/ }
-        function hideModal() { /*...*/ }
-        window.handleUpvote = (topicId) => { /*...*/ };
-        async function handlePostComment() { /*...*/ }
-        function updateWalletBalance(amount) {
-            wallet.balance += amount;
-            walletBalanceEl.innerHTML = `${wallet.balance.toFixed(2)} <span class="text-sm font-normal">SVT</span>`;
-        }
-        async function digestMessage(message) {
-            const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(message));
-            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-        function generateAvatar(seed) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 40; canvas.height = 40;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = `#${seed.substring(0, 6)}`;
-            ctx.fillRect(0, 0, 40, 40);
-            ctx.fillStyle = `#${seed.substring(6, 12)}`;
-            for (let i = 0; i < 15; i++) {
-                const x = parseInt(seed.substring(i * 2, i * 2 + 2), 16) / 255 * 40;
-                const y = parseInt(seed.substring(i * 2 + 2, i * 2 + 4), 16) / 255 * 40;
-                ctx.fillRect(x, y, 4, 4);
-            }
-            return `<img src="${canvas.toDataURL()}" class="rounded-full w-full h-full">`;
-        }
-        function generateAnonymousName() {
-            const adjs = ["Silent", "Crimson", "Whispering", "Forgotten", "Azure", "Golden", "Hidden", "Wandering"];
-            const nouns = ["River", "Fox", "Echo", "Monolith", "Star", "Cipher", "Vagrant", "Oracle"];
-            return `${adjs[Math.floor(Math.random()*adjs.length)]} ${nouns[Math.floor(Math.random()*nouns.length)]}`;
+            return labels[topic] || '💬 Other';
         }
 
-        // --- Event Listeners ---
-        agoraNavBtn.addEventListener('click', () => switchView('agora'));
-        postShoutBtn.addEventListener('click', handlePostShout);
-        shoutInput.addEventListener('input', () => {
-            const count = shoutInput.value.length;
-            shoutCharCount.textContent = 280 - count;
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
+            if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
+            return Math.floor(seconds / 86400) + 'd ago';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        // ==================== INITIALIZE ====================
+        window.addEventListener('load', function() {
+            console.log('🚀 SafeVoice Platform Loaded');
+            console.log('✅ Supabase: Connected');
+            console.log('✅ Version: Professional UI Fixed');
+
+            loadPosts();
         });
-        
-        // --- Event Listeners for Spaces (copied from previous version for completeness) ---
-        createTopicBtn.addEventListener('click', () => {
-             const content = `<div class="space-y-4"><input id="new-topic-title" class="w-full bg-[#16161e] rounded-md p-2" placeholder="Topic Title"><textarea id="new-topic-content" class="w-full bg-[#1616e] rounded-md p-2 h-32" placeholder="What's on your mind?"></textarea><button id="submit-topic" class="w-full btn-primary font-bold py-2 rounded-md">Post Topic</button></div>`;
-            showModal('Create New Topic', content);
-            document.getElementById('submit-topic').onclick = async () => { /* ... */ };
-        });
-        addSpaceBtn.addEventListener('click', () => {
-            const content = `<div class="space-y-4 text-center"><p class="text-gray-300">Create a new Space or join one.</p><input id="new-space-name" class="w-full bg-[#16161e] rounded-md p-2" placeholder="New Space Name"><button id="submit-space" class="w-full btn-primary font-bold py-2 rounded-md">Create Space (5 SVT)</button></div>`;
-            showModal('Create or Join a Space', content);
-            document.getElementById('submit-space').onclick = async () => { /* ... */ };
-        });
-        postCommentBtn.addEventListener('click', handlePostComment);
-        
-        initialize();
-    });
     </script>
 </body>
 </html>
-
