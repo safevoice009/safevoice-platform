@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>SafeVoice v14.0 - Comments & Glass UI</title>
+    <title>SafeVoice v14.0.1 - Loading Bugfix</title>
     <link rel="manifest" href="manifest.json">
 
     <style>
@@ -1228,7 +1228,14 @@
         const SUPABASE_URL = 'https://jjfkwkmdvpxzjzbblodz.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZmt3a21kdnB4emp6YmJsb2R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjk0NzAwOTQsImV4cCI6MjA0NTA0NjA5NH0.rN8oDm5T_JXOG8KN_wBKiBdVTsE7OUOmBBkKJ4VF9TI';
 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let supabase; // Initialize later after checks
+        try {
+             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } catch (e) {
+            console.error("Supabase client initialization failed:", e);
+            // Optionally display an error message to the user on the page
+            document.body.innerHTML = '<div style="color:white; padding: 20px;">Error: Could not connect to the backend. Please try refreshing.</div>';
+        }
 
         // ================================
         // GLOBAL STATE
@@ -1239,6 +1246,7 @@
         let currentFilter = 'all';
         let selectedImageFile = null; // v14.0 - Store file, not Base64
         let currentPostIdForComments = null; // v14.0 - For comments modal
+        let realtimeChannel = null; // v14.0 - Prevent multiple subscriptions
 
         function generateFingerprint() {
             return 'user_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
@@ -1248,122 +1256,275 @@
         // INITIALIZE APP
         // ================================
         window.addEventListener('load', async function() {
-            console.log('🕊️ SafeVoice v14.0 - Comments & Glass UI');
+            console.log('🕊️ SafeVoice v14.0.1 - Loading Bugfix');
+            
+            // Only proceed if Supabase client initialized
+            if (!supabase) {
+                showToast("🔴 Critical Error: Backend connection failed.");
+                return; 
+            }
+            
             console.log('✅ Supabase connected');
 
-            await loadPosts();
-            await fetchAndSetStats(); // Load global stats
+            try {
+                await loadPosts();
+                console.log("Posts loaded successfully.");
+            } catch (error) {
+                 console.error("🚨 CRITICAL ERROR during initial loadPosts:", error);
+                 showToast("❌ Error loading initial posts.");
+                 // Display error state in posts container
+                 const container = document.getElementById('postsContainer') || document.getElementById('memorialsContainer');
+                 if(container) container.innerHTML = \`<div class="empty-state"><h3>⚠️ Error Loading Posts</h3><p>Could not fetch data. Please try refreshing.</p></div>\`;
+            }
             
-            // Add listeners
-            document.getElementById('contentInput').addEventListener('input', updateCharCount);
-            document.getElementById('memorialToggle').addEventListener('change', toggleMemorialFields);
-            document.getElementById('cameraInput').addEventListener('change', handleImageSelect);
-            document.getElementById('galleryInput').addEventListener('change', handleImageSelect);
+            try {
+                await fetchAndSetStats(); // Load global stats
+                console.log("Stats loaded successfully.");
+            } catch (error) {
+                 console.error("🚨 CRITICAL ERROR during initial fetchAndSetStats:", error);
+                 showToast("❌ Error loading stats.");
+                 // Optionally clear stats or show error indicators
+                 document.getElementById('totalPosts').textContent = '-';
+                 document.getElementById('totalReactions').textContent = '-';
+                 document.getElementById('totalMemorials').textContent = '-';
+            }
+            
+            subscribeToChanges(); // v14.0 - Call ONCE
+            
+            // Add listeners safely
+            try {
+                document.getElementById('contentInput').addEventListener('input', updateCharCount);
+                document.getElementById('memorialToggle').addEventListener('change', toggleMemorialFields);
+                document.getElementById('cameraInput').addEventListener('change', handleImageSelect);
+                document.getElementById('galleryInput').addEventListener('change', handleImageSelect);
+            } catch(e) {
+                console.error("Error setting up listeners:", e);
+            }
         });
+        
+        // ================================
+        // REAL-TIME (FIXED: CRITICAL ERROR #1)
+        // ================================
+        function subscribeToChanges() {
+            // Prevent multiple subscriptions
+            if (realtimeChannel || !supabase) return; 
+
+            try {
+                realtimeChannel = supabase
+                    .channel('public-posts')
+                    .on('postgres_changes', 
+                        { event: 'INSERT', schema: 'public', table: 'posts' },
+                        async (payload) => { // Make handler async
+                            console.log('New post received!', payload);
+                            try {
+                                // Smartly add new post instead of full reload? Maybe later.
+                                await loadPosts();
+                                await fetchAndSetStats();
+                            } catch (e) {
+                                console.error("Error handling new post:", e);
+                            }
+                        }
+                    )
+                    .on('postgres_changes',
+                        { event: 'INSERT', schema: 'public', table: 'comments' },
+                        async (payload) => { // Make handler async
+                             console.log('New comment received!', payload);
+                            // If comment modal is open and for this post, refresh it
+                            if (document.getElementById('commentsModal').classList.contains('active') &&
+                                payload.new.post_id === currentPostIdForComments) {
+                                try {
+                                    await loadComments(currentPostIdForComments);
+                                } catch (e) {
+                                    console.error("Error handling new comment:", e);
+                                }
+                            }
+                        }
+                    )
+                    .subscribe((status, err) => {
+                        if (status === 'SUBSCRIBED') {
+                            console.log('✅ Real-time channel subscribed');
+                        }
+                        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+                            console.error('Real-time subscription error/closed:', status, err);
+                            showToast("⚠️ Real-time connection issue.");
+                            // Optionally try to resubscribe after a delay
+                        }
+                        if (err) {
+                            console.error('Real-time subscription error object:', err);
+                        }
+                    });
+            } catch (e) {
+                 console.error("🚨 CRITICAL ERROR subscribing to real-time changes:", e);
+                 showToast("❌ Error setting up real-time updates.");
+            }
+        }
+
 
         // ================================
         // NAVIGATION (v14.0 UPGRADE)
         // ================================
         function switchSection(section) {
-            // Hide all sections
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            try {
+                // Hide all sections
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
 
-            // Show selected section
-            const activeSection = document.getElementById(section);
-            if(activeSection) {
-                activeSection.classList.add('active');
-            }
-
-            // Update nav buttons (Top and Bottom)
-            document.querySelectorAll('.nav-btn, .bottom-nav-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.section === section) {
-                    btn.classList.add('active');
+                // Show selected section
+                const activeSection = document.getElementById(section);
+                if(activeSection) {
+                    activeSection.classList.add('active');
+                } else {
+                     console.warn(\`Section with ID "\${section}" not found.\`);
+                     // Optionally default to home or show an error
+                     document.getElementById('home').classList.add('active');
+                     section = 'home'; // Update section variable to reflect reality
                 }
-            });
 
-            // Load content for the new section
-            if (section === 'home') {
-                filterPosts(null, 'all'); // Reset to 'all' filter
-            } else if (section === 'memorials') {
-                filterPosts(null, 'memorial'); // Set to 'memorial' filter
-            } else if (section === 'profile') {
-                loadProfile();
+                // Update nav buttons (Top and Bottom)
+                document.querySelectorAll('.nav-btn, .bottom-nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.section === section) {
+                        btn.classList.add('active');
+                    }
+                });
+
+                // Load content for the new section
+                if (section === 'home') {
+                    filterPosts(null, 'all'); // Reset to 'all' filter
+                } else if (section === 'memorials') {
+                    filterPosts(null, 'memorial'); // Set to 'memorial' filter
+                } else if (section === 'profile') {
+                    loadProfile();
+                }
+            } catch (error) {
+                console.error("Error in switchSection:", error);
+                showToast("❌ Navigation Error");
             }
         }
         
         function showModal(modalId) {
-            document.getElementById(modalId).classList.add('active');
+             try {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.add('active');
+                } else {
+                    console.error(\`Modal with ID "\${modalId}" not found.\`);
+                }
+             } catch (error) {
+                console.error("Error showing modal:", error);
+                showToast("❌ UI Error");
+             }
         }
         
         function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
+            try {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                     modal.classList.remove('active');
+                } else {
+                    console.error(\`Modal with ID "\${modalId}" not found.\`);
+                }
+            } catch (error) {
+                 console.error("Error closing modal:", error);
+                 showToast("❌ UI Error");
+            }
         }
 
         // ================================
         // IMAGE HANDLING (v14.0 UPGRADE - STORAGE)
         // ================================
         function handleImageSelect(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+            try {
+                const file = e.target.files[0];
+                if (!file) return;
 
-            if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                showToast('❌ Image too large! Max 5MB.');
-                resetImageInputs();
-                return;
+                if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                    showToast('❌ Image too large! Max 5MB.');
+                    resetImageInputs();
+                    return;
+                }
+                
+                if (!file.type.startsWith('image/')) {
+                    showToast('❌ Only image files are allowed.');
+                    resetImageInputs();
+                    return;
+                }
+
+                selectedImageFile = file; // Store the file object
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    displayImagePreview(event.target.result); // Show preview
+                };
+                 reader.onerror = function(error) {
+                    console.error("FileReader error:", error);
+                    showToast("❌ Error reading image file.");
+                    removeImage(); // Clear selection on error
+                };
+                reader.readAsDataURL(file);
+            } catch (error) {
+                 console.error("Error handling image selection:", error);
+                 showToast("❌ Error selecting image.");
+                 removeImage(); // Ensure cleanup
             }
-            
-            if (!file.type.startsWith('image/')) {
-                showToast('❌ Only image files are allowed.');
-                resetImageInputs();
-                return;
-            }
-
-            selectedImageFile = file; // Store the file object
-
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                displayImagePreview(event.target.result); // Show preview
-            };
-            reader.readAsDataURL(file);
         }
 
         function displayImagePreview(imageData) {
-            const preview = document.getElementById('imagePreview');
-            preview.style.display = 'block';
-            preview.innerHTML = \`
-                <img src="\${imageData}" alt="Preview">
-                <button class="remove-image" onclick="removeImage()">×</button>
-            \`;
+            try {
+                const preview = document.getElementById('imagePreview');
+                preview.style.display = 'block';
+                preview.innerHTML = \`
+                    <img src="\${imageData}" alt="Preview">
+                    <button class="remove-image" onclick="removeImage()">×</button>
+                \`;
+            } catch(e) {
+                console.error("Error displaying image preview:", e);
+                showToast("❌ Could not display image preview.");
+            }
         }
 
         function removeImage() {
-            selectedImageFile = null;
-            document.getElementById('imagePreview').style.display = 'none';
-            document.getElementById('imagePreview').innerHTML = '';
-            resetImageInputs();
+            try {
+                selectedImageFile = null;
+                document.getElementById('imagePreview').style.display = 'none';
+                document.getElementById('imagePreview').innerHTML = '';
+                resetImageInputs();
+            } catch (e) {
+                 console.error("Error removing image:", e);
+            }
         }
         
         function resetImageInputs() {
-            document.getElementById('cameraInput').value = '';
-            document.getElementById('galleryInput').value = '';
+            try {
+                document.getElementById('cameraInput').value = '';
+                document.getElementById('galleryInput').value = '';
+            } catch (e) {
+                console.error("Error resetting image inputs:", e);
+            }
         }
 
         // ================================
         // POST FORM HELPERS
         // ================================
         function updateCharCount() {
-            document.getElementById('charCount').textContent = this.value.length;
+             try {
+                const contentInput = document.getElementById('contentInput');
+                document.getElementById('charCount').textContent = contentInput.value.length;
+             } catch(e) { console.error("Error updating char count:", e); }
         }
 
         function toggleMemorialFields() {
-            document.getElementById('memorialFields').style.display = this.checked ? 'block' : 'none';
+             try {
+                const memorialToggle = document.getElementById('memorialToggle');
+                document.getElementById('memorialFields').style.display = memorialToggle.checked ? 'block' : 'none';
+             } catch(e) { console.error("Error toggling memorial fields:", e); }
         }
 
         // ================================
         // CREATE POST (v14.0 UPGRADE - STORAGE)
         // ================================
         async function createPost() {
+            if (!supabase) return showToast("🔴 Backend connection error.");
+
             const college = document.getElementById('collegeInput').value.trim();
             const category = document.getElementById('categorySelect').value;
             const content = document.getElementById('contentInput').value.trim();
@@ -1385,21 +1546,31 @@
 
                 // **NEW: Handle Image Upload to Supabase Storage**
                 if (selectedImageFile) {
-                    const fileName = \`\${userFingerprint}_\${Date.now()}_\${selectedImageFile.name}\`;
+                    const fileName = \`\${userFingerprint}_\${Date.now()}_\${selectedImageFile.name.replace(/[^a-zA-Z0-9._-]/g, '')}\`; // Sanitize filename
                     
                     showToast('Uploading image...');
+                    console.log(\`Uploading \${fileName} to post-images bucket...\`);
                     const { data: uploadData, error: uploadError } = await supabase.storage
                         .from('post-images') // **USER MUST CREATE THIS BUCKET & MAKE PUBLIC**
                         .upload(fileName, selectedImageFile);
 
-                    if (uploadError) throw uploadError;
+                    if (uploadError) {
+                         console.error("Supabase storage upload error:", uploadError);
+                         throw new Error(\`Image upload failed: \${uploadError.message}\`); // Throw specific error
+                    }
+                     console.log("Upload successful:", uploadData);
 
                     // Get the public URL
                     const { data: urlData } = supabase.storage
                         .from('post-images')
                         .getPublicUrl(fileName);
                     
+                    if (!urlData || !urlData.publicUrl) {
+                        console.error("Could not get public URL for uploaded image.");
+                        throw new Error("Failed to get image URL after upload.");
+                    }
                     imageUrl = urlData.publicUrl;
+                     console.log("Image URL:", imageUrl);
                 }
 
                 const postData = {
@@ -1413,29 +1584,31 @@
                     reaction_support: 0,
                     reaction_helpful: 0,
                     reaction_solidarity: 0,
-                    // These fields from v13.0 are still here, 
-                    // but our new react() function won't use them.
-                    // We'll use a separate 'reactions' table for v14.0 logic
-                    // For now, let's keep the schema simple and use the v13.0 rpc call.
                     anonymous_id: userFingerprint // Add user fingerprint
                 };
-
+                
+                 console.log("Inserting post data:", postData);
                 const { data, error } = await supabase
                     .from('posts')
                     .insert([postData])
                     .select();
 
-                if (error) throw error;
+                if (error) {
+                     console.error("Supabase insert post error:", error);
+                     throw error; // Re-throw to be caught by outer catch
+                }
+                console.log("Post inserted successfully:", data);
                 
                 showToast('✅ Post shared successfully!');
                 resetPostForm();
                 closeModal('postModal');
-                await loadPosts(); // Refresh posts
-                await fetchAndSetStats(); // Refresh stats
+                // Real-time subscription *should* handle loading the post
+                // await loadPosts(); 
+                // await fetchAndSetStats(); 
 
             } catch (error) {
-                console.error('Error creating post:', error);
-                showToast(\`❌ Error: \${error.message}\`);
+                console.error("🚨 CRITICAL ERROR creating post:", error);
+                showToast(\`❌ Error creating post: \${error.message}\`); // Show more specific error
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<span>🕊️</span> Post Anonymously';
@@ -1443,21 +1616,32 @@
         }
         
         function resetPostForm() {
-            document.getElementById('collegeInput').value = '';
-            document.getElementById('contentInput').value = '';
-            document.getElementById('charCount').textContent = '0';
-            document.getElementById('memorialToggle').checked = false;
-            document.getElementById('memorialFields').style.display = 'none';
-            document.getElementById('memorialName').value = '';
-            document.getElementById('memorialMessage').value = '';
-            removeImage();
+            try {
+                document.getElementById('collegeInput').value = '';
+                document.getElementById('contentInput').value = '';
+                document.getElementById('charCount').textContent = '0';
+                document.getElementById('memorialToggle').checked = false;
+                document.getElementById('memorialFields').style.display = 'none';
+                document.getElementById('memorialName').value = '';
+                document.getElementById('memorialMessage').value = '';
+                removeImage();
+            } catch (e) {
+                console.error("Error resetting post form:", e);
+            }
         }
 
         // ================================
         // LOAD POSTS
         // ================================
         async function loadPosts() {
+            if (!supabase) return; // Don't run if Supabase failed
+            
+             console.log(\`Loading posts with filter: \${currentFilter}\`);
             const container = (currentFilter === 'memorial') ? document.getElementById('memorialsContainer') : document.getElementById('postsContainer');
+            if (!container) {
+                 console.error("Posts container not found!");
+                 return;
+            }
             
             let loadingMessage = (currentFilter === 'memorial') ? 'Loading memorials...' : 'Loading posts...';
             let loadingIcon = (currentFilter === 'memorial') ? '🕯️' : '🕊️';
@@ -1478,9 +1662,14 @@
                     query = query.eq('category', currentFilter).eq('is_memorial', false);
                 }
 
+                 console.log("Executing query for posts...");
                 const { data: posts, error } = await query;
 
-                if (error) throw error;
+                if (error) {
+                     console.error("Supabase error loading posts:", error);
+                     throw error;
+                }
+                 console.log(\`Fetched \${posts ? posts.length : 0} posts.\`);
 
                 if (!posts || posts.length === 0) {
                     let emptyIcon = (currentFilter === 'memorial') ? '🕯️' : '🕊️';
@@ -1496,23 +1685,33 @@
                     \`;
                     return;
                 }
-
-                container.innerHTML = posts.map(post => renderPost(post)).join('');
                 
-                // v14.0 - Check local storage for reacted posts
-                posts.forEach(post => {
-                    checkReactedStatus(post.id);
-                });
+                // Check if container still exists before updating
+                if (document.body.contains(container)) {
+                    container.innerHTML = posts.map(post => renderPost(post)).join('');
+                
+                    // v14.0 - Check local storage for reacted posts
+                    posts.forEach(post => {
+                        checkReactedStatus(post.id);
+                    });
+                } else {
+                    console.warn("Container was removed before rendering posts.");
+                }
 
             } catch (error) {
-                console.error('Error loading posts:', error);
-                container.innerHTML = \`
-                    <div class="empty-state">
-                        <div class="empty-state-icon">⚠️</div>
-                        <h3>Error loading posts</h3>
-                        <p>Please refresh the page</p>
-                    </div>
-                \`;
+                console.error("🚨 CRITICAL ERROR in loadPosts:", error);
+                 if (document.body.contains(container)) {
+                    container.innerHTML = \`
+                        <div class="empty-state">
+                            <div class="empty-state-icon">⚠️</div>
+                            <h3>Error loading posts</h3>
+                            <p>Could not fetch data. Please refresh.</p>
+                            <p style="font-size: 12px; color: var(--danger);">(\${error.message})</p>
+                        </div>
+                    \`;
+                 }
+                 // Re-throw the error so the initial load handler knows it failed
+                 throw error; 
             }
         }
 
@@ -1520,13 +1719,19 @@
         // RENDER POST (v14.0 UPGRADE)
         // ================================
         function renderPost(post) {
-            const timeAgo = getTimeAgo(new Date(post.timestamp));
-            const badgeClass = post.is_memorial ? 'memorial' : post.category;
+             // Add checks for essential post data
+             if (!post || !post.id || !post.college || typeof post.content === 'undefined') {
+                console.error("Invalid post data received:", post);
+                return '<div class="post-card glassmorphism" style="border-color: var(--danger);">Error rendering post data.</div>'; // Render an error placeholder
+            }
+            
+            const timeAgo = getTimeAgo(new Date(post.timestamp || Date.now())); // Fallback for timestamp
+            const badgeClass = post.is_memorial ? 'memorial' : (post.category || 'other');
 
             // v14.0 - Use image_url, not image_data
             const imageHtml = post.image_url ? \`
                 <div class="post-image">
-                    <img src="\${post.image_url}" alt="Post image" loading="lazy">
+                    <img src="\${post.image_url}" alt="Post image" loading="lazy" onerror="this.style.display='none'; console.warn('Image failed to load:', this.src);"> 
                 </div>
             \` : '';
             
@@ -1536,6 +1741,11 @@
                     \${post.memorial_message ? \`<p>\${escapeHtml(post.memorial_message)}</p>\` : ''}
                 </div>
             \` : '';
+
+            // Ensure reaction counts are numbers, default to 0
+            const supportCount = Number(post.reaction_support) || 0;
+            const helpfulCount = Number(post.reaction_helpful) || 0;
+            const solidarityCount = Number(post.reaction_solidarity) || 0;
 
             return \`
                 <div class="post-card glassmorphism" id="post-\${post.id}">
@@ -1557,15 +1767,15 @@
                         <div class="reactions">
                             <button class="reaction-btn" data-postid="\${post.id}" data-type="support" onclick="react(event, '\${post.id}', 'support')">
                                 <span>💚</span>
-                                <span class="reaction-count">\${post.reaction_support || 0}</span>
+                                <span class="reaction-count">\${supportCount}</span>
                             </button>
                             <button class="reaction-btn" data-postid="\${post.id}" data-type="helpful" onclick="react(event, '\${post.id}', 'helpful')">
                                 <span>🙌</span>
-                                <span class="reaction-count">\${post.reaction_helpful || 0}</span>
+                                <span class="reaction-count">\${helpfulCount}</span>
                             </button>
                             <button class="reaction-btn" data-postid="\${post.id}" data-type="solidarity" onclick="react(event, '\${post.id}', 'solidarity')">
                                 <span>🤝</span>
-                                <span class="reaction-count">\${post.reaction_solidarity || 0}</span>
+                                <span class="reaction-count">\${solidarityCount}</span>
                             </button>
                         </div>
                         <button class="comment-btn" onclick="showComments('\${post.id}')">
@@ -1581,6 +1791,8 @@
         // REACTIONS (v14.0 BUG FIX - NO RELOAD)
         // ================================
         async function react(event, postId, reactionType) {
+            if (!supabase) return showToast("🔴 Backend connection error.");
+
             const reactionKey = \`reacted_\${postId}_\${reactionType}\`;
             const btn = event.currentTarget;
 
@@ -1595,6 +1807,8 @@
             btn.disabled = true;
             const countSpan = btn.querySelector('.reaction-count');
             let currentCount = parseInt(countSpan.textContent || '0');
+             // Ensure count is a number before incrementing
+            if (isNaN(currentCount)) currentCount = 0;
             countSpan.textContent = currentCount + 1;
             
             // 3. Store in local storage
@@ -1603,6 +1817,7 @@
 
             try {
                 // 4. Call Supabase RPC in background
+                 console.log(\`Calling increment_reaction for post \${postId}, type \${reactionType}\`);
                 const { data, error } = await supabase
                     .rpc('increment_reaction', {
                         p_post_id: postId,
@@ -1610,11 +1825,15 @@
                         p_user_fingerprint: userFingerprint
                     });
 
-                if (error) throw error;
+                if (error) {
+                     console.error("Supabase RPC error (increment_reaction):", error);
+                     throw error; // Let outer catch handle rollback
+                }
                 
+                console.log("RPC increment_reaction result:", data);
                 if (data === false) {
                      // This shouldn't happen due to local storage check, but good to have
-                    showToast('ℹ️ You already reacted');
+                    showToast('ℹ️ Already reacted (server check)');
                 } else {
                     showToast('✅ Reaction added!');
                     // 5. Refresh global stats in header
@@ -1622,7 +1841,7 @@
                 }
 
             } catch (error) {
-                console.error('Error adding reaction:', error);
+                console.error("🚨 Error adding reaction:", error);
                 showToast('❌ Error adding reaction');
                 
                 // 6. Rollback optimistic update on error
@@ -1636,16 +1855,20 @@
         
         // Helper to re-apply reacted styles on load
         function checkReactedStatus(postId) {
-            ['support', 'helpful', 'solidarity'].forEach(type => {
-                const reactionKey = \`reacted_\${postId}_\${type}\`;
-                if (localStorage.getItem(reactionKey)) {
-                    const btn = document.querySelector(\`button[data-postid="\${postId}"][data-type="\${type}"]\`);
-                    if (btn) {
-                        btn.classList.add('reacted');
-                        btn.disabled = true;
+            try {
+                ['support', 'helpful', 'solidarity'].forEach(type => {
+                    const reactionKey = \`reacted_\${postId}_\${type}\`;
+                    if (localStorage.getItem(reactionKey)) {
+                        const btn = document.querySelector(\`button[data-postid="\${postId}"][data-type="\${type}"]\`);
+                        if (btn) {
+                            btn.classList.add('reacted');
+                            btn.disabled = true;
+                        }
                     }
-                }
-            });
+                });
+            } catch (e) {
+                console.error("Error checking reaction status:", e);
+            }
         }
 
 
@@ -1653,93 +1876,109 @@
         // FILTER POSTS
         // ================================
         function filterPosts(event, filter) {
+             console.log(\`Filtering posts by: \${filter}\`);
             currentFilter = filter;
 
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            if (event) { // If called from a click
-                 event.target.classList.add('active');
-            } else if (filter === 'all') { // If called from switchSection
-                document.querySelector('#postFilters .filter-btn[onclick*="\'all\'"]').classList.add('active');
-            }
+            try {
+                document.querySelectorAll('#postFilters .filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                if (event && event.target) { // If called from a click
+                     event.target.classList.add('active');
+                } else { // If called programmatically (e.g., switchSection)
+                    const filterBtn = document.querySelector(\`#postFilters .filter-btn[onclick*="='\${filter}'"]\`);
+                     if (filterBtn) filterBtn.classList.add('active');
+                     else console.warn(\`Filter button for '\${filter}' not found.\`);
+                }
 
-            loadPosts();
+                loadPosts(); // Reload posts with the new filter
+            } catch (e) {
+                console.error("Error applying filter:", e);
+                showToast("❌ Error applying filter");
+            }
         }
 
         // ================================
-        // STATS & PROFILE (v14.0 UPGRADE)
+        // STATS & PROFILE (v14.0.1 BUGFIX - Simpler Stats)
         // ================================
         async function fetchAndSetStats() {
+            if (!supabase) return; 
+             console.log("Fetching global stats...");
              try {
-                // This is simpler than querying all posts
-                const { count, error } = await supabase
+                // Get total posts count
+                const { count: totalPostCount, error: countError } = await supabase
                     .from('posts')
                     .select('*', { count: 'exact', head: true });
-                
-                if (error) throw error;
+                if (countError) throw countError;
+                document.getElementById('totalPosts').textContent = totalPostCount || 0;
+                 console.log(\`Total Posts: \${totalPostCount}\`);
 
-                const { data: reactions, error: reactError } = await supabase
-                    .rpc('get_total_reactions'); // Assuming an RPC function for this
-                
-                if (reactError) throw reactError;
-                
+                // Get total memorials count
                 const { count: memorialCount, error: memError } = await supabase
                     .from('posts')
                     .select('*', { count: 'exact', head: true })
                     .eq('is_memorial', true);
-                
                 if (memError) throw memError;
-
-                document.getElementById('totalPosts').textContent = count || 0;
-                document.getElementById('totalReactions').textContent = reactions || 0;
                 document.getElementById('totalMemorials').textContent = memorialCount || 0;
+                 console.log(\`Total Memorials: \${memorialCount}\`);
+
+                // Calculate total reactions (Fallback method from v14.0 is now primary)
+                const { data: allPostsData, error: postDataError } = await supabase
+                    .from('posts')
+                    .select('reaction_support, reaction_helpful, reaction_solidarity');
+                if (postDataError) throw postDataError;
+
+                const totalReactions = allPostsData.reduce((sum, p) => 
+                        sum + (Number(p.reaction_support) || 0) + (Number(p.reaction_helpful) || 0) + (Number(p.reaction_solidarity) || 0), 0
+                    );
+                document.getElementById('totalReactions').textContent = totalReactions || 0;
+                 console.log(\`Total Reactions: \${totalReactions}\`);
                 
             } catch (e) {
-                console.error('Error loading stats:', e);
-                // Fallback to v13.0 method if RPC fails
-                const { data: allPosts } = await supabase.from('posts').select('is_memorial, reaction_support, reaction_helpful, reaction_solidarity');
-                if (allPosts) {
-                     const totalPosts = allPosts.length;
-                    const totalMemorials = allPosts.filter(p => p.is_memorial).length;
-                    const totalReactions = allPosts.reduce((sum, p) => 
-                        sum + (p.reaction_support || 0) + (p.reaction_helpful || 0) + (p.reaction_solidarity || 0), 0
-                    );
-                    document.getElementById('totalPosts').textContent = totalPosts;
-                    document.getElementById('totalReactions').textContent = totalReactions;
-                    document.getElementById('totalMemorials').textContent = totalMemorials;
-                }
+                console.error("🚨 CRITICAL ERROR loading stats:", e);
+                showToast("❌ Error loading header stats.");
+                 // Indicate error in UI
+                 document.getElementById('totalPosts').textContent = '⚠️';
+                 document.getElementById('totalReactions').textContent = '⚠️';
+                 document.getElementById('totalMemorials').textContent = '⚠️';
+                 // Re-throw so initial load handler knows it failed
+                 throw e;
             }
         }
         
         async function loadProfile() {
+            if (!supabase) return; 
+             console.log("Loading profile data...");
             document.getElementById('profileAnonId').textContent = userFingerprint;
             
             // Fix hardcoded post count
             try {
+                 console.log("Fetching post count for user:", userFingerprint);
                 const { count, error } = await supabase
                     .from('posts')
                     .select('*', { count: 'exact', head: true })
                     .eq('anonymous_id', userFingerprint);
                     
                 if (error) throw error;
-                
+                 console.log(\`User post count: \${count}\`);
                 document.getElementById('profilePostCount').textContent = count || 0;
             } catch (error) {
-                console.error('Error loading post count:', error);
+                console.error("🚨 Error loading post count for profile:", error);
                 document.getElementById('profilePostCount').textContent = 'Error';
             }
             
             // Load reaction count from local storage
             const reactionsGiven = localStorage.getItem(\`reacted_total_\${userFingerprint}\`) || 0;
             document.getElementById('profileReactionCount').textContent = reactionsGiven;
+             console.log(\`User reactions given (local): \${reactionsGiven}\`);
         }
 
         // ================================
         // NEW: COMMENTS SYSTEM (v14.0)
         // ================================
         async function showComments(postId) {
+             console.log(\`Showing comments for post: \${postId}\`);
             currentPostIdForComments = postId;
             document.getElementById('commentsContainer').innerHTML = \`
                 <div class="loading">
@@ -1747,11 +1986,19 @@
                     <p>Loading comments...</p>
                 </div>\`;
             showModal('commentsModal');
-            await loadComments(postId);
+            try {
+                await loadComments(postId);
+            } catch (e) {
+                // Error handled within loadComments
+            }
         }
         
         async function loadComments(postId) {
+             if (!supabase) return; 
+             console.log(\`Loading comments for post: \${postId}\`);
             const container = document.getElementById('commentsContainer');
+             if (!container) return console.error("Comments container not found!");
+
             try {
                 const { data: comments, error } = await supabase
                     .from('comments')
@@ -1759,7 +2006,11 @@
                     .eq('post_id', postId)
                     .order('created_at', { ascending: true });
                 
-                if (error) throw error;
+                if (error) {
+                     console.error("Supabase error loading comments:", error);
+                     throw error;
+                }
+                 console.log(\`Fetched \${comments ? comments.length : 0} comments.\`);
                 
                 if (!comments || comments.length === 0) {
                     container.innerHTML = \`
@@ -1771,33 +2022,52 @@
                     return;
                 }
                 
-                container.innerHTML = comments.map(comment => renderComment(comment)).join('');
+                 if (document.body.contains(container)) {
+                    container.innerHTML = comments.map(comment => renderComment(comment)).join('');
+                 } else {
+                     console.warn("Comments container removed before rendering.");
+                 }
                 
             } catch (error) {
-                console.error('Error loading comments:', error);
-                container.innerHTML = \`<div class="empty-state"><h3>Error loading comments</h3></div>\`;
+                console.error("🚨 Error loading comments:", error);
+                 if (document.body.contains(container)) {
+                    container.innerHTML = \`<div class="empty-state"><h3>⚠️ Error loading comments</h3><p>Could not fetch comments. Please try again.</p></div>\`;
+                 }
+                 // Let the caller handle UI state if needed
+                 throw error;
             }
         }
         
         function renderComment(comment) {
-            const timeAgo = getTimeAgo(new Date(comment.created_at));
-            // Use only first 8 chars of anon_id for privacy
-            const anonId = escapeHtml(comment.anonymous_id).substring(0, 8);
-            
-            return \`
-                <div class="comment-card">
-                    <div class="comment-meta">
-                        <strong>\${anonId}...</strong> • <span>\${timeAgo}</span>
-                    </div>
-                    <div class="comment-content">
-                        \${escapeHtml(comment.content)}
-                    </div>
-                    </div>
-            \`;
+            try {
+                 if (!comment || !comment.anonymous_id || typeof comment.content === 'undefined') {
+                    console.error("Invalid comment data:", comment);
+                    return '<div class="comment-card">Error rendering comment.</div>';
+                }
+                const timeAgo = getTimeAgo(new Date(comment.created_at || Date.now()));
+                // Use only first 8 chars of anon_id for privacy
+                const anonId = escapeHtml(comment.anonymous_id).substring(0, 8);
+                
+                return \`
+                    <div class="comment-card">
+                        <div class="comment-meta">
+                            <strong>\${anonId}...</strong> • <span>\${timeAgo}</span>
+                        </div>
+                        <div class="comment-content">
+                            \${escapeHtml(comment.content)}
+                        </div>
+                        </div>
+                \`;
+            } catch (e) {
+                 console.error("Error rendering single comment:", e, comment);
+                 return '<div class="comment-card">Error rendering comment.</div>';
+            }
         }
         
         async function postComment(event) {
             event.preventDefault(); // Stop form from reloading page
+            if (!supabase) return showToast("🔴 Backend connection error.");
+
             const btn = document.getElementById('postCommentBtn');
             const input = document.getElementById('commentInput');
             const content = input.value.trim();
@@ -1808,6 +2078,7 @@
             btn.textContent = '...';
             
             try {
+                 console.log(\`Posting comment to post \${currentPostIdForComments}\`);
                 const { data, error } = await supabase
                     .from('comments')
                     .insert({
@@ -1817,14 +2088,20 @@
                         // user_wallet: null // Add wallet logic later
                     });
                 
-                if (error) throw error;
+                if (error) {
+                     console.error("Supabase error posting comment:", error);
+                     throw error;
+                }
                 
+                 console.log("Comment posted successfully:", data);
                 input.value = ''; // Clear input
-                await loadComments(currentPostIdForComments); // Refresh comments
+                // Real-time *should* handle reloading comments if modal is open
+                // await loadComments(currentPostIdForComments); 
+                showToast("✅ Comment added!");
                 
             } catch (error) {
-                console.error('Error posting comment:', error);
-                showToast('❌ Error posting comment');
+                console.error("🚨 Error posting comment:", error);
+                showToast(\`❌ Error posting comment: \${error.message}\`);
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Post';
@@ -1842,51 +2119,59 @@
                 bullying: '🚫 Bullying',
                 other: '💬 Other'
             };
-            return labels[category] || category;
+            return labels[category] || '💬 Other'; // Default to 'Other' if category is missing/invalid
         }
 
         function getTimeAgo(date) {
-            const seconds = Math.floor((new Date() - date) / 1000);
-            if (isNaN(seconds)) return 'just now'; // Handle invalid dates
-            
-            const intervals = {
-                year: 31536000,
-                month: 2592000,
-                week: 604800,
-                day: 86400,
-                hour: 3600,
-                minute: 60
-            };
+            try {
+                const seconds = Math.floor((new Date() - date) / 1000);
+                if (isNaN(seconds) || seconds < 0) return 'just now'; // Handle invalid dates or future dates
+                
+                const intervals = {
+                    year: 31536000,
+                    month: 2592000,
+                    week: 604800,
+                    day: 86400,
+                    hour: 3600,
+                    minute: 60
+                };
 
-            for (const [unit, secondsInUnit] of Object.entries(intervals)) {
-                const interval = Math.floor(seconds / secondsInUnit);
-                if (interval >= 1) {
-                    return \`\${interval} \${unit}\${interval !== 1 ? 's' : ''} ago\`;
+                for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+                    const interval = Math.floor(seconds / secondsInUnit);
+                    if (interval >= 1) {
+                        return \`\${interval} \${unit}\${interval !== 1 ? 's' : ''} ago\`;
+                    }
                 }
+                return 'Just now';
+            } catch (e) {
+                 console.error("Error calculating time ago:", e);
+                 return 'a while ago';
             }
-            return 'Just now';
         }
 
         function escapeHtml(text) {
-            if (!text) return '';
-            return text.replace(/[&<>"']/g, function(match) {
-                return {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#39;'
-                }[match];
-            }).replace(/\\n/g, '<br>'); // Also convert newlines
+             try {
+                if (!text) return '';
+                // Simpler, safer escape
+                const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+                let escapedText = String(text).replace(/[&<>"']/g, m => map[m]);
+                // Convert newlines AFTER escaping
+                return escapedText.replace(/\\n|\n/g, '<br>'); 
+             } catch(e) {
+                 console.error("Error escaping HTML:", e);
+                 return 'Content error';
+             }
         }
 
         function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+             try {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+             } catch(e) { console.error("Error showing toast:", e); }
         }
 
         // ================================
@@ -1895,7 +2180,7 @@
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js')
                 .then(() => console.log('✅ Service Worker registered'))
-                .catch(err => console.log('SW failed:', err));
+                .catch(err => console.log('SW registration failed:', err));
         }
     </script>
 </body>
