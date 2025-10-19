@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>SafeVoice v14.0.6 - Second Syntax Fix</title> 
+    <title>SafeVoice v14.0.8 - Rigorous Syntax Fix</title> 
     <link rel="manifest" href="manifest.json">
 
     <style>
@@ -1275,10 +1275,10 @@
         }
 
         // ================================
-        // INITIALIZE APP (v14.0.6 - Syntax Fix)
+        // INITIALIZE APP (v14.0.8 - Rigorous Syntax Fix)
         // ================================
         window.addEventListener('load', async function() {
-            console.log('🚀 [DEBUG] SafeVoice v14.0.6 - Syntax Fix Initializing...'); // DEBUG
+            console.log('🚀 [DEBUG] SafeVoice v14.0.8 - Rigorous Syntax Fix Initializing...'); // DEBUG
             
             // Only proceed if Supabase client initialized
             if (!supabase) {
@@ -1727,7 +1727,7 @@
         }
 
         // ================================
-        // LOAD POSTS (v14.0.6 - Syntax Fix)
+        // LOAD POSTS (v14.0.8 - Rigorous Syntax Fix)
         // ================================
         async function loadPosts() {
             // Ensure Supabase client is available
@@ -1843,7 +1843,7 @@
 
 
         // ================================
-        // RENDER POST (v14.0.6 - Syntax Fix)
+        // RENDER POST (v14.0.8 - Rigorous Syntax Fix)
         // ================================
         function renderPost(post) {
              // console.log(\`[DEBUG] Rendering post ID: \${post ? post.id : 'undefined'}\`); // DEBUG
@@ -1873,11 +1873,38 @@
                 const supportCount = Number(post.reaction_support) || 0;
                 const helpfulCount = Number(post.reaction_helpful) || 0;
                 const solidarityCount = Number(post.reaction_solidarity) || 0;
+                
+                // Escape post.id for use in onclick attributes
+                const escapedPostId = escapeHtml(post.id); 
 
                 // v14.0.5 - Log variables right before returning the template string
                 console.log(\`[DEBUG] renderPost Variables for ID \${post.id}:\`, { postId: post.id, college: post.college, timeAgo: timeAgo, badgeClass: badgeClass, category: category, contentLength: post.content.length, imageHtmlExists: !!imageHtml, memorialHtmlExists: !!memorialHtml, supportCount: supportCount, helpfulCount: helpfulCount, solidarityCount: solidarityCount });
 
-                // Construct the final HTML template literal - carefully checked for syntax errors around buttons
+                // v14.0.8 RIGOROUS SYNTAX FIX: Rebuild button HTML carefully
+                // Using single quotes for onclick attributes and escaped single quotes for string parameters inside.
+                const reactionButtonsHtml = \`
+                    <button class="reaction-btn" data-postid="\${escapedPostId}" data-type="support" onclick="react(event, '\${escapedPostId}', 'support')">
+                        <span>💚</span>
+                        <span class="reaction-count">\${supportCount}</span>
+                    </button>
+                    <button class="reaction-btn" data-postid="\${escapedPostId}" data-type="helpful" onclick="react(event, '\${escapedPostId}', 'helpful')">
+                        <span>🙌</span>
+                        <span class="reaction-count">\${helpfulCount}</span>
+                    </button>
+                    <button class="reaction-btn" data-postid="\${escapedPostId}" data-type="solidarity" onclick="react(event, '\${escapedPostId}', 'solidarity')">
+                        <span>🤝</span>
+                        <span class="reaction-count">\${solidarityCount}</span>
+                    </button>
+                \`;
+
+                const commentButtonHtml = \`
+                    <button class="comment-btn" onclick="showComments('\${escapedPostId}')">
+                        <span>💬</span>
+                        Comments
+                    </button>
+                \`;
+
+                // Construct the final HTML template literal using the rebuilt button sections
                 return \` 
                     <div class="post-card glassmorphism" id="post-\${post.id}">
                         <div class="post-header">
@@ -1896,26 +1923,12 @@
 
                         <div class="post-actions">
                             <div class="reactions">
-                                <button class="reaction-btn" data-postid="\${post.id}" data-type="support" onclick="react(event, '\${post.id}', 'support')">
-                                    <span>💚</span>
-                                    <span class="reaction-count">\${supportCount}</span>
-                                </button>
-                                <button class="reaction-btn" data-postid="\${post.id}" data-type="helpful" onclick="react(event, '\${post.id}', 'helpful')">
-                                    <span>🙌</span>
-                                    <span class="reaction-count">\${helpfulCount}</span>
-                                </button>
-                                <button class="reaction-btn" data-postid="\${post.id}" data-type="solidarity" onclick="react(event, '\${post.id}', 'solidarity')">
-                                    <span>🤝</span>
-                                    <span class="reaction-count">\${solidarityCount}</span>
-                                </button>
+                                \${reactionButtonsHtml}
                             </div>
-                            <button class="comment-btn" onclick="showComments('\${post.id}')">
-                                <span>💬</span>
-                                Comments
-                            </button>
+                            \${commentButtonHtml}
                         </div>
                     </div>
-                \`; // v14.0.6 - Double checked closing backtick and internal quotes/syntax
+                \`; 
             } catch (renderError) { 
                  console.error(\`🚨 [DEBUG] [renderPost] Unexpected error rendering post ID \${post.id}:\`, renderError, post); 
                  return \`<div class="post-card glassmorphism render-error">Failed to render post ID: \${post.id}. Check console. (\${escapeHtml(renderError.message)})</div>\`; // Include error message
@@ -1986,9 +1999,11 @@
                 
                 // 6. Rollback optimistic update on error
                  console.log("⏪ [DEBUG] Rolling back optimistic reaction update..."); // DEBUG
-                btn.classList.remove('reacted');
-                btn.disabled = false;
-                countSpan.textContent = currentCount; // Set back to old count
+                 try { // Add try-catch for UI rollback
+                    btn.classList.remove('reacted');
+                    btn.disabled = false;
+                    countSpan.textContent = currentCount; // Set back to old count
+                 } catch (uiError) { console.error("🚨 [DEBUG] Error rolling back button UI:", uiError); }
                 localStorage.removeItem(reactionKey); // Clear local storage
                 localStorage.setItem(\`reacted_total_\${userFingerprint}\`, (parseInt(localStorage.getItem(\`reacted_total_\${userFingerprint}\`)) || 1) - 1);
             }
@@ -2001,12 +2016,14 @@
                 ['support', 'helpful', 'solidarity'].forEach(type => {
                     const reactionKey = \`reacted_\${postId}_\${type}\`;
                     if (localStorage.getItem(reactionKey)) {
-                        const btn = document.querySelector(\`button[data-postid="\${postId}"][data-type="\${type}"]\`);
+                        // Use more specific selector targeting buttons within the specific post card
+                        const btn = document.querySelector(\`#post-\${postId} button[data-postid="\${postId}"][data-type="\${type}"]\`);
                         if (btn) {
                              // console.log(\`[DEBUG] Applying reacted style to \${type} for post \${postId}\`); // DEBUG
                             btn.classList.add('reacted');
                             btn.disabled = true;
                         } else {
+                            // It's possible the button isn't rendered yet if loadPosts hasn't finished, so this isn't necessarily an error
                             // console.warn(\`[DEBUG] Button not found for post \${postId}, type \${type} during status check.\`); // DEBUG
                         }
                     }
@@ -2025,22 +2042,24 @@
             currentFilter = filter;
 
             try {
+                 // Deactivate all buttons first
                 document.querySelectorAll('#postFilters .filter-btn').forEach(btn => {
                     btn.classList.remove('active');
                 });
                 
                 let targetButton = null;
-                if (event && event.target) { // If called from a click
+                if (event && event.target && event.target.matches('.filter-btn')) { // Ensure the click was on a filter button
                      targetButton = event.target;
-                } else { // If called programmatically (e.g., switchSection)
-                     // Corrected selector to find button based on filter value in onclick attribute
-                    targetButton = document.querySelector(\`#postFilters .filter-btn[onclick*="='\${filter}'"]\`);
+                } else { // If called programmatically or click target was wrong
+                    // Find button based on filter value in onclick attribute more reliably
+                    const buttons = document.querySelectorAll('#postFilters .filter-btn');
+                    targetButton = Array.from(buttons).find(btn => btn.getAttribute('onclick')?.includes(\`'\${filter}'\`));
                 }
 
                 if (targetButton) {
                     targetButton.classList.add('active');
                 } else {
-                     console.warn(\`⚠️ [DEBUG] Filter button for '\${filter}' not found.\`); // DEBUG
+                     console.warn(\`⚠️ [DEBUG] Filter button for '\${filter}' not found or event target was incorrect.\`); // DEBUG
                      // Attempt to activate 'all' as fallback
                      const allFilterBtn = document.querySelector('#postFilters .filter-btn[onclick*="\'all\'"]');
                      if(allFilterBtn) allFilterBtn.classList.add('active');
@@ -2055,7 +2074,7 @@
 
 
         // ================================
-        // STATS & PROFILE (v14.0.6 - Syntax Fix)
+        // STATS & PROFILE (v14.0.8 - Rigorous Syntax Fix)
         // ================================
         async function fetchAndSetStats() {
             // Ensure Supabase client is available
@@ -2078,7 +2097,10 @@
                      throw countError; // Propagate error
                 }
                  // Safely update UI
-                 try { document.getElementById('totalPosts').textContent = totalPostCount || 0; } catch(uiErr){ console.error("[DEBUG] Error setting totalPosts UI:", uiErr); }
+                 try { 
+                     const el = document.getElementById('totalPosts');
+                     if (el) el.textContent = totalPostCount || 0; 
+                 } catch(uiErr){ console.error("[DEBUG] Error setting totalPosts UI:", uiErr); }
                  console.log(\`✅ [DEBUG] [fetchAndSetStats] Total Posts: \${totalPostCount}\`); // DEBUG
 
                  console.log("⏳ [DEBUG] [fetchAndSetStats] Fetching total memorials count..."); // DEBUG
@@ -2092,7 +2114,10 @@
                      throw memError; // Propagate error
                 }
                  // Safely update UI
-                 try { document.getElementById('totalMemorials').textContent = memorialCount || 0; } catch(uiErr){ console.error("[DEBUG] Error setting totalMemorials UI:", uiErr); }
+                 try { 
+                     const el = document.getElementById('totalMemorials');
+                     if (el) el.textContent = memorialCount || 0; 
+                 } catch(uiErr){ console.error("[DEBUG] Error setting totalMemorials UI:", uiErr); }
                  console.log(\`✅ [DEBUG] [fetchAndSetStats] Total Memorials: \${memorialCount}\`); // DEBUG
 
                  console.log("⏳ [DEBUG] [fetchAndSetStats] Fetching posts for reaction counts..."); // DEBUG
@@ -2110,7 +2135,10 @@
                         sum + (Number(p.reaction_support) || 0) + (Number(p.reaction_helpful) || 0) + (Number(p.reaction_solidarity) || 0), 0
                     );
                  // Safely update UI
-                 try { document.getElementById('totalReactions').textContent = totalReactions || 0; } catch(uiErr){ console.error("[DEBUG] Error setting totalReactions UI:", uiErr); }
+                 try { 
+                     const el = document.getElementById('totalReactions');
+                     if (el) el.textContent = totalReactions || 0; 
+                 } catch(uiErr){ console.error("[DEBUG] Error setting totalReactions UI:", uiErr); }
                  console.log(\`✅ [DEBUG] [fetchAndSetStats] Total Reactions calculated: \${totalReactions}\`); // DEBUG
                  
                  console.log("✅ [DEBUG] [fetchAndSetStats] Fetch completed successfully."); // DEBUG
@@ -2342,7 +2370,7 @@
         }
 
         // ================================
-        // HELPER FUNCTIONS (v14.0.6 - Syntax Fix)
+        // HELPER FUNCTIONS (v14.0.8 - Rigorous Syntax Fix)
         // ================================
         function getCategoryLabel(category) {
             const labels = {
@@ -2391,6 +2419,7 @@
                 // Define the map including backtick `
                 const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '\`': '&#96;' }; // Added backtick
                 // Replace special characters using the map
+                // Ensure regex has 'g' flag for global replacement
                 let escapedText = text.replace(/[&<>\"'\`]/g, m => map[m]); // Added backtick to regex
                 // Convert newline characters to <br> tags AFTER escaping
                 return escapedText.replace(/\\r\\n|\\r|\\n|\n/g, '<br>'); 
