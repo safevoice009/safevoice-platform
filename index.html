@@ -153,8 +153,8 @@
     <script>
         const GEMINI_API_KEY = ''; 
         const gun = Gun();
-        const posts = gun.get('safevoice-dapp-posts-v12');
-        const users = gun.get('safevoice-dapp-users-v12');
+        const posts = gun.get('safevoice-dapp-posts-v14');
+        const users = gun.get('safevoice-dapp-users-v14');
         let web3Provider, signer, userAddress, userAnonymousId;
         const ADJECTIVES = ['Brave', 'Strong', 'Hopeful', 'Kind', 'Wise', 'Calm', 'Proud', 'Valiant'];
         const NOUNS = ['Panda', 'Tiger', 'Eagle', 'Lion', 'Wolf', 'Bear', 'Fox', 'Hawk'];
@@ -247,7 +247,7 @@
         
         async function getAICommentSuggestion(postId) {
             if (!GEMINI_API_KEY) {
-                return alert("The creator has not configured the AI assistant yet.");
+                return alert("The creator has not configured the AI assistant yet. Please add your Gemini API key to the code.");
             }
             const button = document.querySelector(`#comments-${postId} .suggest-reply-btn`);
             const textarea = document.querySelector(`#comments-${postId} textarea`);
