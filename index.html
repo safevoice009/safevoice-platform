@@ -226,21 +226,22 @@
         </div>
 
         <div class="form-group" style="margin-bottom: 10px;">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <input type="checkbox" id="memorialToggle" />
-            <label for="memorialToggle">🕯️ This is a memorial tribute</label>
-          </div>
-        </div>
-        <div id="memorialFields" style="display:none;">
-          <div class="form-group" style="margin-bottom: 10px;">
-            <label>Name of the person (optional)</label>
-            <input id="memorialName" placeholder="Their name..." />
-          </div>
-          <div class="form-group" style="margin-bottom: 10px;">
-            <label>Memorial message</label>
-            <textarea id="memorialMessage" placeholder="Share memories, celebrate their life..."></textarea>
-          </div>
-        </div>
+  <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+    <input type="checkbox" id="memorialToggle" style="width:18px; height:18px; cursor:pointer;" />
+    🕯️ This is a memorial tribute
+  </label>
+</div>
+<div id="memorialFields" style="display:none;">
+  <div class="form-group" style="margin-bottom: 10px;">
+    <label>Name of the person (optional)</label>
+    <input id="memorialName" placeholder="Their name..." />
+  </div>
+  <div class="form-group" style="margin-bottom: 10px;">
+    <label>Memorial message</label>
+    <textarea id="memorialMessage" placeholder="Share memories, celebrate their life..."></textarea>
+  </div>
+</div>
+
 
         <button class="btn" id="postBtn" onclick="createPost()"><span>🕊️</span> Post Anonymously</button>
       </div>
@@ -334,25 +335,28 @@
   <!-- Toast -->
   <div id="toast" class="toast"></div>
 
-  <script>
-    // ================================
-    // Supabase configuration
-    // ================================
-    const SUPABASE_URL = 'https://jjfkwkmdvpxzjzbblodz.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZmt3a21kdnB4emp6YmJsb2R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjk0NzAwOTQsImV4cCI6MjA0NTA0NjA5NH0.rN8oDm5T_JXOG8KN_wBKiBdVTsE7OUOmBBkKJ4VF9TI';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<script>
+  // ================================
+  // Supabase configuration (SafeVoice)
+  // ================================
+  const SUPABASE_URL = 'https://jjfkwkmdvpxzjzbblodz.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZmt3a21kdnB4emp6YmJsb2R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjk0NzAwOTQsImV4cCI6MjA0NTA0NjA5NH0.rN8oDm5T_JXOG8KN_wBKiBdVTsE7OUOmBBkKJ4VF9TI';
 
-    // Anonymous ID (stable per device; not PII)
-    function getAnonymousId() {
-      const key = 'sv_anon_id';
-      let val = localStorage.getItem(key);
-      if (!val) {
-        val = 'anon_' + Math.random().toString(36).slice(2);
-        localStorage.setItem(key, val);
-      }
-      return val;
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // Stable anonymous ID
+  function getAnonymousId() {
+    const key = 'sv_anon_id';
+    let val = localStorage.getItem(key);
+    if (!val) {
+      val = 'anon_' + Math.random().toString(36).slice(2);
+      localStorage.setItem(key, val);
     }
-    const anonymousId = getAnonymousId();
+    return val;
+  }
+  const anonymousId = getAnonymousId();
+</script>
+
 
     // ================================
     // Global state
