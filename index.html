@@ -2,282 +2,852 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>SafeVoice v14.0 — Your Anonymous Voice Matters</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="manifest" href="manifest.json" />
   <style>
-    body { background:#0f172a; color:#f1f5f9; font-family:sans-serif; margin:0; padding-bottom:100px; }
-    .container { max-width:900px; margin:0 auto; padding:20px; }
-    .card { background:rgba(30,41,59,0.7); border:1px solid #475569; border-radius:16px; padding:20px; margin-bottom:20px; }
-    .btn { background:linear-gradient(135deg,#6366f1,#8b5cf6); color:white; border:none; border-radius:8px; padding:12px; font-weight:700; cursor:pointer; width:100%; }
-    .reaction-btn { background:#1e293b; border:1px solid #475569; border-radius:8px; padding:8px 12px; cursor:pointer; margin:4px; }
-    .comment-item { background:#334155; border-radius:8px; padding:8px; margin-top:6px; }
-    .toast { position:fixed; bottom:100px; left:50%; transform:translateX(-50%); background:#1e293b; color:white; padding:12px 20px; border-radius:8px; opacity:0; transition:opacity 0.3s; }
-    .toast.show { opacity:1; }
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --bg: #0f172a;
+      --surface: rgba(30,41,59,0.7);
+      --surface-solid: #1e293b;
+      --surface-light: #334155;
+      --text: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --border: #475569;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      padding-bottom: 100px;
+    }
+    .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+    .card {
+      background: var(--surface);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 0 16px rgba(99,102,241,0.35);
+      margin-bottom: 16px;
+    }
+    .header { margin-bottom: 24px; }
+    .logo { display:flex; align-items:center; gap:12px; margin-bottom:8px; }
+    .logo h1 {
+      font-size: 28px; font-weight: 800;
+      background: linear-gradient(135deg, var(--primary), #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .tagline { color: var(--text-secondary); font-size: 14px; }
+    .stats { display:grid; grid-template-columns: repeat(3,1fr); gap:12px; margin-top:16px; }
+    .stat { text-align:center; }
+    .stat .value { font-weight: 800; color: var(--primary); font-size: 22px; }
+    .stat .label { font-size: 12px; color: var(--text-secondary); }
+    .banner {
+      margin-bottom: 20px; background: linear-gradient(135deg, #dc2626, #b91c1c);
+      border-radius: 12px; padding: 16px; animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.92} }
+    .banner h3 { color:white; margin-bottom:4px; }
+    .banner p { color: rgba(255,255,255,0.85); }
+    .banner .call-btn { display:inline-block; margin-top:10px; background:white; color:#b91c1c;
+      padding:10px 16px; border-radius:8px; font-weight:700; text-decoration:none; }
+    .nav { display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin-bottom: 16px; }
+    .nav-btn {
+      padding: 10px 16px; border-radius: 18px; font-weight: 700; font-size: 14px;
+      border:1px solid var(--border); background: var(--surface-solid); color: var(--text);
+      cursor: pointer;
+    }
+    .nav-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+    .section { display:none; }
+    .section.active { display:block; }
+    label { display:block; margin-bottom:6px; font-size: 13px; color: var(--text-secondary); font-weight: 600; }
+    input, select, textarea {
+      width:100%; background: var(--surface-solid); border:1px solid var(--border); color: var(--text);
+      border-radius:8px; padding:10px 12px; font-size: 14px; font-family: inherit;
+    }
+    textarea { resize: vertical; min-height: 110px; }
+    input:focus, select:focus, textarea:focus { outline:none; border-color: var(--primary); }
+    .btn {
+      background: linear-gradient(135deg, var(--primary), #8b5cf6); color:white; border:none; border-radius:8px;
+      padding: 12px 18px; font-size: 15px; font-weight: 800; cursor:pointer; width:100%; display:flex;
+      align-items:center; justify-content:center; gap:8px;
+    }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .image-upload { display:flex; gap:10px; margin-top:8px; }
+    .image-button {
+      flex:1; padding:12px; border-radius:8px; border:2px dashed var(--border); background: var(--surface-light);
+      font-weight:700; cursor:pointer; text-align:center;
+    }
+    .image-button:hover { border-color: var(--primary); background: var(--primary); color:white; }
+    .image-preview { margin-top:10px; position:relative; }
+    .image-preview img { max-width:100%; border-radius:8px; border:1px solid var(--border); }
+    .remove-image {
+      position:absolute; top:8px; right:8px; background: var(--danger); color:white; border:none;
+      border-radius:50%; width:36px; height:36px; font-size:18px; font-weight: 800; cursor:pointer;
+    }
+    .filters { display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin: 16px 0; }
+    .filter-btn {
+      padding: 8px 14px; border-radius: 18px; font-weight: 700; font-size: 13px;
+      border:1px solid var(--border); background: var(--surface-solid); color: var(--text);
+      cursor: pointer; white-space: nowrap;
+    }
+    .filter-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+    .post-card { background: var(--surface); border:1px solid var(--border); border-radius: 12px; padding: 18px; }
+    .post-header { display:flex; align-items:flex-start; justify-content:space-between; }
+    .post-meta { font-size: 13px; color: var(--text-secondary); }
+    .post-meta strong { color: var(--text); font-size: 15px; }
+    .post-badge { padding:6px 12px; border-radius: 12px; font-size: 12px; font-weight: 800; }
+    .badge-mental { background: #8b5cf6; color:white; }
+    .badge-academic { background: #3b82f6; color:white; }
+    .badge-social { background: #10b981; color:white; }
+    .badge-bullying { background: #ef4444; color:white; }
+    .badge-other { background: #6b7280; color:white; }
+    .badge-memorial { background: #f59e0b; color:white; }
+    .post-content { margin: 12px 0; line-height: 1.8; font-size: 15px; white-space: pre-wrap; word-wrap: break-word; }
+    .post-image { margin: 12px 0; border-radius:8px; overflow:hidden; }
+    .post-image img { width:100%; display:block; }
+    .reactions { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+    .reaction-btn {
+      flex: none; padding:10px; background: var(--surface-solid); border:1px solid var(--border);
+      border-radius:8px; cursor:pointer; font-size: 18px; display:flex; gap:6px; align-items:center; font-weight: 700;
+    }
+    .reaction-count { font-size: 14px; }
+    .comments { margin-top: 12px; }
+    .comment-item { background: var(--surface-light); border: 1px solid var(--border); border-radius:8px; padding:10px; margin-top:8px; }
+    .comment-meta { font-size: 12px; color: var(--text-secondary); }
+    .loading { text-align:center; color: var(--text-secondary); padding: 40px 0; }
+    .empty-state { text-align:center; color: var(--text-secondary); padding: 60px 0; }
+    .toast {
+      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+      background: var(--surface); color: var(--text); padding: 14px 22px; border-radius: 12px; border: 1px solid var(--border);
+      z-index: 1000; opacity: 0; transition: opacity 0.3s; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    }
+    .toast.show { opacity: 1; }
+    .bottom-nav {
+      position: fixed; bottom:0; left:0; right:0; background: var(--surface-solid); border-top:1px solid var(--border);
+      display:flex; justify-content:space-around; padding: 10px 0; z-index: 100;
+    }
+    .bottom-nav-btn { background:none; border:none; color: var(--text-secondary); cursor:pointer; font-size: 22px; display:flex; flex-direction:column; align-items:center; gap:4px; }
+    .bottom-nav-btn.active { color: var(--primary); }
+    @media (max-width: 640px) {
+      .container { padding: 12px; }
+      .stats { grid-template-columns: repeat(3,1fr); }
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="card">
-      <h1>🕊️ SafeVoice</h1>
-      <p>Your anonymous voice matters • Powered by community</p>
-      <div>
-        <b id="totalPosts">0</b> Posts •
-        <b id="totalReactions">0</b> Reactions •
-        <b id="totalComments">0</b> Comments
+    <!-- Header -->
+    <div class="card header">
+      <div class="logo">
+        <span class="logo-icon">🕊️</span>
+        <div>
+          <h1>SafeVoice</h1>
+          <p class="tagline">Your anonymous voice matters • Powered by community</p>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat">
+          <div class="value" id="totalPosts">0</div>
+          <div class="label">Stories Shared</div>
+        </div>
+        <div class="stat">
+          <div class="value" id="totalReactions">0</div>
+          <div class="label">Support Given</div>
+        </div>
+        <div class="stat">
+          <div class="value" id="totalComments">0</div>
+          <div class="label">Comments</div>
+        </div>
       </div>
     </div>
 
-    <div class="card">
-      <h2>Share Anonymously</h2>
-      <input id="collegeInput" placeholder="Your College/University" />
-      <select id="topicSelect">
-        <option value="mental">💭 Mental Health</option>
-        <option value="academic">📚 Academic Pressure</option>
-        <option value="social">👥 Social Issues</option>
-        <option value="bullying">🚫 Bullying/Harassment</option>
-        <option value="other">💬 Other</option>
-      </select>
-      <textarea id="contentInput" maxlength="1000" placeholder="Share your story..."></textarea>
-      <div style="text-align:right;font-size:12px;"><span id="charCount">0</span>/1000</div>
-
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-        <input type="checkbox" id="memorialToggle" /> 🕯️ This is a memorial tribute
-      </label>
-      <div id="memorialFields" style="display:none;">
-        <input id="memorialName" placeholder="Name of the person (optional)" />
-        <textarea id="memorialMessage" placeholder="Memorial message"></textarea>
-      </div>
-
-      <button class="btn" id="postBtn" onclick="createPost()">🕊️ Post Anonymously</button>
+    <!-- Crisis Banner -->
+    <div class="banner">
+      <h3>Need Help Now?</h3>
+      <p>You're not alone. Help is available now.</p>
+      <a class="call-btn" href="tel:1860-2662-345">📞 Call 1860-2662-345</a>
     </div>
 
-    <div id="postsContainer">Loading posts...</div>
+    <!-- Navigation -->
+    <div class="nav">
+      <button class="nav-btn active" onclick="switchSection('home', this)">🏠 Home</button>
+      <button class="nav-btn" onclick="switchSection('helplines', this)">📞 Helplines</button>
+      <button class="nav-btn" onclick="switchSection('memorials', this)">🕯️ Memorials</button>
+      <button class="nav-btn" onclick="switchSection('community', this)">👥 Community</button>
+    </div>
+
+    <!-- Home Section -->
+    <div id="home" class="section active">
+      <!-- Post Form -->
+      <div class="card">
+        <h2 style="margin-bottom: 12px;">Share Anonymously</h2>
+        <div class="form-group" style="margin-bottom: 10px;">
+          <label>Your College/University</label>
+          <input id="collegeInput" placeholder="e.g., IIT Kharagpur" />
+        </div>
+        <div class="form-group" style="margin-bottom: 10px;">
+          <label>Topic</label>
+          <select id="topicSelect">
+            <option value="mental">💭 Mental Health</option>
+            <option value="academic">📚 Academic Pressure</option>
+            <option value="social">👥 Social Issues</option>
+            <option value="bullying">🚫 Bullying/Harassment</option>
+            <option value="other">💬 Other</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 6px;">
+          <label>Your Story (Max 1000 characters)</label>
+          <textarea id="contentInput" maxlength="1000" placeholder="Share your story anonymously... Your words matter."></textarea>
+          <div style="text-align:right; font-size: 12px; color: var(--text-secondary);">
+            <span id="charCount">0</span>/1000
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 10px;">
+          <label>Add Image (Optional)</label>
+          <div class="image-upload">
+            <label class="image-button" for="cameraInput">📷 Camera</label>
+            <label class="image-button" for="galleryInput">🖼️ Gallery</label>
+          </div>
+          <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" />
+          <input type="file" id="galleryInput" accept="image/*" style="display:none;" />
+          <div id="imagePreview" class="image-preview" style="display:none;"></div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 10px;">
+          <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+            <input type="checkbox" id="memorialToggle" style="width:18px; height:18px; cursor:pointer;" />
+            🕯️ This is a memorial tribute
+          </label>
+        </div>
+        <div id="memorialFields" style="display:none;">
+          <div class="form-group" style="margin-bottom: 10px;">
+            <label>Name of the person (optional)</label>
+            <input id="memorialName" placeholder="Their name..." />
+          </div>
+          <div class="form-group" style="margin-bottom: 10px;">
+            <label>Memorial message</label>
+            <textarea id="memorialMessage" placeholder="Share memories, celebrate their life..."></textarea>
+          </div>
+        </div>
+
+        <button class="btn" id="postBtn" onclick="createPost()"><span>🕊️</span> Post Anonymously</button>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters">
+        <button class="filter-btn active" onclick="filterPosts('all', this)">All Posts</button>
+        <button class="filter-btn" onclick="filterPosts('mental', this)">💭 Mental Health</button>
+        <button class="filter-btn" onclick="filterPosts('academic', this)">📚 Academic</button>
+        <button class="filter-btn" onclick="filterPosts('social', this)">👥 Social</button>
+        <button class="filter-btn" onclick="filterPosts('bullying', this)">🚫 Bullying</button>
+        <button class="filter-btn" onclick="filterPosts('memorial', this)">🕯️ Memorials</button>
+      </div>
+
+      <!-- Posts Container -->
+      <div id="postsContainer">
+        <div class="loading">
+          <div style="font-size: 42px;">🕊️</div>
+          <p>Loading posts...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Helplines Section -->
+    <div id="helplines" class="section">
+      <div class="card">
+        <h2>🆘 Crisis Helplines</h2>
+        <div style="margin-top:12px;">
+          <div class="post-card">
+            <div class="post-header"><span class="post-badge badge-other">💚 Vandrevala Foundation</span></div>
+            <p class="post-content">24/7 • Mental health support & crisis intervention</p>
+            <div class="reactions"><a class="btn" href="tel:1860-2662-345">📞 Call 1860-2662-345</a></div>
+          </div>
+          <div class="post-card" style="margin-top:10px;">
+            <div class="post-header"><span class="post-badge badge-other">🆘 iCall - TISS</span></div>
+            <p class="post-content">Mon-Sat • 8 AM-10 PM • Suicide prevention & counseling</p>
+            <div class="reactions"><a class="btn" href="tel:9152987821">📞 Call 9152-987821</a></div>
+          </div>
+          <div class="post-card" style="margin-top:10px;">
+            <div class="post-header"><span class="post-badge badge-other">🧠 NIMHANS Helpline</span></div>
+            <p class="post-content">Mon-Sat • 8 AM-10 PM • Professional counseling</p>
+            <div class="reactions"><a class="btn" href="tel:08046110007">📞 Call 080-46110007</a></div>
+          </div>
+          <div class="post-card" style="margin-top:10px;">
+            <div class="post-header"><span class="post-badge badge-danger">🚨 Emergency Services</span></div>
+            <p class="post-content">National Emergency Number • 24/7</p>
+            <div class="reactions"><a class="btn" href="tel:112">📞 Call 112</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Memorials Section -->
+    <div id="memorials" class="section">
+      <div class="card">
+        <h2>🕯️ In Loving Memory</h2>
+        <p class="tagline">Honoring those we've lost • Celebrating their lives</p>
+      </div>
+      <div id="memorialsContainer">
+        <div class="loading">
+          <div style="font-size: 42px;">🕯️</div>
+          <p>Loading memorials...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Community Section -->
+    <div id="community" class="section">
+      <div class="card">
+        <h2>👥 Community Guidelines</h2>
+        <ul style="margin-top:12px; list-style:none;">
+          <li style="padding:6px 0;">✓ Be kind and supportive</li>
+          <li style="padding:6px 0;">✓ Respect others' experiences</li>
+          <li style="padding:6px 0;">✓ No hate speech or bullying</li>
+          <li style="padding:6px 0;">✓ Report harmful content</li>
+          <li style="padding:6px 0;">✓ Seek help if you need it</li>
+        </ul>
+      </div>
+    </div>
+
   </div>
 
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <button class="bottom-nav-btn active" onclick="switchSection('home', this)"><div>🏠</div><span>Home</span></button>
+    <button class="bottom-nav-btn" onclick="switchSection('helplines', this)"><div>📞</div><span>Help</span></button>
+    <button class="bottom-nav-btn" onclick="switchSection('memorials', this)"><div>🕯️</div><span>Memorial</span></button>
+    <button class="bottom-nav-btn" onclick="switchSection('community', this)"><div>👥</div><span>Community</span></button>
+  </div>
+
+  <!-- Toast -->
   <div id="toast" class="toast"></div>
-<script>
-  // ================================
-  // Supabase configuration
-  // ================================
-  const SUPABASE_URL = 'https://ytdlvsfhfyasisksrjyn.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl0ZGx2c2ZoZnlhc2lza3NyanluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2NzQ0NzMsImV4cCI6MjA3NjI1MDQ3M30.MB2EojydD3256h3EkjQzR1WsuUw1z2DTsFTLldjigZE';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // Stable anonymous ID
-  function getAnonymousId() {
-    let id = localStorage.getItem('sv_anon_id');
-    if (!id) {
-      id = 'anon_' + Math.random().toString(36).slice(2);
-      localStorage.setItem('sv_anon_id', id);
-    }
-    return id;
-  }
-  const anonymousId = getAnonymousId();
+  <script>
+    // ================================
+    // Supabase configuration (SafeVoice)
+    // ================================
+    const SUPABASE_URL = 'https://jjfkwkmdvpxzjzbblodz.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqZmt3a21kdnB4emp6YmJsb2R6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjk0NzAwOTQsImV4cCI6MjA0NTA0NjA5NH0.rN8oDm5T_JXOG8KN_wBKiBdVTsE7OUOmBBkKJ4VF9TI';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // ================================
-  // Helpers
-  // ================================
-  function showToast(msg) {
-    const toast = document.getElementById('toast');
-    toast.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
-  }
-  function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-  function timeAgo(iso) {
-    const date = new Date(iso);
-    const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
-    const units = [['year',31536000],['month',2592000],['week',604800],['day',86400],['hour',3600],['minute',60]];
-    for (const [label, size] of units) {
-      const n = Math.floor(seconds / size);
-      if (n >= 1) return `${n} ${label}${n!==1?'s':''} ago`;
-    }
-    return 'Just now';
-  }
-
-  // ================================
-  // Create post
-  // ================================
-  async function createPost() {
-    const college = document.getElementById('collegeInput').value.trim();
-    const topic = document.getElementById('topicSelect').value;
-    let content = document.getElementById('contentInput').value.trim();
-    const isMemorial = document.getElementById('memorialToggle').checked;
-    const memorialName = document.getElementById('memorialName').value.trim();
-    const memorialMessage = document.getElementById('memorialMessage').value.trim();
-
-    if (!college || !content) return showToast('❌ Fill all fields');
-
-    let finalTopic = topic;
-    if (isMemorial) {
-      finalTopic = 'memorial';
-      if (memorialName) content = `In Memory of ${memorialName}\n\n${content}`;
-      if (memorialMessage) content += `\n\n${memorialMessage}`;
-    }
-
-    const { error } = await supabase.from('posts').insert([{
-      college, topic: finalTopic, content,
-      image_url: null, user_wallet: null,
-      anonymous_id: anonymousId, created_at: new Date().toISOString()
-    }]);
-    if (error) { console.error(error); return showToast('❌ Error posting'); }
-
-    showToast('✅ Posted');
-    document.getElementById('collegeInput').value='';
-    document.getElementById('contentInput').value='';
-    document.getElementById('charCount').textContent='0';
-    document.getElementById('memorialToggle').checked=false;
-    document.getElementById('memorialFields').style.display='none';
-    document.getElementById('memorialName').value='';
-    document.getElementById('memorialMessage').value='';
-    loadPosts();
-  }
-
-  // ================================
-  // Load posts
-  // ================================
-  async function loadPosts() {
-    const container = document.getElementById('postsContainer');
-    container.innerHTML = 'Loading...';
-
-    const { data: posts, error } = await supabase
-      .from('posts')
-      .select('*')
-      .order('created_at',{ascending:false})
-      .limit(20);
-
-    if (error) { console.error(error); container.innerHTML='Error loading posts'; return; }
-    if (!posts || posts.length===0) { container.innerHTML='No posts yet'; return; }
-
-    const postIds = posts.map(p=>p.id);
-    const { data: reactions } = await supabase.from('reactions').select('post_id,type').in('post_id', postIds);
-    const { data: comments } = await supabase.from('comments').select('post_id,id').in('post_id', postIds);
-
-    const reactionCounts={};
-    (reactions||[]).forEach(r=>{
-      reactionCounts[r.post_id]??={};
-      reactionCounts[r.post_id][r.type]=(reactionCounts[r.post_id][r.type]||0)+1;
-    });
-
-    const commentCounts={};
-    (comments||[]).forEach(c=>{
-      commentCounts[c.post_id]=(commentCounts[c.post_id]||0)+1;
-    });
-
-    container.innerHTML = posts.map(p=>renderPost(p,reactionCounts[p.id]||{},commentCounts[p.id]||0)).join('');
-  }
-
-  // ================================
-  // Render post
-  // ================================
-  function renderPost(post, counts, commentCount) {
-    return `
-      <div class="card">
-        <h3>${escapeHtml(post.college)} • ${escapeHtml(post.topic)}</h3>
-        <div style="font-size:12px;color:#94a3b8;">${timeAgo(post.created_at)}</div>
-        <p>${escapeHtml(post.content)}</p>
-        <div>
-          <button class="reaction-btn" onclick="react('${post.id}','heart')">💖 ${counts.heart||0}</button>
-          <button class="reaction-btn" onclick="react('${post.id}','support')">💚 ${counts.support||0}</button>
-          <button class="reaction-btn" onclick="react('${post.id}','celebrate')">🎉 ${counts.celebrate||0}</button>
-          <button class="reaction-btn" onclick="react('${post.id}','strong')">💪 ${counts.strong||0}</button>
-          <button class="reaction-btn" onclick="react('${post.id}','fire')">🔥 ${counts.fire||0}</button>
-          <button class="reaction-btn" onclick="react('${post.id}','sad')">😔 ${counts.sad||0}</button>
-        </div>
-        <div style="margin-top:10px;">
-          <b>Comments (${commentCount})</b>
-          <div id="comments-${post.id}"></div>
-          <textarea id="comment-input-${post.id}" maxlength="500" placeholder="Write a comment..."></textarea>
-          <button class="btn" onclick="addComment('${post.id}')">💬 Add Comment</button>
-        </div>
-      </div>
-    `;
-  }
-  // ================================
-  // Comments
-  // ================================
-  async function loadComments(postId) {
-    const list = document.getElementById(`comments-${postId}`);
-    if (!list) return;
-    const { data, error } = await supabase
-      .from('comments')
-      .select('*')
-      .eq('post_id', postId)
-      .order('created_at',{ascending:true});
-    if (error) { console.error(error); list.innerHTML='Error loading comments'; return; }
-    if (!data || data.length===0) { list.innerHTML='<div class="comment-item">No comments yet</div>'; return; }
-    list.innerHTML = data.map(c=>`
-      <div class="comment-item">
-        <div style="font-size:12px;color:#94a3b8;">${timeAgo(c.created_at)}</div>
-        ${escapeHtml(c.content)}
-      </div>
-    `).join('');
-  }
-
-  async function addComment(postId) {
-    const input = document.getElementById(`comment-input-${postId}`);
-    const content = input.value.trim();
-    if (!content) return showToast('❌ Write a comment');
-    const { error } = await supabase.from('comments').insert([{
-      post_id: postId, content,
-      user_wallet: null, anonymous_id: anonymousId,
-      created_at: new Date().toISOString()
-    }]);
-    if (error) { console.error(error); return showToast('❌ Error adding comment'); }
-    input.value='';
-    showToast('✅ Comment added');
-    loadComments(postId);
-  }
-
-  // ================================
-  // Reactions
-  // ================================
-  async function react(postId,type) {
-    const { error } = await supabase.from('reactions').insert([{
-      post_id: postId, type,
-      user_wallet: null, anonymous_id: anonymousId,
-      created_at: new Date().toISOString()
-    }]);
-    if (error) {
-      if ((error.message||'').toLowerCase().includes('duplicate')) {
-        return showToast('ℹ️ Already reacted');
+    // Stable anonymous ID
+    function getAnonymousId() {
+      const key = 'sv_anon_id';
+      let val = localStorage.getItem(key);
+      if (!val) {
+        val = 'anon_' + Math.random().toString(36).slice(2);
+        localStorage.setItem(key, val);
       }
-      console.error(error); return showToast('❌ Error reacting');
+      return val;
     }
-    showToast('✅ Reaction added');
-    loadPosts();
-  }
+    const anonymousId = getAnonymousId();
 
-  // ================================
-  // Stats updater
-  // ================================
-  function updateStats() {
-    const posts = document.querySelectorAll('.card');
-    document.getElementById('totalPosts').textContent = posts.length;
-    let reactions=0, comments=0;
-    document.querySelectorAll('.reaction-btn').forEach(btn=>{
-      const num = parseInt(btn.textContent.replace(/\D/g,''))||0;
-      reactions+=num;
-    });
-    document.querySelectorAll('[id^="comments-"]').forEach(div=>{
-      comments+=div.children.length;
-    });
-    document.getElementById('totalReactions').textContent = reactions;
-    document.getElementById('totalComments').textContent = comments;
-  }
+    // ================================
+    // Global state
+    // ================================
+    let currentFilter = 'all';
+    let pageLimit = 15;
+    let lastCreatedAt = null;
+    let selectedImage = null;
 
-  // ================================
-  // Init
-  // ================================
-  window.addEventListener('load', ()=>{
-    loadPosts();
-  });
-</script>
+    // ================================
+    // Navigation
+    // ================================
+    function switchSection(section, el) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(section).classList.add('active');
+
+      document.querySelectorAll('.nav-btn, .bottom-nav-btn').forEach(btn => btn.classList.remove('active'));
+      if (el) el.classList.add('active');
+
+      if (section === 'home') {
+        resetPagination();
+        loadPosts();
+      } else if (section === 'memorials') {
+        loadMemorials();
+      }
+    }
+    function filterPosts(filter, el) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      if (el) el.classList.add('active');
+      resetPagination();
+      loadPosts();
+    }
+    function resetPagination() { lastCreatedAt = null; }
+
+    // ================================
+    // Image handling
+    // ================================
+    document.getElementById('cameraInput').addEventListener('change', handleImageSelect);
+    document.getElementById('galleryInput').addEventListener('change', handleImageSelect);
+
+    function handleImageSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) return showToast('❌ Image too large! Max 5MB');
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        selectedImage = evt.target.result;
+        displayImagePreview(selectedImage);
+      };
+      reader.readAsDataURL(file);
+    }
+    function displayImagePreview(data) {
+      const preview = document.getElementById('imagePreview');
+      preview.style.display = 'block';
+      preview.innerHTML = `
+        <img src="${data}" alt="Preview">
+        <button class="remove-image" onclick="removeImage()">×</button>
+      `;
+    }
+    function removeImage() {
+      selectedImage = null;
+      const preview = document.getElementById('imagePreview');
+      preview.style.display = 'none';
+      document.getElementById('cameraInput').value = '';
+      document.getElementById('galleryInput').value = '';
+    }
+
+    // ================================
+    // Form helpers
+    // ================================
+    document.getElementById('contentInput').addEventListener('input', function() {
+      document.getElementById('charCount').textContent = this.value.length;
+    });
+    document.getElementById('memorialToggle').addEventListener('change', function() {
+      document.getElementById('memorialFields').style.display = this.checked ? 'block' : 'none';
+    });
+
+    // ================================
+    // Create post
+    // ================================
+    async function createPost() {
+      const college = document.getElementById('collegeInput').value.trim();
+      const topic = document.getElementById('topicSelect').value;
+      const contentRaw = document.getElementById('contentInput').value.trim();
+      const isMemorial = document.getElementById('memorialToggle').checked;
+      const memorialName = document.getElementById('memorialName').value.trim();
+      const memorialMessage = document.getElementById('memorialMessage').value.trim();
+
+      if (!college) return showToast('❌ Please enter your college name');
+      if (!contentRaw) return showToast('❌ Please write your story');
+      if (contentRaw.length > 1000) return showToast('❌ Content exceeds 1000 characters');
+
+      const btn = document.getElementById('postBtn');
+      btn.disabled = true; btn.innerHTML = '<span>⏳</span> Posting...';
+
+      try {
+        let content = contentRaw;
+        let finalTopic = topic;
+        if (isMemorial) {
+          finalTopic = 'memorial';
+          if (memorialName) content = `In Memory of ${memorialName}\n\n${content}`;
+          if (memorialMessage) content += `\n\n${memorialMessage}`;
+        }
+
+        const { error } = await supabase.from('posts').insert([{
+          college,
+          topic: finalTopic,
+          content,
+          image_url: selectedImage || null,
+          user_wallet: null,
+          anonymous_id: anonymousId,
+          created_at: new Date().toISOString()
+        }]);
+        if (error) throw error;
+
+        showToast('✅ Post shared successfully!');
+        // Reset form
+        document.getElementById('collegeInput').value = '';
+        document.getElementById('contentInput').value = '';
+        document.getElementById('charCount').textContent = '0';
+        document.getElementById('memorialToggle').checked = false;
+        document.getElementById('memorialFields').style.display = 'none';
+        document.getElementById('memorialName').value = '';
+        document.getElementById('memorialMessage').value = '';
+        removeImage();
+
+        resetPagination();
+        loadPosts();
+
+      } catch (e) {
+        console.error('Error creating post:', e);
+        showToast('❌ Error posting. Please try again.');
+      } finally {
+        btn.disabled = false; btn.innerHTML = '<span>🕊️</span> Post Anonymously';
+      }
+    }
+
+    // ================================
+    // Load posts with pagination
+    // ================================
+    async function loadPosts(loadMore = false) {
+      const container = document.getElementById('postsContainer');
+      if (!loadMore) {
+        container.innerHTML = `
+          <div class="loading"><div style="font-size:42px;">🕊️</div><p>Loading posts...</p></div>`;
+      }
+
+      try {
+        let query = supabase.from('posts').select('*').order('created_at', { ascending: false }).limit(pageLimit);
+        if (currentFilter !== 'all') query = query.eq('topic', currentFilter);
+        if (lastCreatedAt) query = query.lt('created_at', lastCreatedAt);
+
+        const { data: posts, error } = await query;
+        if (error) throw error;
+
+        if (!posts || posts.length === 0) {
+          if (!loadMore) {
+            container.innerHTML = `
+              <div class="empty-state">
+                <div style="font-size:64px; opacity:0.6;">🕊️</div>
+                <h3 style="color: var(--text); margin-top:6px;">No posts yet</h3>
+                <p>Be the first to share your voice!</p>
+              </div>`;
+          }
+          return;
+        }
+
+        lastCreatedAt = posts[posts.length - 1].created_at;
+
+        // Get reaction counts and comments counts
+        const postIds = posts.map(p => p.id);
+        const { data: reactions } = await supabase.from('reactions').select('post_id,type').in('post_id', postIds);
+        const { data: comments } = await supabase.from('comments').select('post_id,id').in('post_id', postIds);
+
+        const reactionCounts = {};
+        (reactions || []).forEach(r => {
+          const pid = r.post_id;
+          reactionCounts[pid] ||= { heart:0, support:0, celebrate:0, strong:0, fire:0, sad:0 };
+          reactionCounts[pid][r.type] += 1;
+        });
+
+        const commentCounts = {};
+        (comments || []).forEach(c => {
+          const pid = c.post_id;
+          commentCounts[pid] ||= 0;
+          commentCounts[pid] += 1;
+        });
+
+        const html = posts.map(p => renderPost(p, reactionCounts[p.id] || {}, commentCounts[p.id] || 0)).join('');
+        if (loadMore) {
+          container.insertAdjacentHTML('beforeend', html);
+        } else {
+          container.innerHTML = html;
+        }
+
+        updateStatsFromDOM();
+
+        // Add load more button once
+        if (!document.getElementById('loadMoreBtn')) {
+          const btn = document.createElement('button');
+          btn.id = 'loadMoreBtn'; btn.className = 'btn'; btn.style.marginTop = '12px'; btn.textContent = '⬇️ Load more';
+          btn.onclick = () => loadPosts(true);
+          container.parentElement.appendChild(btn);
+        }
+
+      } catch (e) {
+        console.error('Error loading posts:', e);
+        container.innerHTML = `
+          <div class="empty-state">
+            <div style="font-size:64px;">⚠️</div>
+            <h3 style="color: var(--text); margin-top:6px;">Error loading posts</h3>
+            <p>Please refresh the page</p>
+          </div>`;
+      }
+    }
+
+    // ================================
+    // Render post + comments section
+    // ================================
+    function getBadge(topic) {
+      const map = {
+        mental: 'badge-mental', academic: 'badge-academic', social: 'badge-social',
+        bullying: 'badge-bullying', other: 'badge-other', memorial: 'badge-memorial'
+      };
+      return map[topic] || 'badge-other';
+    }
+    function labelTopic(topic) {
+      const labels = {
+        mental: '💭 Mental Health', academic: '📚 Academic', social: '👥 Social',
+        bullying: '🚫 Bullying', other: '💬 Other', memorial: '🕯️ Memorial'
+      };
+      return labels[topic] || topic;
+    }
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div'); div.textContent = text; return div.innerHTML;
+    }
+    function timeAgo(iso) {
+      const date = new Date(iso);
+      const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+      const units = [['year',31536000],['month',2592000],['week',604800],['day',86400],['hour',3600],['minute',60]];
+      for (const [label, size] of units) {
+        const n = Math.floor(seconds / size); if (n >= 1) return `${n} ${label}${n!==1?'s':''} ago`;
+      }
+      return 'Just now';
+    }
+
+    function renderPost(post, counts, commentCount) {
+      const badge = getBadge(post.topic);
+      return `
+        <div class="post-card" data-post="${post.id}">
+          <div class="post-header">
+            <div class="post-meta">
+              <strong>${escapeHtml(post.college)}</strong><br>
+              <span>${timeAgo(post.created_at)}</span>
+            </div>
+            <span class="post-badge ${badge}">${labelTopic(post.topic)}</span>
+          </div>
+
+          <div class="post-content">${escapeHtml(post.content)}</div>
+
+          ${post.image_url ? `
+            <div class="post-image"><img src="${post.image_url}" alt="Post image" loading="lazy"></div>
+          ` : ''}
+
+          <div class="reactions">
+            <button class="reaction-btn" onclick="react('${post.id}','heart')">💖 <span class="reaction-count" data-type="heart">${counts.heart||0}</span></button>
+            <button class="reaction-btn" onclick="react('${post.id}','support')">💚 <span class="reaction-count" data-type="support">${counts.support||0}</span></button>
+            <button class="reaction-btn" onclick="react('${post.id}','celebrate')">🎉 <span class="reaction-count" data-type="celebrate">${counts.celebrate||0}</span></button>
+            <button class="reaction-btn" onclick="react('${post.id}','strong')">💪 <span class="reaction-count" data-type="strong">${counts.strong||0}</span></button>
+            <button class="reaction-btn" onclick="react('${post.id}','fire')">🔥 <span class="reaction-count" data-type="fire">${counts.fire||0}</span></button>
+            <button class="reaction-btn" onclick="react('${post.id}','sad')">😔 <span class="reaction-count" data-type="sad">${counts.sad||0}</span></button>
+          </div>
+
+          <div class="comments">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-top:12px;">
+              <h4 style="font-size: 15px;">💬 Comments <span style="color: var(--text-secondary)">(${commentCount})</span></h4>
+              <button class="reaction-btn" onclick="toggleComments('${post.id}')">Toggle</button>
+            </div>
+            <div id="comments-${post.id}" style="margin-top:6px; display:none;">
+              <div class="loading">Loading comments...</div>
+            </div>
+            <div class="form-group" style="margin-top:8px;">
+              <label>Add a comment (max 500 characters)</label>
+              <textarea id="comment-input-${post.id}" maxlength="500" placeholder="Write anonymously..."></textarea>
+              <button class="btn" style="margin-top:8px;" onclick="addComment('${post.id}')">💬 Add Comment</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleComments(postId) {
+      const box = document.getElementById(`comments-${postId}`);
+      if (!box) return;
+      const show = box.style.display === 'none' || box.style.display === '';
+      box.style.display = show ? 'block' : 'none';
+      if (show) loadComments(postId);
+    }
+
+    async function loadComments(postId) {
+      const list = document.getElementById(`comments-${postId}`);
+      if (!list) return;
+      try {
+        const { data, error } = await supabase
+          .from('comments')
+          .select('*')
+          .eq('post_id', postId)
+          .order('created_at', { ascending: true });
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          list.innerHTML = `<div class="comment-item"><div class="comment-meta">No comments yet</div></div>`;
+          return;
+        }
+
+        list.innerHTML = data.map(c => `
+          <div class="comment-item">
+            <div class="comment-meta">${timeAgo(c.created_at)}</div>
+            <div style="margin-top:6px;">${escapeHtml(c.content)}</div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error('Error loading comments:', e);
+        list.innerHTML = `<div class="comment-item"><div class="comment-meta">Error loading comments</div></div>`;
+      }
+    }
+
+    async function addComment(postId) {
+      const input = document.getElementById(`comment-input-${postId}`);
+      if (!input) return;
+      const content = input.value.trim();
+      if (!content) return showToast('❌ Write a comment');
+      if (content.length > 500) return showToast('❌ Comment too long');
+
+      try {
+        const { error } = await supabase.from('comments').insert([{
+          post_id: postId,
+          content,
+          user_wallet: null,
+          anonymous_id: anonymousId,
+          created_at: new Date().toISOString()
+        }]);
+        if (error) throw error;
+
+        input.value = '';
+        showToast('✅ Comment added');
+        loadComments(postId);
+        updateStatsFromDOM(0, 0, 1);
+      } catch (e) {
+        console.error('Error adding comment:', e);
+        showToast('❌ Error adding comment');
+      }
+    }
+
+    // ================================
+    // Reactions with dedupe
+    // ================================
+    async function react(postId, reactionType) {
+      const allowed = ['heart','support','celebrate','strong','fire','sad'];
+      if (!allowed.includes(reactionType)) return showToast('❌ Invalid reaction');
+
+      try {
+        const { error } = await supabase.from('reactions').insert([{
+          post_id: postId,
+          type: reactionType,
+          user_wallet: null,
+          anonymous_id: anonymousId,
+          created_at: new Date().toISOString()
+        }]);
+
+        if (error) {
+          const msg = (error.message || '').toLowerCase();
+          if (msg.includes('duplicate') || msg.includes('unique')) {
+            showToast('ℹ️ You already reacted to this post');
+            return;
+          }
+          console.error(error);
+          showToast('❌ Error adding reaction');
+          return;
+        }
+
+        showToast('✅ Reaction added!');
+        const { data } = await supabase.from('reactions').select('type').eq('post_id', postId);
+        const counts = { heart:0, support:0, celebrate:0, strong:0, fire:0, sad:0 };
+        (data || []).forEach(r => counts[r.type]++);
+        updatePostReactionCounts(postId, counts);
+        updateStatsFromDOM(0, 1, 0);
+      } catch (e) {
+        console.error('Error adding reaction:', e);
+        showToast('❌ Error adding reaction');
+      }
+    }
+    function updatePostReactionCounts(postId, counts) {
+      const card = document.querySelector(`.post-card[data-post="${postId}"]`);
+      if (!card) return;
+      ['heart','support','celebrate','strong','fire','sad'].forEach(t => {
+        const el = card.querySelector(`.reaction-count[data-type="${t}"]`);
+        if (el) el.textContent = String(counts[t] || 0);
+      });
+    }
+
+    // ================================
+    // Memorials
+    // ================================
+    async function loadMemorials() {
+      const container = document.getElementById('memorialsContainer');
+      container.innerHTML = `
+        <div class="loading"><div style="font-size:42px;">🕯️</div><p>Loading memorials...</p></div>`;
+      try {
+        const { data: posts, error } = await supabase
+          .from('posts')
+          .select('*')
+          .eq('topic', 'memorial')
+          .order('created_at', { ascending: false })
+          .limit(50);
+        if (error) throw error;
+
+        if (!posts || posts.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div style="font-size:64px; opacity:0.6;">🕯️</div>
+              <h3 style="color: var(--text); margin-top:6px;">No memorials yet</h3>
+              <p>Honor someone's memory by creating a tribute</p>
+            </div>`;
+          return;
+        }
+
+        const html = posts.map(p => `
+          <div class="post-card">
+            <div class="post-header">
+              <div class="post-meta">
+                <strong>${escapeHtml(p.college)}</strong><br>
+                <span>${timeAgo(p.created_at)}</span>
+              </div>
+              <span class="post-badge badge-memorial">🕯️ Memorial</span>
+            </div>
+            <div class="post-content">${escapeHtml(p.content)}</div>
+            ${p.image_url ? `<div class="post-image"><img src="${p.image_url}" alt="Post image" loading="lazy"></div>` : ''}
+          </div>
+        `).join('');
+        container.innerHTML = html;
+      } catch (e) {
+        console.error('Error loading memorials:', e);
+        container.innerHTML = `
+          <div class="empty-state">
+            <div style="font-size:64px;">⚠️</div>
+            <h3 style="color: var(--text); margin-top:6px;">Error loading memorials</h3>
+            <p>Please refresh the page</p>
+          </div>`;
+      }
+    }
+
+    // ================================
+    // Stats
+    // ================================
+    function updateStatsFromDOM(addPosts=0, addReactions=0, addComments=0) {
+      const postsOnPage = document.querySelectorAll('.post-card').length + addPosts;
+      let reactionSum = addReactions;
+      document.querySelectorAll('.reaction-count').forEach(el => { reactionSum += Number(el.textContent || 0); });
+
+      const commentIndicators = document.querySelectorAll('.comments h4 span');
+      let commentSum = addComments;
+      commentIndicators.forEach(s => {
+        const txt = s.textContent || '(0)'; const m = txt.match(/\((\d+)\)/);
+        if (m) commentSum += Number(m[1]);
+      });
+
+      document.getElementById('totalPosts').textContent = String(postsOnPage);
+      document.getElementById('totalReactions').textContent = String(reactionSum);
+      document.getElementById('totalComments').textContent = String(commentSum);
+    }
+
+    // ================================
+    // Toast
+    // ================================
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // ================================
+    // Init
+    // ================================
+    window.addEventListener('load', function() {
+      loadPosts();
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(()=>{});
+      }
+    });
+  </script>
 </body>
 </html>
