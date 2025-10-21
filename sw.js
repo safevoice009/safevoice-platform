@@ -29,10 +29,41 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch
+// Fetch (serve from cache first)
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => response || fetch(event.request))
   );
 });
+
+////////////////////////////////////////////////////////////////////////////////
+// Helper for uploading files to Supabase Edge Function
+////////////////////////////////////////////////////////////////////////////////
+async function uploadAndGetUrl(file) {
+  // Read file as Base64
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  await new Promise(resolve => reader.onload = resolve);
+  const base64 = reader.result.split(',')[1];
+
+  // Call your Supabase function
+  const res = await fetch(
+    'https://mrgapvgbtqgwysfjzwoy.functions.supabase.co/uploadToDrive',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileData: base64,
+        fileName: file.name,
+        mimeType: file.type
+      })
+    }
+  );
+  const { url, error } = await res.json();
+  if (error) throw new Error(error);
+  return url;
+}
+
+// Export for client pages to call
+self.uploadAndGetUrl = uploadAndGetUrl;
