@@ -151,27 +151,37 @@
     const NFT_STORAGE_API_KEY = '7a8ef7f8.87809ecfa3ac47a899dd5e8a9c5f1dfc';
 
     async function uploadToNFTStorage(file) {
-      // This is a more direct and robust way to upload the file.
+      // Using FormData is the most robust method for file uploads across different browsers.
+      const formData = new FormData();
+      formData.append('file', file);
+
       const response = await fetch('https://api.nft.storage/upload', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${NFT_STORAGE_API_KEY}`,
-          'Content-Type': file.type
+          // The browser will automatically set the 'Content-Type: multipart/form-data' header with the correct boundary.
+          // Do NOT set it manually here.
+          'Authorization': `Bearer ${NFT_STORAGE_API_KEY}`
         },
-        body: file // Send the file directly as the request body
+        body: formData
       });
 
       if (!response.ok) {
-        // Log more detailed error information to the console for debugging
-        const errorBody = await response.text();
-        console.error("NFT.Storage Error:", response.status, response.statusText, errorBody);
-        throw new Error(`NFT.Storage upload failed: ${response.statusText}`);
+        // Try to get a detailed error message from the API response.
+        const errorBody = await response.json().catch(() => response.text());
+        console.error("NFT.Storage Error Response:", {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorBody
+        });
+        // Create a more informative error message for the user.
+        throw new Error(`Upload failed. Status: ${response.status}. Check the console for details.`);
       }
 
       const data = await response.json();
       const cid = data.value.cid;
-      // Correctly form the URL by including the filename
-      return `https://${cid}.ipfs.nftstorage.link/${encodeURIComponent(file.name)}`;
+      
+      // For the /upload endpoint, the gateway URL doesn't need the filename.
+      return `https://${cid}.ipfs.nftstorage.link`;
     }
   </script>
 
@@ -448,8 +458,8 @@
         displayImagePreview(ipfsUrl);
         showToast('✅ Decentralized upload complete!');
       } catch (err) {
-        showToast('❌ NFT.Storage upload failed');
-        // Log the full error object for better debugging
+        // Display the more detailed error message from our upload function.
+        showToast(`❌ ${err.message}`);
         console.error("Full upload error object:", err);
         selectedImage = null;
       }
@@ -918,14 +928,8 @@
     // Init
     // ================================
     window.addEventListener('load', function() {
-      // I've renamed updateStatsFromDOM to just updateStats.
-      // And I renamed the global stats function to updateGlobalStats.
-      // No change in functionality, just clearer names.
       loadPosts();
       updateGlobalStats();
-      // I also noticed updateStatsFromDOM was called in loadPosts but not adding to the global count,
-      // so I removed that call to avoid confusion. The global stats are loaded once at the start,
-      // and local actions optimistically update the UI.
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js').catch(()=>{});
       }
