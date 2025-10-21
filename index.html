@@ -145,6 +145,19 @@
       .stats { grid-template-columns: repeat(3,1fr); }
     }
   </style>
+
+  <!-- NFT.Storage CDN and API key script -->
+  <script src="https://cdn.jsdelivr.net/npm/nft.storage/dist/bundle.esm.min.js"></script>
+  <script>
+    const NFT_STORAGE_API_KEY = '7a8ef7f8.87809ecfa3ac47a899dd5e8a9c5f1dfc';
+
+    async function uploadToNFTStorage(file) {
+      const client = new window.NFTStorage.NFTStorage({ token: NFT_STORAGE_API_KEY });
+      const cid = await client.storeBlob(file);
+      return `https://${cid}.ipfs.nftstorage.link/${file.name}`;
+    }
+  </script>
+
 </head>
 <body>
   <div class="container">
@@ -321,7 +334,6 @@
         </ul>
       </div>
     </div>
-
   </div>
 
   <!-- Bottom Navigation -->
@@ -337,12 +349,11 @@
 
   <script>
     // ================================
-// Supabase configuration (SafeVoice - new deployment)
-// ================================
-const SUPABASE_URL = 'https://mrgapvgbtqgwysfjzwoy.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yZ2FwdmdidHFnd3lzZmp6d295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4NTU2OTYsImV4cCI6MjA3NjQzMTY5Nn0.RMPJ9DhGXJL0qWel88vtjczygunMxY-zra1gzZvN8SM';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
+    // Supabase configuration (SafeVoice - new deployment)
+    // ================================
+    const SUPABASE_URL = 'https://mrgapvgbtqgwysfjzwoy.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1yZ2FwdmdidHFnd3lzZmp6d295Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA4NTU2OTYsImV4cCI6MjA3NjQzMTY5Nn0.RMPJ9DhGXJL0qWel88vtjczygunMxY-zra1gzZvN8SM';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // Stable anonymous ID
     function getAnonymousId() {
@@ -391,31 +402,38 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     function resetPagination() { lastCreatedAt = null; }
 
     // ================================
-    // Image handling
+    // Image handling - UPDATED FOR NFT.Storage integration
     // ================================
     document.getElementById('cameraInput').addEventListener('change', handleImageSelect);
     document.getElementById('galleryInput').addEventListener('change', handleImageSelect);
 
-    function handleImageSelect(e) {
+    async function handleImageSelect(e) {
       const file = e.target.files[0];
       if (!file) return;
       if (file.size > 5 * 1024 * 1024) return showToast('❌ Image too large! Max 5MB');
 
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        selectedImage = evt.target.result;
-        displayImagePreview(selectedImage);
-      };
-      reader.readAsDataURL(file);
+      try {
+        showToast('⏳ Uploading to decentralized storage...');
+        const ipfsUrl = await uploadToNFTStorage(file);
+        selectedImage = ipfsUrl;
+        displayImagePreview(ipfsUrl);
+        showToast('✅ Decentralized upload complete!');
+      } catch (err) {
+        showToast('❌ NFT.Storage upload failed');
+        console.error(err);
+        selectedImage = null;
+      }
     }
-    function displayImagePreview(data) {
+
+    function displayImagePreview(url) {
       const preview = document.getElementById('imagePreview');
       preview.style.display = 'block';
       preview.innerHTML = `
-        <img src="${data}" alt="Preview">
+        <img src="${url}" alt="Preview">
         <button class="remove-image" onclick="removeImage()">×</button>
       `;
     }
+
     function removeImage() {
       selectedImage = null;
       const preview = document.getElementById('imagePreview');
@@ -554,10 +572,12 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         updateStatsFromDOM();
 
-        // Add load more button once
         if (!document.getElementById('loadMoreBtn')) {
           const btn = document.createElement('button');
-          btn.id = 'loadMoreBtn'; btn.className = 'btn'; btn.style.marginTop = '12px'; btn.textContent = '⬇️ Load more';
+          btn.id = 'loadMoreBtn';
+          btn.className = 'btn';
+          btn.style.marginTop = '12px';
+          btn.textContent = '⬇️ Load more';
           btn.onclick = () => loadPosts(true);
           container.parentElement.appendChild(btn);
         }
@@ -599,7 +619,7 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
       const units = [['year',31536000],['month',2592000],['week',604800],['day',86400],['hour',3600],['minute',60]];
       for (const [label, size] of units) {
-        const n = Math.floor(seconds / size); if (n >= 1) return `${n} ${label}${n!==1?'s':''} ago`;
+        const n = Math.floor(seconds / size); if (n >= 1) return `${n} ${label}${n !== 1 ? 's' : ''} ago`;
       }
       return 'Just now';
     }
@@ -623,12 +643,12 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
           ` : ''}
 
           <div class="reactions">
-            <button class="reaction-btn" onclick="react('${post.id}','heart')">💖 <span class="reaction-count" data-type="heart">${counts.heart||0}</span></button>
-            <button class="reaction-btn" onclick="react('${post.id}','support')">💚 <span class="reaction-count" data-type="support">${counts.support||0}</span></button>
-            <button class="reaction-btn" onclick="react('${post.id}','celebrate')">🎉 <span class="reaction-count" data-type="celebrate">${counts.celebrate||0}</span></button>
-            <button class="reaction-btn" onclick="react('${post.id}','strong')">💪 <span class="reaction-count" data-type="strong">${counts.strong||0}</span></button>
-            <button class="reaction-btn" onclick="react('${post.id}','fire')">🔥 <span class="reaction-count" data-type="fire">${counts.fire||0}</span></button>
-            <button class="reaction-btn" onclick="react('${post.id}','sad')">😔 <span class="reaction-count" data-type="sad">${counts.sad||0}</span></button>
+            <button class="reaction-btn" onclick="react('${post.id}','heart')">💖 <span class="reaction-count" data-type="heart">${counts.heart || 0}</span></button>
+            <button class="reaction-btn" onclick="react('${post.id}','support')">💚 <span class="reaction-count" data-type="support">${counts.support || 0}</span></button>
+            <button class="reaction-btn" onclick="react('${post.id}','celebrate')">🎉 <span class="reaction-count" data-type="celebrate">${counts.celebrate || 0}</span></button>
+            <button class="reaction-btn" onclick="react('${post.id}','strong')">💪 <span class="reaction-count" data-type="strong">${counts.strong || 0}</span></button>
+            <button class="reaction-btn" onclick="react('${post.id}','fire')">🔥 <span class="reaction-count" data-type="fire">${counts.fire || 0}</span></button>
+            <button class="reaction-btn" onclick="react('${post.id}','sad')">😔 <span class="reaction-count" data-type="sad">${counts.sad || 0}</span></button>
           </div>
 
           <div class="comments">
