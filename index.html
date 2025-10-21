@@ -103,7 +103,7 @@
       cursor: pointer; white-space: nowrap;
     }
     .filter-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
-    .post-card { background: var(--surface); border:1px solid var(--border); border-radius: 12px; padding: 18px; }
+    .post-card { background: var(--surface); border:1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 12px; }
     .post-header { display:flex; align-items:flex-start; justify-content:space-between; }
     .post-meta { font-size: 13px; color: var(--text-secondary); }
     .post-meta strong { color: var(--text); font-size: 15px; }
@@ -146,15 +146,29 @@
     }
   </style>
 
-  <!-- NFT.Storage CDN and API key script -->
-  <script src="https://cdn.jsdelivr.net/npm/nft.storage/dist/bundle.esm.min.js"></script>
+  <!-- NFT.Storage API key and upload function -->
   <script>
     const NFT_STORAGE_API_KEY = '7a8ef7f8.87809ecfa3ac47a899dd5e8a9c5f1dfc';
 
     async function uploadToNFTStorage(file) {
-      const client = new window.NFTStorage.NFTStorage({ token: NFT_STORAGE_API_KEY });
-      const cid = await client.storeBlob(file);
-      return `https://${cid}.ipfs.nftstorage.link/${file.name}`;
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('https://api.nft.storage/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${NFT_STORAGE_API_KEY}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(`NFT.Storage upload failed: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const cid = data.value.cid;
+      return `https://${cid}.ipfs.nftstorage.link`;
     }
   </script>
 
@@ -383,7 +397,19 @@
       document.getElementById(section).classList.add('active');
 
       document.querySelectorAll('.nav-btn, .bottom-nav-btn').forEach(btn => btn.classList.remove('active'));
-      if (el) el.classList.add('active');
+      
+      const bottomNavButtons = document.querySelectorAll('.bottom-nav-btn');
+      if (section === 'home') bottomNavButtons[0].classList.add('active');
+      if (section === 'helplines') bottomNavButtons[1].classList.add('active');
+      if (section === 'memorials') bottomNavButtons[2].classList.add('active');
+      if (section === 'community') bottomNavButtons[3].classList.add('active');
+
+      const topNavButtons = document.querySelectorAll('.nav-btn');
+      if (section === 'home') topNavButtons[0].classList.add('active');
+      if (section === 'helplines') topNavButtons[1].classList.add('active');
+      if (section === 'memorials') topNavButtons[2].classList.add('active');
+      if (section === 'community') topNavButtons[3].classList.add('active');
+
 
       if (section === 'home') {
         resetPagination();
@@ -529,6 +555,9 @@
 
         const { data: posts, error } = await query;
         if (error) throw error;
+        
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
+        if (loadMoreBtn) loadMoreBtn.remove();
 
         if (!posts || posts.length === 0) {
           if (!loadMore) {
@@ -572,15 +601,16 @@
 
         updateStatsFromDOM();
 
-        if (!document.getElementById('loadMoreBtn')) {
-          const btn = document.createElement('button');
-          btn.id = 'loadMoreBtn';
-          btn.className = 'btn';
-          btn.style.marginTop = '12px';
-          btn.textContent = '⬇️ Load more';
-          btn.onclick = () => loadPosts(true);
-          container.parentElement.appendChild(btn);
+        if (posts.length === pageLimit) {
+            const btn = document.createElement('button');
+            btn.id = 'loadMoreBtn';
+            btn.className = 'btn';
+            btn.style.marginTop = '12px';
+            btn.textContent = '⬇️ Load more';
+            btn.onclick = () => loadPosts(true);
+            container.parentElement.appendChild(btn);
         }
+
 
       } catch (e) {
         console.error('Error loading posts:', e);
@@ -627,7 +657,7 @@
     function renderPost(post, counts, commentCount) {
       const badge = getBadge(post.topic);
       return `
-        <div class="post-card" data-post="${post.id}">
+        <div class="post-card" data-post-id="${post.id}">
           <div class="post-header">
             <div class="post-meta">
               <strong>${escapeHtml(post.college)}</strong><br>
@@ -653,7 +683,7 @@
 
           <div class="comments">
             <div style="display:flex; align-items:center; justify-content:space-between; margin-top:12px;">
-              <h4 style="font-size: 15px;">💬 Comments <span style="color: var(--text-secondary)">(${commentCount})</span></h4>
+              <h4 style="font-size: 15px;">💬 Comments <span class="comment-count-display">(${commentCount})</span></h4>
               <button class="reaction-btn" onclick="toggleComments('${post.id}')">Toggle</button>
             </div>
             <div id="comments-${post.id}" style="margin-top:6px; display:none;">
@@ -725,7 +755,16 @@
         input.value = '';
         showToast('✅ Comment added');
         loadComments(postId);
+
+        // Update comment count
+        const postCard = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+        if(postCard) {
+            const countEl = postCard.querySelector('.comment-count-display');
+            const currentCount = parseInt(countEl.textContent.match(/\d+/)[0], 10);
+            countEl.textContent = `(${currentCount + 1})`;
+        }
         updateStatsFromDOM(0, 0, 1);
+
       } catch (e) {
         console.error('Error adding comment:', e);
         showToast('❌ Error adding comment');
@@ -740,6 +779,17 @@
       if (!allowed.includes(reactionType)) return showToast('❌ Invalid reaction');
 
       try {
+        // Optimistic UI update
+        const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+        if(card){
+            const el = card.querySelector(`.reaction-count[data-type="${reactionType}"]`);
+            if(el) {
+                el.textContent = parseInt(el.textContent, 10) + 1;
+                updateStatsFromDOM(0, 1, 0);
+            }
+        }
+
+
         const { error } = await supabase.from('reactions').insert([{
           post_id: postId,
           type: reactionType,
@@ -750,6 +800,16 @@
 
         if (error) {
           const msg = (error.message || '').toLowerCase();
+          
+          // Revert optimistic update on error
+          if(card){
+            const el = card.querySelector(`.reaction-count[data-type="${reactionType}"]`);
+            if(el) {
+                el.textContent = parseInt(el.textContent, 10) - 1;
+                 updateStatsFromDOM(0, -1, 0);
+            }
+          }
+
           if (msg.includes('duplicate') || msg.includes('unique')) {
             showToast('ℹ️ You already reacted to this post');
             return;
@@ -760,25 +820,13 @@
         }
 
         showToast('✅ Reaction added!');
-        const { data } = await supabase.from('reactions').select('type').eq('post_id', postId);
-        const counts = { heart:0, support:0, celebrate:0, strong:0, fire:0, sad:0 };
-        (data || []).forEach(r => counts[r.type]++);
-        updatePostReactionCounts(postId, counts);
-        updateStatsFromDOM(0, 1, 0);
+
       } catch (e) {
         console.error('Error adding reaction:', e);
         showToast('❌ Error adding reaction');
       }
     }
-    function updatePostReactionCounts(postId, counts) {
-      const card = document.querySelector(`.post-card[data-post="${postId}"]`);
-      if (!card) return;
-      ['heart','support','celebrate','strong','fire','sad'].forEach(t => {
-        const el = card.querySelector(`.reaction-count[data-type="${t}"]`);
-        if (el) el.textContent = String(counts[t] || 0);
-      });
-    }
-
+    
     // ================================
     // Memorials
     // ================================
@@ -833,22 +881,26 @@
     // ================================
     // Stats
     // ================================
-    function updateStatsFromDOM(addPosts=0, addReactions=0, addComments=0) {
-      const postsOnPage = document.querySelectorAll('.post-card').length + addPosts;
-      let reactionSum = addReactions;
-      document.querySelectorAll('.reaction-count').forEach(el => { reactionSum += Number(el.textContent || 0); });
+    async function updateGlobalStats() {
+        const { count: postsCount, error: postsError } = await supabase.from('posts').select('*', { count: 'exact', head: true });
+        const { count: reactionsCount, error: reactionsError } = await supabase.from('reactions').select('*', { count: 'exact', head: true });
+        const { count: commentsCount, error: commentsError } = await supabase.from('comments').select('*', { count: 'exact', head: true });
 
-      const commentIndicators = document.querySelectorAll('.comments h4 span');
-      let commentSum = addComments;
-      commentIndicators.forEach(s => {
-        const txt = s.textContent || '(0)'; const m = txt.match(/\((\d+)\)/);
-        if (m) commentSum += Number(m[1]);
-      });
-
-      document.getElementById('totalPosts').textContent = String(postsOnPage);
-      document.getElementById('totalReactions').textContent = String(reactionSum);
-      document.getElementById('totalComments').textContent = String(commentSum);
+        if(!postsError) document.getElementById('totalPosts').textContent = postsCount;
+        if(!reactionsError) document.getElementById('totalReactions').textContent = reactionsCount;
+        if(!commentsError) document.getElementById('totalComments').textContent = commentsCount;
     }
+
+    function updateStatsFromDOM(addPosts = 0, addReactions = 0, addComments = 0) {
+        const totalPostsEl = document.getElementById('totalPosts');
+        const totalReactionsEl = document.getElementById('totalReactions');
+        const totalCommentsEl = document.getElementById('totalComments');
+
+        if (addPosts) totalPostsEl.textContent = parseInt(totalPostsEl.textContent, 10) + addPosts;
+        if (addReactions) totalReactionsEl.textContent = parseInt(totalReactionsEl.textContent, 10) + addReactions;
+        if (addComments) totalCommentsEl.textContent = parseInt(totalCommentsEl.textContent, 10) + addComments;
+    }
+
 
     // ================================
     // Toast
@@ -865,6 +917,7 @@
     // ================================
     window.addEventListener('load', function() {
       loadPosts();
+      updateGlobalStats();
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js').catch(()=>{});
       }
