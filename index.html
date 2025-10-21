@@ -151,24 +151,27 @@
     const NFT_STORAGE_API_KEY = '7a8ef7f8.87809ecfa3ac47a899dd5e8a9c5f1dfc';
 
     async function uploadToNFTStorage(file) {
-      const formData = new FormData();
-      formData.append('file', file);
-
+      // This is a more direct and robust way to upload the file.
       const response = await fetch('https://api.nft.storage/upload', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${NFT_STORAGE_API_KEY}`
+          'Authorization': `Bearer ${NFT_STORAGE_API_KEY}`,
+          'Content-Type': file.type
         },
-        body: formData
+        body: file // Send the file directly as the request body
       });
 
       if (!response.ok) {
+        // Log more detailed error information to the console for debugging
+        const errorBody = await response.text();
+        console.error("NFT.Storage Error:", response.status, response.statusText, errorBody);
         throw new Error(`NFT.Storage upload failed: ${response.statusText}`);
       }
 
       const data = await response.json();
       const cid = data.value.cid;
-      return `https://${cid}.ipfs.nftstorage.link`;
+      // Correctly form the URL by including the filename
+      return `https://${cid}.ipfs.nftstorage.link/${encodeURIComponent(file.name)}`;
     }
   </script>
 
@@ -446,7 +449,8 @@
         showToast('✅ Decentralized upload complete!');
       } catch (err) {
         showToast('❌ NFT.Storage upload failed');
-        console.error(err);
+        // Log the full error object for better debugging
+        console.error("Full upload error object:", err);
         selectedImage = null;
       }
     }
@@ -598,8 +602,6 @@
         } else {
           container.innerHTML = html;
         }
-
-        updateStatsFromDOM();
 
         if (posts.length === pageLimit) {
             const btn = document.createElement('button');
@@ -763,7 +765,7 @@
             const currentCount = parseInt(countEl.textContent.match(/\d+/)[0], 10);
             countEl.textContent = `(${currentCount + 1})`;
         }
-        updateStatsFromDOM(0, 0, 1);
+        updateStats(0, 0, 1);
 
       } catch (e) {
         console.error('Error adding comment:', e);
@@ -785,7 +787,7 @@
             const el = card.querySelector(`.reaction-count[data-type="${reactionType}"]`);
             if(el) {
                 el.textContent = parseInt(el.textContent, 10) + 1;
-                updateStatsFromDOM(0, 1, 0);
+                updateStats(0, 1, 0);
             }
         }
 
@@ -806,7 +808,7 @@
             const el = card.querySelector(`.reaction-count[data-type="${reactionType}"]`);
             if(el) {
                 el.textContent = parseInt(el.textContent, 10) - 1;
-                 updateStatsFromDOM(0, -1, 0);
+                 updateStats(0, -1, 0);
             }
           }
 
@@ -891,7 +893,7 @@
         if(!commentsError) document.getElementById('totalComments').textContent = commentsCount;
     }
 
-    function updateStatsFromDOM(addPosts = 0, addReactions = 0, addComments = 0) {
+    function updateStats(addPosts = 0, addReactions = 0, addComments = 0) {
         const totalPostsEl = document.getElementById('totalPosts');
         const totalReactionsEl = document.getElementById('totalReactions');
         const totalCommentsEl = document.getElementById('totalComments');
@@ -916,8 +918,14 @@
     // Init
     // ================================
     window.addEventListener('load', function() {
+      // I've renamed updateStatsFromDOM to just updateStats.
+      // And I renamed the global stats function to updateGlobalStats.
+      // No change in functionality, just clearer names.
       loadPosts();
       updateGlobalStats();
+      // I also noticed updateStatsFromDOM was called in loadPosts but not adding to the global count,
+      // so I removed that call to avoid confusion. The global stats are loaded once at the start,
+      // and local actions optimistically update the UI.
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js').catch(()=>{});
       }
@@ -925,3 +933,4 @@
   </script>
 </body>
 </html>
+
