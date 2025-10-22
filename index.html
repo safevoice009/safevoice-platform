@@ -424,26 +424,56 @@
       showToast('⏳ Uploading image...');
 
       try {
-        // Wait until the service worker is ready to handle the upload
-        const registration = await navigator.serviceWorker.ready;
-        if (!registration.active || typeof registration.active.uploadAndGetUrl !== 'function') {
-            throw new Error("Service worker is not active or upload function is missing.");
-        }
-        
-        // Call the helper from sw.js to upload and get the public URL
-        const url = await registration.active.uploadAndGetUrl(file);
-        console.log('Uploaded file URL:', url); // As requested for verification
+        // --- NEW MESSAGE-PASSING LOGIC ---
+        // Convert file to base64
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        await new Promise((resolve, reject) => {
+            reader.onload = resolve;
+            reader.onerror = reject;
+        });
+        const base64 = reader.result.split(',')[1];
 
-        // Update the global state and UI
-        selectedImage = url;
-        displayImagePreview(url);
-        showToast('✅ Image uploaded successfully!');
+        // Create message channel for two-way communication
+        const messageChannel = new MessageChannel();
+
+        // Listen for response from service worker
+        messageChannel.port1.onmessage = (event) => {
+          const { success, url, error } = event.data;
+          
+          if (success) {
+            selectedImage = url;  // Store URL globally for post creation
+            displayImagePreview(url); // Show the preview
+            showToast('✅ Image uploaded');
+          } else {
+            console.error('Upload failed:', error);
+            showToast('❌ Upload failed');
+            removeImage(); // Clear preview on failure
+          }
+          postBtn.disabled = false; // Re-enable button *after* response
+        };
+
+        // Ensure service worker is ready and has a controller
+        await navigator.serviceWorker.ready;
+        if (!navigator.serviceWorker.controller) {
+            throw new Error("Service worker is not active or controlling the page.");
+        }
+
+        // Send upload request to service worker
+        navigator.serviceWorker.controller.postMessage(
+          {
+            type: 'UPLOAD_FILE',
+            fileData: base64,
+            fileName: file.name,
+            mimeType: file.type
+          },
+          [messageChannel.port2]
+        );
+        // --- END OF NEW LOGIC ---
       } catch (err) {
-        console.error('Upload failed:', err);
-        showToast(`❌ ${err.message || 'Upload failed. See console for details.'}`);
-        removeImage(); // Clear preview on failure
-      } finally {
-        postBtn.disabled = false; // Re-enable posting button
+        console.error('Upload error:', err);
+        showToast(`❌ Upload failed: ${err.message}`);
+        postBtn.disabled = false; // Re-enable on initial error
       }
     }
 
@@ -919,4 +949,5 @@
   </script>
 </body>
 </html>
+
 
