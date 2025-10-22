@@ -444,10 +444,15 @@
           if (success) {
             selectedImage = url;  // Store URL globally for post creation
             displayImagePreview(url); // Show the preview
-            showToast('✅ Image uploaded');
+            // Make success message clearer
+            showToast('✅ Image uploaded. Click "Post" to finish.'); 
           } else {
             console.error('Upload failed:', error);
-            showToast('❌ Upload failed');
+            // Make error toast longer and more descriptive
+            const toast = document.getElementById('toast');
+            toast.textContent = `❌ Upload failed: ${error || 'Unknown error'}`;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 8000); // 8 seconds
             removeImage(); // Clear preview on failure
           }
           postBtn.disabled = false; // Re-enable button *after* response
@@ -472,7 +477,11 @@
         // --- END OF NEW LOGIC ---
       } catch (err) {
         console.error('Upload error:', err);
-        showToast(`❌ Upload failed: ${err.message}`);
+        // Make error toast longer and more descriptive
+        const toast = document.getElementById('toast');
+        toast.textContent = `❌ Upload failed: ${err.message}`;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 8000); // 8 seconds
         postBtn.disabled = false; // Re-enable on initial error
       }
     }
@@ -949,5 +958,6 @@
   </script>
 </body>
 </html>
+
 
 
