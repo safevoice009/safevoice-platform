@@ -411,10 +411,23 @@
       const file = e.target.files[0];
       if (!file) return;
 
-      // Basic client-side validation
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        return showToast('❌ Image is too large! Max 5MB.');
+      // --- DEBUGGING STEP ---
+      // Let's drastically lower the size limit to 0.5MB (500KB)
+      // Base64 encoding increases size, so a 0.5MB file becomes ~0.66MB.
+      // This helps check if the Supabase Function has a small payload limit (e.g., 1MB).
+      const MAX_FILE_SIZE_MB = 0.5;
+      const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        // Use the 8-second toast to make sure this is readable
+        const toast = document.getElementById('toast');
+        toast.textContent = `❌ Image too large. DEBUG: Max ${MAX_FILE_SIZE_MB}MB allowed.`;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 8000); // 8 seconds
+        return;
       }
+      // --- END DEBUGGING STEP ---
+
       if (!file.type.startsWith('image/')) {
         return showToast('❌ Invalid file type. Please select an image.');
       }
@@ -439,6 +452,7 @@
 
         // Listen for response from service worker
         messageChannel.port1.onmessage = (event) => {
+          console.log('Received message from service worker:', event.data); // DEBUG LOG
           const { success, url, error } = event.data;
           
           if (success) {
@@ -460,9 +474,18 @@
 
         // Ensure service worker is ready and has a controller
         await navigator.serviceWorker.ready;
+        console.log('Service worker is ready.'); // DEBUG LOG
         if (!navigator.serviceWorker.controller) {
+            console.error("Service worker is not active or controlling the page."); // DEBUG LOG
             throw new Error("Service worker is not active or controlling the page.");
         }
+
+        console.log('Sending message to service worker:', { // DEBUG LOG
+            type: 'UPLOAD_FILE',
+            fileName: file.name,
+            mimeType: file.type,
+            fileDataSize: base64.length // Log the size of the payload
+        });
 
         // Send upload request to service worker
         navigator.serviceWorker.controller.postMessage(
@@ -476,7 +499,7 @@
         );
         // --- END OF NEW LOGIC ---
       } catch (err) {
-        console.error('Upload error:', err);
+        console.error('Full upload error in handleImageSelect:', err); // DEBUG LOG
         // Make error toast longer and more descriptive
         const toast = document.getElementById('toast');
         toast.textContent = `❌ Upload failed: ${err.message}`;
@@ -958,6 +981,7 @@
   </script>
 </body>
 </html>
+
 
 
 
